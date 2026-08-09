@@ -32,14 +32,14 @@ export default {
       fontFamily: {
         sans: [
           '"Avenir Next"',
-          'var(--font-sans)',
           '"Century Gothic"',
           '"Segoe UI"',
+          'Montserrat',
           'system-ui',
           'sans-serif'
         ],
-        serif: ['Baskerville', 'var(--font-serif)', '"Baskerville Old Face"', 'Georgia', 'serif'],
-        arabic: ['var(--font-arabic)', 'Tajawal', 'Tahoma', 'Arial', 'sans-serif']
+        serif: ['Baskerville', '"Baskerville Old Face"', 'Georgia', 'serif'],
+        arabic: ['Tajawal', 'Tahoma', 'Arial', 'sans-serif']
       },
       boxShadow: {
         gold: '0 0 0 1px rgba(255, 215, 0, 0.22), 0 14px 40px rgba(0, 0, 0, 0.28)'

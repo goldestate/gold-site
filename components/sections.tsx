@@ -47,10 +47,8 @@ function SectionTitle({
         isRtl ? 'text-right' : 'text-left'
       }`}
     >
-      <div className={`font-serif text-xs uppercase tracking-[0.22em] sm:tracking-[0.42em] ${eyebrowClass}`}>
-        {eyebrow}
-      </div>
-      <h2 className={`mt-4 text-2xl font-semibold uppercase tracking-[0.08em] sm:text-4xl sm:tracking-[0.24em] lg:text-[2.65rem] ${titleClass}`}>
+      <div className={`font-serif text-xs uppercase tracking-[0.42em] ${eyebrowClass}`}>{eyebrow}</div>
+      <h2 className={`mt-4 text-3xl font-semibold uppercase tracking-[0.24em] sm:text-4xl lg:text-[2.65rem] ${titleClass}`}>
         {title}
       </h2>
       {intro ? <p className={`mt-5 max-w-2xl text-base leading-8 ${introClass}`}>{intro}</p> : null}
@@ -232,18 +230,18 @@ export function HeroSection({ copy, isRtl }: { copy: SiteCopy['hero']; isRtl: bo
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_16%,rgba(255,215,0,0.18),transparent_28%),linear-gradient(180deg,rgba(35,31,32,0.18),rgba(35,31,32,0.92))]" />
       </div>
 
-      <div className="relative mx-auto grid max-w-7xl grid-cols-1 gap-12 px-4 pb-20 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
+      <div className="relative mx-auto grid max-w-7xl gap-12 px-4 pb-20 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
         <motion.div
           variants={fadeUp}
           initial="hidden"
           animate="show"
           transition={{ duration: 0.8, ease: 'easeOut', staggerChildren: 0.1 }}
-          className={`min-w-0 max-w-3xl ${isRtl ? 'lg:order-2 lg:text-right' : 'lg:order-1 lg:text-left'}`}
+          className={`max-w-3xl ${isRtl ? 'lg:order-2 lg:text-right' : 'lg:order-1 lg:text-left'}`}
         >
-          <div className="font-serif text-xs uppercase tracking-[0.28em] text-[#FFD700]/90 sm:tracking-[0.48em]">
+          <div className="font-serif text-xs uppercase tracking-[0.48em] text-[#FFD700]/90">
             {copy.eyebrow}
           </div>
-          <h1 className="mt-6 text-4xl font-semibold uppercase tracking-[0.12em] sm:text-6xl sm:tracking-[0.28em] lg:text-[5.3rem]">
+          <h1 className="mt-6 text-5xl font-semibold uppercase tracking-[0.28em] sm:text-6xl lg:text-[5.3rem]">
             <span className="block bg-[linear-gradient(90deg,#B8860B_0%,#FFD700_50%,#B8860B_100%)] bg-clip-text text-transparent">
               {copy.titleLine1}
             </span>
@@ -270,17 +268,15 @@ export function HeroSection({ copy, isRtl }: { copy: SiteCopy['hero']; isRtl: bo
             </a>
           </div>
 
-          <div className="mt-12 grid max-w-2xl grid-cols-3 gap-2 rounded-[1.75rem] border border-white/10 bg-white/6 p-4 backdrop-blur-sm sm:gap-4 sm:p-5">
+          <div className="mt-12 grid max-w-2xl grid-cols-3 gap-4 rounded-[1.75rem] border border-white/10 bg-white/6 p-5 backdrop-blur-sm">
             {[
               { label: copy.statLabel1, value: copy.statValue1 },
               { label: copy.statLabel2, value: copy.statValue2 },
               { label: copy.statLabel3, value: copy.statValue3 }
             ].map((item) => (
-              <div key={item.label} className="min-w-0 space-y-2 text-center">
-                <div className="truncate text-[0.65rem] uppercase tracking-[0.14em] text-white/56 sm:text-xs sm:tracking-[0.28em]">
-                  {item.label}
-                </div>
-                <div className="truncate text-lg font-semibold tracking-[0.08em] text-[#FFD700] sm:text-2xl sm:tracking-[0.2em]">
+              <div key={item.label} className="space-y-2 text-center">
+                <div className="text-xs uppercase tracking-[0.28em] text-white/56">{item.label}</div>
+                <div className="text-2xl font-semibold tracking-[0.2em] text-[#FFD700]">
                   {item.value}
                 </div>
               </div>
@@ -293,9 +289,9 @@ export function HeroSection({ copy, isRtl }: { copy: SiteCopy['hero']; isRtl: bo
           initial="hidden"
           animate="show"
           transition={{ duration: 0.9, ease: 'easeOut', delay: 0.08 }}
-          className={`relative flex min-w-0 items-end ${isRtl ? 'lg:order-1' : 'lg:order-2'}`}
+          className={`relative flex items-end ${isRtl ? 'lg:order-1' : 'lg:order-2'}`}
         >
-          <div className="relative ml-auto w-full max-w-md min-w-0 rounded-[2rem] border border-white/12 bg-black/30 p-4 shadow-[0_26px_70px_rgba(0,0,0,0.34)] backdrop-blur-sm">
+          <div className="relative ml-auto w-full max-w-md rounded-[2rem] border border-white/12 bg-black/30 p-4 shadow-[0_26px_70px_rgba(0,0,0,0.34)] backdrop-blur-sm">
             <div className="overflow-hidden rounded-[1.45rem] border border-white/10">
               <Image
                 src="https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1600&q=80"
@@ -324,8 +320,8 @@ export function HeroSection({ copy, isRtl }: { copy: SiteCopy['hero']; isRtl: bo
 export function AboutSection({ copy, isRtl }: { copy: SiteCopy['about']; isRtl: boolean }) {
   return (
     <SurfaceShell id="about" variant="light" className="px-4 py-20 sm:px-6 lg:px-8">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-        <div className={`min-w-0 ${isRtl ? 'lg:order-2 text-right' : 'lg:order-1'}`}>
+      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+        <div className={`${isRtl ? 'lg:order-2 text-right' : 'lg:order-1'}`}>
           <SectionTitle eyebrow={copy.eyebrow} title={copy.title} isRtl={isRtl} tone="light" />
           <motion.p
             variants={fadeUp}
@@ -368,11 +364,11 @@ export function AboutSection({ copy, isRtl }: { copy: SiteCopy['about']; isRtl: 
           </div>
         </div>
 
-        <div className={`relative min-w-0 ${isRtl ? 'lg:order-1' : 'lg:order-2'}`}>
+        <div className={`relative ${isRtl ? 'lg:order-1' : 'lg:order-2'}`}>
           <div className="relative overflow-hidden rounded-[2rem] border border-black/10 bg-[#231F20] p-5 text-white shadow-[0_26px_70px_rgba(35,31,32,0.18)]">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_14%,rgba(255,215,0,0.34),transparent_25%),radial-gradient(circle_at_18%_84%,rgba(255,255,255,0.05),transparent_24%)]" />
-            <div className="relative grid grid-cols-1 gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
-              <div className="min-w-0 space-y-5">
+            <div className="relative grid gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+              <div className="space-y-5">
                 <div className="rounded-[1.4rem] border border-white/10 bg-white/6 p-4 backdrop-blur-sm">
                   <div className="h-48 rounded-[1rem] bg-[linear-gradient(135deg,rgba(255,215,0,0.9),rgba(184,134,11,0.82),rgba(255,215,0,0.55))] shadow-[inset_0_0_40px_rgba(255,255,255,0.18)]" />
                 </div>
@@ -384,7 +380,7 @@ export function AboutSection({ copy, isRtl }: { copy: SiteCopy['about']; isRtl: 
                 </div>
               </div>
 
-              <div className="min-w-0 rounded-[1.8rem] border border-white/10 bg-black/30 p-5 backdrop-blur-md">
+              <div className="rounded-[1.8rem] border border-white/10 bg-black/30 p-5 backdrop-blur-md">
                 <div className="overflow-hidden rounded-[1.25rem]">
                   <Image
                     src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=80"
@@ -410,7 +406,7 @@ export function USPSection({ copy, isRtl }: { copy: SiteCopy['usps']; isRtl: boo
   return (
     <SurfaceShell id="why-gold" variant="dark" className="px-4 py-20 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <SectionTitle eyebrow={copy.eyebrow} title={copy.title} isRtl={isRtl} />
+        <SectionTitle eyebrow={copy.eyebrow} title={copy.title} isRtl={isRtl} tone="light" />
 
         <div className="mt-12 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           {copy.items.map((item, index) => (
@@ -477,7 +473,7 @@ export function PropertiesSection({ copy, isRtl }: { copy: SiteCopy['properties'
                     {item.location}
                   </p>
                 </div>
-                <div className="flex flex-col gap-4 border-t border-[#231F20]/10 pt-4">
+                <div className="flex items-end justify-between gap-4">
                   <div>
                     <div className="text-xs uppercase tracking-[0.3em] text-[#58595B]">Price</div>
                     <div className="mt-2 text-lg font-semibold tracking-[0.08em] text-[#231F20]">
@@ -486,7 +482,7 @@ export function PropertiesSection({ copy, isRtl }: { copy: SiteCopy['properties'
                   </div>
                   <a
                     href="#contact"
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#231F20]/12 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.22em] text-[#231F20] transition hover:border-[#B8860B] hover:text-[#B8860B]"
+                    className="inline-flex items-center gap-2 rounded-full border border-[#231F20]/12 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-[#231F20] transition hover:border-[#B8860B] hover:text-[#B8860B]"
                   >
                     View Details
                     <ArrowIcon rtl={isRtl} />
@@ -732,9 +728,9 @@ export function ContactSection({ copy, isRtl }: { copy: SiteCopy['contact']; isR
       <div className="mx-auto max-w-7xl">
         <SectionTitle eyebrow={copy.eyebrow} title={copy.title} intro={copy.intro} isRtl={isRtl} />
 
-        <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="mt-12 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
           <div
-            className={`min-w-0 rounded-[2rem] border border-white/10 bg-[#231F20]/78 p-6 shadow-[0_24px_64px_rgba(0,0,0,0.28)] backdrop-blur-md sm:p-8 ${
+            className={`rounded-[2rem] border border-white/10 bg-[#231F20]/78 p-6 shadow-[0_24px_64px_rgba(0,0,0,0.28)] backdrop-blur-md sm:p-8 ${
               isRtl ? 'lg:order-2' : 'lg:order-1'
             }`}
           >
@@ -746,7 +742,7 @@ export function ContactSection({ copy, isRtl }: { copy: SiteCopy['contact']; isR
             </div>
           </div>
 
-          <div className={`min-w-0 grid gap-6 ${isRtl ? 'lg:order-1' : 'lg:order-2'}`}>
+          <div className={`grid gap-6 ${isRtl ? 'lg:order-1' : 'lg:order-2'}`}>
             <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-[0_24px_64px_rgba(0,0,0,0.28)] backdrop-blur-md sm:p-8">
               <div className="font-serif text-xs uppercase tracking-[0.4em] text-[#FFD700]/90">
                 {copy.addressLabel}

@@ -4,20 +4,21 @@
 
 :root {
   color-scheme: dark;
+  --gold-black: #231f20;
+  --gold-graphite: #58595b;
+  --gold-piege: #e2e1d4;
+  --gold-kashmer: #ccc7c2;
+  --gold-blue-gray: #c8d6d9;
+  --gold-metal: linear-gradient(92deg, #8b6508 0%, #b8860b 18%, #ffd700 48%, #fff2a8 58%, #b8860b 82%, #6d4d06 100%);
 }
 
 html {
   scroll-behavior: smooth;
 }
 
-html,
-body {
-  overflow-x: hidden;
-}
-
 body {
   margin: 0;
-  background: #231f20;
+  background: var(--gold-black);
   color: #ffffff;
   text-rendering: optimizeLegibility;
 }
@@ -37,22 +38,44 @@ a {
 
 .bg-spotlight-black {
   background:
-    radial-gradient(circle at 12% 18%, rgba(255, 215, 0, 0.14), transparent 24%),
-    radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.05), transparent 18%),
-    linear-gradient(180deg, #2a2627 0%, #231f20 46%, #181516 100%);
+    radial-gradient(circle at 16% 12%, rgba(255, 215, 0, 0.18), transparent 26%),
+    radial-gradient(circle at 84% 20%, rgba(255, 255, 255, 0.06), transparent 19%),
+    linear-gradient(180deg, #343031 0%, #231f20 45%, #111010 100%);
 }
 
 .bg-middle-black {
   background:
+    radial-gradient(circle at 85% 12%, rgba(255, 255, 255, 0.04), transparent 22%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0)),
     linear-gradient(135deg, #2b2627, #231f20 46%, #1b1819);
 }
 
 .gold-gradient-text {
-  background: linear-gradient(90deg, #b8860b 0%, #ffd700 50%, #b8860b 100%);
+  background: var(--gold-metal);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+.gold-foil {
+  background:
+    radial-gradient(circle at 22% 26%, rgba(255, 255, 255, 0.54), transparent 9%),
+    radial-gradient(circle at 72% 34%, rgba(255, 248, 166, 0.48), transparent 14%),
+    linear-gradient(115deg, #7a5607 0%, #b8860b 19%, #ffd700 46%, #fff4b8 55%, #b8860b 78%, #6b4d06 100%);
+  box-shadow: inset 0 0 42px rgba(255, 255, 255, 0.2), inset 0 -26px 58px rgba(63, 39, 0, 0.25);
+}
+
+.brand-noise::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.18;
+  background-image:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 38px 38px;
+  mask-image: linear-gradient(180deg, transparent, black 18%, black 78%, transparent);
 }
 
 .glass-panel {

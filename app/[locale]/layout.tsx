@@ -25,7 +25,7 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      {children}
+      <div lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'}>{children}</div>
     </NextIntlClientProvider>
   );
 }
