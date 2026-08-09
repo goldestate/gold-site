@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  background: #231f20;
+  color: #ffffff;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: rgba(255, 215, 0, 0.28);
+  color: #ffffff;
+}
+
+a {
+  text-decoration: none;
+}
+
+.bg-spotlight-black {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255, 215, 0, 0.14), transparent 24%),
+    radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.05), transparent 18%),
+    linear-gradient(180deg, #2a2627 0%, #231f20 46%, #181516 100%);
+}
+
+.bg-middle-black {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0)),
+    linear-gradient(135deg, #2b2627, #231f20 46%, #1b1819);
+}
+
+.gold-gradient-text {
+  background: linear-gradient(90deg, #b8860b 0%, #ffd700 50%, #b8860b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.glass-panel {
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+input,
+textarea,
+select,
+button {
+  font: inherit;
+}
+
+option {
+  color: #ffffff;
+}
