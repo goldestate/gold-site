@@ -58,7 +58,7 @@ export function SiteHeader({ copy, locale, isRtl }: SiteHeaderProps) {
               <a
                 key={item.href}
                 href={item.href}
-                className="tracking-[0.16em] text-white/80 transition hover:text-[#FFD700]"
+                className="tracking-[0.16em] text-white/80 transition hover:text-[#D9B355]"
               >
                 {item.label}
               </a>
@@ -70,7 +70,7 @@ export function SiteHeader({ copy, locale, isRtl }: SiteHeaderProps) {
               href="/"
               locale="en"
               className={`rounded-full px-3 py-1 text-xs font-semibold tracking-[0.24em] transition ${
-                locale === 'en' ? 'bg-[#FFD700] text-[#231F20]' : 'text-white/70 hover:text-white'
+                locale === 'en' ? 'btn-gold' : 'text-white/70 hover:text-white'
               }`}
             >
               {t('english')}
@@ -79,7 +79,7 @@ export function SiteHeader({ copy, locale, isRtl }: SiteHeaderProps) {
               href="/"
               locale="ar"
               className={`rounded-full px-3 py-1 text-xs font-semibold tracking-[0.24em] transition ${
-                locale === 'ar' ? 'bg-[#FFD700] text-[#231F20]' : 'text-white/70 hover:text-white'
+                locale === 'ar' ? 'btn-gold' : 'text-white/70 hover:text-white'
               }`}
             >
               {t('arabic')}
@@ -116,7 +116,7 @@ export function SiteHeader({ copy, locale, isRtl }: SiteHeaderProps) {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMenuOpen(false)}
-                className="tracking-[0.12em] text-white/85 transition hover:text-[#FFD700]"
+                className="tracking-[0.12em] text-white/85 transition hover:text-[#D9B355]"
               >
                 {item.label}
               </a>
@@ -125,7 +125,7 @@ export function SiteHeader({ copy, locale, isRtl }: SiteHeaderProps) {
               <Link
                 href="/"
                 locale={switchLocale}
-                className="rounded-full border border-[#FFD700]/30 px-4 py-2 text-xs font-semibold tracking-[0.22em] text-[#FFD700]"
+                className="rounded-full border border-[#D9B355]/30 px-4 py-2 text-xs font-semibold tracking-[0.22em] text-[#D9B355]"
               >
                 {switchLocale === 'en' ? t('english') : t('arabic')}
               </Link>

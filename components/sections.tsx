@@ -5,6 +5,9 @@ import type { FormEvent, ReactNode } from 'react';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import type { SiteCopy } from '@/lib/site-content';
+import type { Property } from '@/lib/properties-store';
+import { formatPriceRange } from '@/lib/format-price';
+import { GMark } from './gmark';
 
 type SectionsProps = {
   copy: SiteCopy;
@@ -33,7 +36,7 @@ function SectionTitle({
   tone?: 'dark' | 'light';
 }) {
   const titleClass = tone === 'light' ? 'text-[#231F20]' : 'text-white';
-  const eyebrowClass = tone === 'light' ? 'text-[#B8860B]/88' : 'text-[#FFD700]/88';
+  const eyebrowClass = tone === 'light' ? 'text-[#B8860B]/88' : 'text-[#D9B355]/88';
   const introClass = tone === 'light' ? 'text-[#231F20]/78' : 'text-white/72';
 
   return (
@@ -48,7 +51,7 @@ function SectionTitle({
       }`}
     >
       <div className={`font-serif text-xs uppercase tracking-[0.42em] ${eyebrowClass}`}>{eyebrow}</div>
-      <h2 className={`mt-4 text-3xl font-semibold uppercase tracking-[0.24em] sm:text-4xl lg:text-[2.65rem] ${titleClass}`}>
+      <h2 className={`mt-4 text-3xl font-medium uppercase tracking-[0.18em] sm:text-4xl lg:text-[2.65rem] ${titleClass}`}>
         {title}
       </h2>
       {intro ? <p className={`mt-5 max-w-2xl text-base leading-8 ${introClass}`}>{intro}</p> : null}
@@ -99,8 +102,8 @@ function LineIcon({
   className?: string;
   gold?: boolean;
 }) {
-  const stroke = gold ? '#FFD700' : 'currentColor';
-  const fill = gold ? 'rgba(255,215,0,0.15)' : 'transparent';
+  const stroke = gold ? '#D9B355' : 'currentColor';
+  const fill = gold ? 'rgba(217,179,85,0.14)' : 'transparent';
   const base = `h-11 w-11 ${className}`;
 
   const shared = {
@@ -227,8 +230,14 @@ export function HeroSection({ copy, isRtl }: { copy: SiteCopy['hero']; isRtl: bo
           sizes="100vw"
           className="object-cover object-center opacity-30"
         />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_16%,rgba(255,215,0,0.18),transparent_28%),linear-gradient(180deg,rgba(35,31,32,0.18),rgba(35,31,32,0.92))]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_16%,rgba(212,175,55,0.16),transparent_28%),linear-gradient(180deg,rgba(35,31,32,0.18),rgba(35,31,32,0.92))]" />
       </div>
+
+      <GMark
+        tone="gold"
+        size={760}
+        className={`-bottom-40 opacity-[0.05] ${isRtl ? '-left-40 scale-x-[-1]' : '-right-40'}`}
+      />
 
       <div className="relative mx-auto grid max-w-7xl gap-12 px-4 pb-20 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
         <motion.div
@@ -238,14 +247,16 @@ export function HeroSection({ copy, isRtl }: { copy: SiteCopy['hero']; isRtl: bo
           transition={{ duration: 0.8, ease: 'easeOut', staggerChildren: 0.1 }}
           className={`max-w-3xl ${isRtl ? 'lg:order-2 lg:text-right' : 'lg:order-1 lg:text-left'}`}
         >
-          <div className="font-serif text-xs uppercase tracking-[0.48em] text-[#FFD700]/90">
+          <div className="font-serif text-xs uppercase tracking-[0.48em] text-[#D9B355]/90">
             {copy.eyebrow}
           </div>
-          <h1 className="mt-6 text-5xl font-semibold uppercase tracking-[0.28em] sm:text-6xl lg:text-[5.3rem]">
-            <span className="block bg-[linear-gradient(90deg,#B8860B_0%,#FFD700_50%,#B8860B_100%)] bg-clip-text text-transparent">
+          <h1 className="mt-6 text-5xl font-medium uppercase tracking-[0.22em] sm:text-6xl lg:text-[5.3rem]">
+            <span className="block bg-[linear-gradient(90deg,#8B6508_0%,#D4AF37_28%,#F1D878_50%,#D4AF37_72%,#8B6508_100%)] bg-clip-text text-transparent">
               {copy.titleLine1}
             </span>
-            <span className="mt-3 block text-white/96">{copy.titleLine2}</span>
+            <span className="mt-3 block text-xl font-light uppercase tracking-[0.32em] text-white/85 sm:text-2xl lg:text-3xl">
+              {copy.titleLine2}
+            </span>
           </h1>
           <p className="mt-7 max-w-2xl text-base leading-8 text-white/74 sm:text-lg">{copy.subtitle}</p>
 
@@ -254,14 +265,14 @@ export function HeroSection({ copy, isRtl }: { copy: SiteCopy['hero']; isRtl: bo
           >
             <a
               href="#properties"
-              className="inline-flex items-center gap-3 rounded-full bg-[#FFD700] px-6 py-3 text-sm font-semibold tracking-[0.2em] text-[#231F20] transition hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(255,215,0,0.18)]"
+              className="btn-gold inline-flex items-center gap-3 rounded-full px-6 py-3 text-sm font-medium uppercase tracking-[0.2em] transition hover:-translate-y-0.5"
             >
               {copy.primaryCta}
               <ArrowIcon rtl={isRtl} />
             </a>
             <a
               href="#contact"
-              className="inline-flex items-center gap-3 rounded-full border border-white/18 bg-white/6 px-6 py-3 text-sm font-semibold tracking-[0.2em] text-white transition hover:border-[#FFD700]/70 hover:text-[#FFD700]"
+              className="inline-flex items-center gap-3 rounded-full border border-white/18 bg-white/6 px-6 py-3 text-sm font-medium uppercase tracking-[0.2em] text-white transition hover:border-[#D9B355]/70 hover:text-[#D9B355]"
             >
               {copy.secondaryCta}
               <ArrowIcon rtl={isRtl} />
@@ -276,7 +287,7 @@ export function HeroSection({ copy, isRtl }: { copy: SiteCopy['hero']; isRtl: bo
             ].map((item) => (
               <div key={item.label} className="space-y-2 text-center">
                 <div className="text-xs uppercase tracking-[0.28em] text-white/56">{item.label}</div>
-                <div className="text-2xl font-semibold tracking-[0.2em] text-[#FFD700]">
+                <div className="gold-gradient-text text-2xl font-medium tracking-[0.16em]">
                   {item.value}
                 </div>
               </div>
@@ -303,7 +314,7 @@ export function HeroSection({ copy, isRtl }: { copy: SiteCopy['hero']; isRtl: bo
             </div>
             <div className="absolute inset-0 rounded-[2rem] bg-[radial-gradient(circle_at_20%_15%,rgba(255,215,0,0.23),transparent_26%),linear-gradient(180deg,rgba(35,31,32,0),rgba(35,31,32,0.44))]" />
             <div className="absolute bottom-8 left-8 right-8 rounded-[1.25rem] border border-white/12 bg-[#231F20]/72 p-5 backdrop-blur-md">
-              <div className="font-serif text-xs uppercase tracking-[0.42em] text-[#FFD700]/90">
+              <div className="font-serif text-xs uppercase tracking-[0.42em] text-[#D9B355]/90">
                 GOLD Signature
               </div>
               <p className="mt-3 text-sm leading-7 text-white/76">
@@ -367,32 +378,22 @@ export function AboutSection({ copy, isRtl }: { copy: SiteCopy['about']; isRtl: 
         <div className={`relative ${isRtl ? 'lg:order-1' : 'lg:order-2'}`}>
           <div className="relative overflow-hidden rounded-[2rem] border border-black/10 bg-[#231F20] p-5 text-white shadow-[0_26px_70px_rgba(35,31,32,0.18)]">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_14%,rgba(255,215,0,0.34),transparent_25%),radial-gradient(circle_at_18%_84%,rgba(255,255,255,0.05),transparent_24%)]" />
-            <div className="relative grid gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
-              <div className="space-y-5">
-                <div className="rounded-[1.4rem] border border-white/10 bg-white/6 p-4 backdrop-blur-sm">
-                  <div className="h-48 rounded-[1rem] bg-[linear-gradient(135deg,rgba(255,215,0,0.9),rgba(184,134,11,0.82),rgba(255,215,0,0.55))] shadow-[inset_0_0_40px_rgba(255,255,255,0.18)]" />
+            <div className="relative grid gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-stretch">
+              <div className="rounded-[1.4rem] border border-white/10 bg-white/6 p-5 backdrop-blur-sm">
+                <div className="font-serif text-xs uppercase tracking-[0.38em] text-[#D9B355]/90">
+                  {copy.signature}
                 </div>
-                <div className="rounded-[1.4rem] border border-white/10 bg-white/6 p-5 backdrop-blur-sm">
-                  <div className="font-serif text-xs uppercase tracking-[0.38em] text-[#FFD700]/90">
-                    {copy.signature}
-                  </div>
-                  <p className="mt-3 text-sm leading-7 text-white/72">{copy.quote}</p>
-                </div>
+                <p className="mt-4 text-base leading-8 text-white/78">{copy.quote}</p>
               </div>
 
-              <div className="rounded-[1.8rem] border border-white/10 bg-black/30 p-5 backdrop-blur-md">
-                <div className="overflow-hidden rounded-[1.25rem]">
-                  <Image
-                    src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=80"
-                    alt="Black and white luxury family portrait"
-                    width={900}
-                    height={1200}
-                    className="h-[26rem] w-full object-cover object-center grayscale contrast-110"
-                  />
-                </div>
-                <p className="mt-4 text-sm leading-7 text-white/70">
-                  {copy.story.slice(0, 132)}...
-                </p>
+              <div className="overflow-hidden rounded-[1.8rem] border border-white/10 bg-black/30">
+                <Image
+                  src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=80"
+                  alt="Black and white luxury family portrait"
+                  width={900}
+                  height={1200}
+                  className="h-full min-h-[22rem] w-full object-cover object-center grayscale contrast-110"
+                />
               </div>
             </div>
           </div>
@@ -417,10 +418,10 @@ export function USPSection({ copy, isRtl }: { copy: SiteCopy['usps']; isRtl: boo
               whileInView="show"
               viewport={{ once: true, margin: '-120px' }}
               transition={{ duration: 0.7, delay: index * 0.05 }}
-              className="group rounded-[1.7rem] border border-white/10 bg-white/6 p-6 transition duration-300 hover:-translate-y-1 hover:border-[#FFD700]/45 hover:bg-white/[0.08]"
+              className="group rounded-[1.7rem] border border-white/10 bg-white/6 p-6 transition duration-300 hover:-translate-y-1 hover:border-[#D9B355]/45 hover:bg-white/[0.08]"
             >
               <LineIcon icon={item.icon} gold />
-              <h3 className="mt-8 text-xl font-semibold uppercase tracking-[0.18em] text-white">
+              <h3 className="mt-8 text-xl font-medium uppercase tracking-[0.14em] text-white">
                 {item.title}
               </h3>
               <p className="mt-4 text-sm leading-7 text-white/68">{item.description}</p>
@@ -432,66 +433,138 @@ export function USPSection({ copy, isRtl }: { copy: SiteCopy['usps']; isRtl: boo
   );
 }
 
-export function PropertiesSection({ copy, isRtl }: { copy: SiteCopy['properties']; isRtl: boolean }) {
+export function PropertiesSection({
+  copy,
+  properties,
+  locale,
+  isRtl
+}: {
+  copy: SiteCopy['properties'];
+  properties: Property[];
+  locale: 'en' | 'ar';
+  isRtl: boolean;
+}) {
+  const [location, setLocation] = useState('all');
+  const [maxPrice, setMaxPrice] = useState('any');
+
+  const locations = Array.from(new Set(properties.map((item) => item.location))).sort();
+
+  const filtered = properties.filter((item) => {
+    const matchesLocation = location === 'all' || item.location === location;
+    const matchesPrice = maxPrice === 'any' || item.priceMin <= Number(maxPrice);
+    return matchesLocation && matchesPrice;
+  });
+
+  const selectClass =
+    'w-full rounded-full border border-[#231F20]/15 bg-white px-5 py-2.5 text-sm text-[#231F20] outline-none transition focus:border-[#B8860B] focus:ring-2 focus:ring-[#B8860B]/18 sm:w-auto';
+
   return (
     <SurfaceShell id="properties" variant="light" className="px-4 py-20 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <SectionTitle eyebrow={copy.eyebrow} title={copy.title} isRtl={isRtl} tone="light" />
+        <div
+          className={`flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between ${
+            isRtl ? 'lg:flex-row-reverse' : ''
+          }`}
+        >
+          <SectionTitle eyebrow={copy.eyebrow} title={copy.title} isRtl={isRtl} tone="light" />
 
-        <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {copy.items.map((item, index) => (
-            <motion.article
-              key={item.name}
-              variants={fadeUp}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, margin: '-120px' }}
-              transition={{ duration: 0.7, delay: index * 0.06 }}
-              className="group overflow-hidden rounded-[1.9rem] border border-[#231F20]/10 bg-white shadow-[0_18px_50px_rgba(35,31,32,0.12)] transition hover:-translate-y-1 hover:border-[#B8860B]/35 hover:shadow-[0_24px_68px_rgba(35,31,32,0.16)]"
-            >
-              <div className="relative h-72 overflow-hidden">
-                <Image
-                  src={item.image}
-                  alt={item.name}
-                  fill
-                  sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
-                  className={`object-cover object-center transition duration-700 group-hover:scale-[1.04] ${
-                    item.tone === 'mono' ? 'grayscale contrast-110' : ''
-                  }`}
-                />
-                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(35,31,32,0.05),rgba(35,31,32,0.56))]" />
-                <div className="absolute left-6 top-6 rounded-full border border-white/20 bg-black/25 px-4 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.36em] text-white/90 backdrop-blur-sm">
-                  GOLD
-                </div>
-              </div>
-              <div className="space-y-4 p-6">
-                <div>
-                  <h3 className="text-2xl font-semibold tracking-[0.08em] text-[#231F20]">
-                    {item.name}
-                  </h3>
-                  <p className="mt-2 text-sm uppercase tracking-[0.24em] text-[#58595B]">
-                    {item.location}
-                  </p>
-                </div>
-                <div className="flex items-end justify-between gap-4">
-                  <div>
-                    <div className="text-xs uppercase tracking-[0.3em] text-[#58595B]">Price</div>
-                    <div className="mt-2 text-lg font-semibold tracking-[0.08em] text-[#231F20]">
-                      {item.price}
-                    </div>
-                  </div>
-                  <a
-                    href="#contact"
-                    className="inline-flex items-center gap-2 rounded-full border border-[#231F20]/12 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-[#231F20] transition hover:border-[#B8860B] hover:text-[#B8860B]"
-                  >
-                    View Details
-                    <ArrowIcon rtl={isRtl} />
-                  </a>
-                </div>
-              </div>
-            </motion.article>
-          ))}
+          <div className={`flex flex-wrap gap-3 ${isRtl ? 'flex-row-reverse' : ''}`}>
+            <label className="block">
+              <span className="sr-only">{copy.filters.locationLabel}</span>
+              <select
+                value={location}
+                onChange={(event) => setLocation(event.target.value)}
+                dir={isRtl ? 'rtl' : 'ltr'}
+                className={selectClass}
+              >
+                <option value="all">{copy.filters.allLocations}</option>
+                {locations.map((loc) => (
+                  <option key={loc} value={loc}>
+                    {loc}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              <span className="sr-only">{copy.filters.priceLabel}</span>
+              <select
+                value={maxPrice}
+                onChange={(event) => setMaxPrice(event.target.value)}
+                dir={isRtl ? 'rtl' : 'ltr'}
+                className={selectClass}
+              >
+                <option value="any">{copy.filters.anyPrice}</option>
+                {copy.filters.priceBuckets.map((bucket) => (
+                  <option key={bucket.max} value={bucket.max}>
+                    {bucket.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
         </div>
+
+        {filtered.length === 0 ? (
+          <div className="mt-16 rounded-[1.9rem] border border-[#231F20]/10 bg-white/70 p-12 text-center">
+            <p className="text-lg font-medium text-[#231F20]">{copy.filters.noResultsTitle}</p>
+            <p className="mt-2 text-sm text-[#231F20]/68">{copy.filters.noResultsBody}</p>
+          </div>
+        ) : (
+          <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {filtered.map((item, index) => (
+              <motion.article
+                key={item.id}
+                variants={fadeUp}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, margin: '-120px' }}
+                transition={{ duration: 0.7, delay: (index % 3) * 0.06 }}
+                className="group overflow-hidden rounded-[1.9rem] border border-[#231F20]/10 bg-white shadow-[0_18px_50px_rgba(35,31,32,0.12)] transition hover:-translate-y-1 hover:border-[#B8860B]/35 hover:shadow-[0_24px_68px_rgba(35,31,32,0.16)]"
+              >
+                <div className="relative h-72 overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    loading="lazy"
+                    className={`h-full w-full object-cover object-center transition duration-700 group-hover:scale-[1.04] ${
+                      item.tone === 'mono' ? 'grayscale contrast-110' : ''
+                    }`}
+                  />
+                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(35,31,32,0.05),rgba(35,31,32,0.56))]" />
+                  <div className="absolute left-6 top-6 rounded-full border border-white/20 bg-black/25 px-4 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.36em] text-white/90 backdrop-blur-sm">
+                    GOLD
+                  </div>
+                </div>
+                <div className="space-y-4 p-6">
+                  <div>
+                    <h3 className="text-2xl font-semibold tracking-[0.08em] text-[#231F20]">
+                      {item.name}
+                    </h3>
+                    <p className="mt-2 text-sm uppercase tracking-[0.24em] text-[#58595B]">
+                      {item.location}
+                    </p>
+                  </div>
+                  <div className="flex items-end justify-between gap-4">
+                    <div>
+                      <div className="text-xs uppercase tracking-[0.3em] text-[#58595B]">Price</div>
+                      <div className="mt-2 text-lg font-semibold tracking-[0.08em] text-[#231F20]">
+                        {formatPriceRange(item.priceMin, item.priceMax, locale)}
+                      </div>
+                    </div>
+                    <a
+                      href="#contact"
+                      className="inline-flex items-center gap-2 rounded-full border border-[#231F20]/12 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-[#231F20] transition hover:border-[#B8860B] hover:text-[#B8860B]"
+                    >
+                      {copy.filters.viewDetails}
+                      <ArrowIcon rtl={isRtl} />
+                    </a>
+                  </div>
+                </div>
+              </motion.article>
+            ))}
+          </div>
+        )}
       </div>
     </SurfaceShell>
   );
@@ -499,14 +572,15 @@ export function PropertiesSection({ copy, isRtl }: { copy: SiteCopy['properties'
 
 export function SubbrandStrip({ copy, isRtl }: { copy: SiteCopy['subbrands']; isRtl: boolean }) {
   return (
-    <section id="subbrands" className="border-y border-white/10 bg-[#1a1718] px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
+    <section id="subbrands" className="relative overflow-hidden border-y border-white/10 bg-[#1a1718] px-4 py-10 sm:px-6 lg:px-8">
+      <GMark tone="gold" size={420} className={`-top-16 opacity-[0.05] ${isRtl ? '-left-16' : '-right-16'}`} />
+      <div className="relative mx-auto max-w-7xl">
         <div className={`flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between ${isRtl ? 'text-right' : ''}`}>
           <div>
-            <div className="font-serif text-xs uppercase tracking-[0.42em] text-[#FFD700]/88">
+            <div className="font-serif text-xs uppercase tracking-[0.42em] text-[#D9B355]/88">
               {copy.eyebrow}
             </div>
-            <h2 className="mt-4 text-2xl font-semibold uppercase tracking-[0.22em] text-white">
+            <h2 className="mt-4 text-2xl font-medium uppercase tracking-[0.18em] text-white">
               {copy.title}
             </h2>
           </div>
@@ -514,7 +588,7 @@ export function SubbrandStrip({ copy, isRtl }: { copy: SiteCopy['subbrands']; is
             {copy.items.map((item) => (
               <div
                 key={item.name}
-                className="rounded-[1.2rem] border border-white/8 bg-white/[0.03] px-4 py-4 transition hover:border-[#FFD700]/35 hover:bg-white/[0.05]"
+                className="rounded-[1.2rem] border border-white/8 bg-white/[0.03] px-4 py-4 transition hover:border-[#D9B355]/35 hover:bg-white/[0.05]"
               >
                 <LineIcon icon={item.icon} gold className="h-9 w-9" />
                 <div className="mt-4 text-sm font-semibold tracking-[0.18em] text-white">
@@ -641,7 +715,7 @@ function InquiryForm({
         <select
           value={form.interest}
           onChange={(event) => update('interest', event.target.value)}
-          className={`w-full rounded-[1rem] border bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#FFD700] focus:ring-2 focus:ring-[#FFD700]/22 ${
+          className={`w-full rounded-[1rem] border bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#D9B355] focus:ring-2 focus:ring-[#D9B355]/22 ${
             errors.interest ? 'border-red-400/70' : 'border-white/12'
           }`}
           dir={isRtl ? 'rtl' : 'ltr'}
@@ -665,7 +739,7 @@ function InquiryForm({
           value={form.message}
           onChange={(event) => update('message', event.target.value)}
           rows={5}
-          className={`w-full rounded-[1rem] border bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#FFD700] focus:ring-2 focus:ring-[#FFD700]/22 ${
+          className={`w-full rounded-[1rem] border bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#D9B355] focus:ring-2 focus:ring-[#D9B355]/22 ${
             errors.message ? 'border-red-400/70' : 'border-white/12'
           }`}
           placeholder={labels.message}
@@ -676,14 +750,14 @@ function InquiryForm({
       <button
         type="submit"
         disabled={isSubmitting}
-        className="inline-flex items-center gap-3 rounded-full bg-[#FFD700] px-6 py-3 text-sm font-semibold tracking-[0.2em] text-[#231F20] transition hover:-translate-y-0.5 hover:shadow-[0_20px_42px_rgba(255,215,0,0.2)] disabled:cursor-not-allowed disabled:opacity-60"
+        className="btn-gold inline-flex items-center gap-3 rounded-full px-6 py-3 text-sm font-medium uppercase tracking-[0.2em] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isSubmitting ? (isRtl ? 'جار الإرسال...' : 'Sending...') : labels.submit}
         <ArrowIcon rtl={isRtl} />
       </button>
 
       {formError ? <p className="text-sm text-red-300">{formError}</p> : null}
-      {submitted ? <p className="text-sm text-[#FFD700]">{labels.success}</p> : null}
+      {submitted ? <p className="text-sm text-[#D9B355]">{labels.success}</p> : null}
     </form>
   );
 }
@@ -713,7 +787,7 @@ function Field({
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         dir={isRtl ? 'rtl' : 'ltr'}
-        className={`w-full rounded-[1rem] border bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#FFD700] focus:ring-2 focus:ring-[#FFD700]/22 ${
+        className={`w-full rounded-[1rem] border bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#D9B355] focus:ring-2 focus:ring-[#D9B355]/22 ${
           error ? 'border-red-400/70' : 'border-white/12'
         }`}
       />
@@ -725,7 +799,8 @@ function Field({
 export function ContactSection({ copy, isRtl }: { copy: SiteCopy['contact']; isRtl: boolean }) {
   return (
     <SurfaceShell id="contact" variant="spotlight" className="px-4 py-20 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
+      <GMark tone="gold" size={560} className={`-bottom-24 opacity-[0.05] ${isRtl ? '-right-24' : '-left-24'}`} />
+      <div className="relative mx-auto max-w-7xl">
         <SectionTitle eyebrow={copy.eyebrow} title={copy.title} intro={copy.intro} isRtl={isRtl} />
 
         <div className="mt-12 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
@@ -734,7 +809,7 @@ export function ContactSection({ copy, isRtl }: { copy: SiteCopy['contact']; isR
               isRtl ? 'lg:order-2' : 'lg:order-1'
             }`}
           >
-            <div className="font-serif text-xs uppercase tracking-[0.4em] text-[#FFD700]/90">
+            <div className="font-serif text-xs uppercase tracking-[0.4em] text-[#D9B355]/90">
               {copy.formTitle}
             </div>
             <div className="mt-6">
@@ -744,7 +819,7 @@ export function ContactSection({ copy, isRtl }: { copy: SiteCopy['contact']; isR
 
           <div className={`grid gap-6 ${isRtl ? 'lg:order-1' : 'lg:order-2'}`}>
             <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-[0_24px_64px_rgba(0,0,0,0.28)] backdrop-blur-md sm:p-8">
-              <div className="font-serif text-xs uppercase tracking-[0.4em] text-[#FFD700]/90">
+              <div className="font-serif text-xs uppercase tracking-[0.4em] text-[#D9B355]/90">
                 {copy.addressLabel}
               </div>
               <p className="mt-4 max-w-md text-sm leading-7 text-white/74">{copy.address}</p>
@@ -756,7 +831,7 @@ export function ContactSection({ copy, isRtl }: { copy: SiteCopy['contact']; isR
                 href="https://www.google.com/maps?q=The%20Office,%20Tulip,%2090th%20Street,%205th%20Settlement,%20New%20Cairo,%20Egypt&output=embed"
                 target="_blank"
                 rel="noreferrer"
-                className="mt-6 inline-flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.2em] text-[#FFD700]"
+                className="mt-6 inline-flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.2em] text-[#D9B355]"
               >
                 {copy.mapCta}
                 <ArrowIcon rtl={isRtl} />

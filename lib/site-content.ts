@@ -49,13 +49,16 @@ export type SiteCopy = {
   properties: {
     eyebrow: string;
     title: string;
-    items: Array<{
-      name: string;
-      location: string;
-      price: string;
-      image: string;
-      tone: 'color' | 'mono';
-    }>;
+    filters: {
+      locationLabel: string;
+      allLocations: string;
+      priceLabel: string;
+      anyPrice: string;
+      priceBuckets: Array<{ label: string; max: number }>;
+      noResultsTitle: string;
+      noResultsBody: string;
+      viewDetails: string;
+    };
   };
   subbrands: {
     eyebrow: string;
@@ -100,17 +103,6 @@ export type SiteCopy = {
     legal: string;
     sublinks: string[];
   };
-};
-
-const commonAssets = {
-  hero:
-    'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=2200&q=80',
-  interior:
-    'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1400&q=80',
-  estate:
-    'https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1400&q=80',
-  lifestyle:
-    'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80'
 };
 
 export const siteCopy: Record<Locale, SiteCopy> = {
@@ -190,29 +182,21 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     properties: {
       eyebrow: 'Featured Listings',
       title: 'Selected properties with quiet confidence.',
-      items: [
-        {
-          name: 'The Observatory Residence',
-          location: 'New Cairo, Egypt',
-          price: 'EGP 18M - 26M',
-          image: commonAssets.estate,
-          tone: 'color'
-        },
-        {
-          name: 'The Atelier House',
-          location: '5th Settlement, Egypt',
-          price: 'EGP 9M - 14M',
-          image: commonAssets.interior,
-          tone: 'mono'
-        },
-        {
-          name: 'Palm Court Villas',
-          location: 'North Coast, Egypt',
-          price: 'EGP 24M - 42M',
-          image: commonAssets.lifestyle,
-          tone: 'color'
-        }
-      ]
+      filters: {
+        locationLabel: 'Location',
+        allLocations: 'All locations',
+        priceLabel: 'Budget',
+        anyPrice: 'Any price',
+        priceBuckets: [
+          { label: 'Up to EGP 10M', max: 10_000_000 },
+          { label: 'Up to EGP 20M', max: 20_000_000 },
+          { label: 'Up to EGP 30M', max: 30_000_000 },
+          { label: 'Up to EGP 50M', max: 50_000_000 }
+        ],
+        noResultsTitle: 'No properties match these filters.',
+        noResultsBody: 'Try a different location or a wider budget range.',
+        viewDetails: 'View Details'
+      }
     },
     subbrands: {
       eyebrow: 'Sub-brand Platform',
@@ -352,29 +336,21 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     properties: {
       eyebrow: 'العروض المميزة',
       title: 'اختيارات انتقائية بثقة هادئة.',
-      items: [
-        {
-          name: 'The Observatory Residence',
-          location: 'القاهرة الجديدة، مصر',
-          price: '18 - 26 مليون جنيه',
-          image: commonAssets.estate,
-          tone: 'color'
-        },
-        {
-          name: 'The Atelier House',
-          location: 'التجمع الخامس، مصر',
-          price: '9 - 14 مليون جنيه',
-          image: commonAssets.interior,
-          tone: 'mono'
-        },
-        {
-          name: 'Palm Court Villas',
-          location: 'الساحل الشمالي، مصر',
-          price: '24 - 42 مليون جنيه',
-          image: commonAssets.lifestyle,
-          tone: 'color'
-        }
-      ]
+      filters: {
+        locationLabel: 'الموقع',
+        allLocations: 'كل المواقع',
+        priceLabel: 'الميزانية',
+        anyPrice: 'أي سعر',
+        priceBuckets: [
+          { label: 'حتى 10 مليون جنيه', max: 10_000_000 },
+          { label: 'حتى 20 مليون جنيه', max: 20_000_000 },
+          { label: 'حتى 30 مليون جنيه', max: 30_000_000 },
+          { label: 'حتى 50 مليون جنيه', max: 50_000_000 }
+        ],
+        noResultsTitle: 'لا توجد عقارات مطابقة لهذا البحث.',
+        noResultsBody: 'جرّب موقعاً مختلفاً أو نطاق ميزانية أوسع.',
+        viewDetails: 'عرض التفاصيل'
+      }
     },
     subbrands: {
       eyebrow: 'منصة الفروع',

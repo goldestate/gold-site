@@ -1,6 +1,29 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import { Jost, Libre_Baskerville, Tajawal } from 'next/font/google';
 import './globals.css';
+
+const jost = Jost({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-sans',
+  display: 'swap'
+});
+
+const libreBaskerville = Libre_Baskerville({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  style: ['normal', 'italic'],
+  variable: '--font-serif',
+  display: 'swap'
+});
+
+const tajawal = Tajawal({
+  subsets: ['arabic'],
+  weight: ['300', '400', '500', '700'],
+  variable: '--font-arabic',
+  display: 'swap'
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://gold-investment-opportunities.example'),
@@ -26,7 +49,11 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${jost.variable} ${libreBaskerville.variable} ${tajawal.variable}`}
+    >
       <body className="bg-[#231F20] font-sans text-white antialiased">{children}</body>
     </html>
   );

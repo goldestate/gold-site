@@ -1,0 +1,35 @@
+[
+  {
+    "id": "seed-observatory",
+    "name": "The Observatory Residence",
+    "location": "New Cairo, Egypt",
+    "priceMin": 18000000,
+    "priceMax": 26000000,
+    "image": "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1400&q=80",
+    "tone": "color",
+    "published": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "seed-atelier",
+    "name": "The Atelier House",
+    "location": "5th Settlement, Egypt",
+    "priceMin": 9000000,
+    "priceMax": 14000000,
+    "image": "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1400&q=80",
+    "tone": "mono",
+    "published": true,
+    "createdAt": "2026-01-02T00:00:00.000Z"
+  },
+  {
+    "id": "seed-palm-court",
+    "name": "Palm Court Villas",
+    "location": "North Coast, Egypt",
+    "priceMin": 24000000,
+    "priceMax": 42000000,
+    "image": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80",
+    "tone": "color",
+    "published": true,
+    "createdAt": "2026-01-03T00:00:00.000Z"
+  }
+]

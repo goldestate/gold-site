@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { getSiteCopy } from '@/lib/site-content';
+import { readPublishedProperties } from '@/lib/properties-store';
 import { type Locale } from '@/i18n/routing';
 import { LandingPage } from '@/components/landing-page';
 
@@ -48,6 +49,9 @@ export default async function LocalePage({
 }) {
   const { locale } = params;
   const copy = getSiteCopy(locale);
+  const properties = await readPublishedProperties();
 
-  return <LandingPage locale={locale} copy={copy} />;
+  return <LandingPage locale={locale} copy={copy} properties={properties} />;
 }
+
+export const dynamic = 'force-dynamic';

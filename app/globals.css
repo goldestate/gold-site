@@ -9,7 +9,8 @@
   --gold-piege: #e2e1d4;
   --gold-kashmer: #ccc7c2;
   --gold-blue-gray: #c8d6d9;
-  --gold-metal: linear-gradient(92deg, #8b6508 0%, #b8860b 18%, #ffd700 48%, #fff2a8 58%, #b8860b 82%, #6d4d06 100%);
+  --gold-metal: linear-gradient(92deg, #7a5607 0%, #b8860b 20%, #d4af37 42%, #f1d878 52%, #b8860b 80%, #6d4d06 100%);
+  --gold-foil-solid: #c9a545;
 }
 
 html {
@@ -81,6 +82,23 @@ a {
 .glass-panel {
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
+}
+
+.btn-gold {
+  background: var(--gold-metal);
+  color: #231f20;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset, 0 16px 34px rgba(184, 134, 11, 0.22);
+}
+
+.btn-gold:hover {
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset, 0 20px 42px rgba(184, 134, 11, 0.32);
+}
+
+.watermark-mark {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.06;
+  user-select: none;
 }
 
 input,

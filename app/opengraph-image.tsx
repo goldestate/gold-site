@@ -13,7 +13,7 @@ export default function Image() {
           flexDirection: 'column',
           justifyContent: 'space-between',
           background:
-            'radial-gradient(circle at 12% 18%, rgba(255,215,0,0.18), transparent 18%), radial-gradient(circle at 82% 18%, rgba(255,255,255,0.06), transparent 16%), linear-gradient(180deg, #2a2627 0%, #231f20 46%, #181516 100%)',
+            'radial-gradient(circle at 12% 18%, rgba(212,175,55,0.18), transparent 18%), radial-gradient(circle at 82% 18%, rgba(255,255,255,0.06), transparent 16%), linear-gradient(180deg, #2a2627 0%, #231f20 46%, #181516 100%)',
           color: '#FFFFFF',
           padding: '72px'
         }}
@@ -24,13 +24,13 @@ export default function Image() {
               width: 116,
               height: 116,
               borderRadius: 28,
-              border: '2px solid rgba(255,215,0,0.7)',
+              border: '2px solid rgba(212,175,55,0.7)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#FFD700',
+              color: '#D4AF37',
               fontSize: 58,
-              fontWeight: 700
+              fontWeight: 500
             }}
           >
             G
@@ -41,7 +41,7 @@ export default function Image() {
                 fontSize: 30,
                 letterSpacing: '0.42em',
                 textTransform: 'uppercase',
-                color: 'rgba(255,215,0,0.9)'
+                color: 'rgba(212,175,55,0.9)'
               }}
             >
               GOLD
@@ -65,7 +65,7 @@ export default function Image() {
             style={{
               fontSize: 82,
               lineHeight: 1,
-              fontWeight: 600,
+              fontWeight: 500,
               letterSpacing: '0.14em',
               textTransform: 'uppercase'
             }}
