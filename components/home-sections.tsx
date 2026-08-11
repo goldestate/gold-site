@@ -260,7 +260,7 @@ export function FeaturedProperties({
           </Link>
         </div>
 
-        <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-12 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 md:gap-6 xl:grid-cols-4">
           {properties.map((property, index) => (
             <PropertyCard
               key={property.id}

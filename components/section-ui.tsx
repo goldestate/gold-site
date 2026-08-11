@@ -333,6 +333,25 @@ export function StatIcon({
   );
 }
 
+export function FunnelIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={`h-4 w-4 flex-none ${className}`}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M4 6h16" />
+      <path d="M7.5 12h9" />
+      <path d="M10.5 18h3" />
+    </svg>
+  );
+}
+
 export function ArrowIcon({ rtl = false }: { rtl?: boolean }) {
   return (
     <svg
