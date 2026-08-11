@@ -12,7 +12,7 @@ import {
   PROPERTY_TYPES,
   UNIT_TYPES
 } from '@/lib/property-taxonomy';
-import { SectionTitle, UnitTypeIcon } from './section-ui';
+import { SectionTitle, UnitTypeIcon, FunnelIcon } from './section-ui';
 import { RangeSlider } from './range-slider';
 import { PropertyCard } from './property-card';
 
@@ -159,47 +159,46 @@ export function PropertiesPageClient({
     <div className="mx-auto max-w-7xl px-4 pb-24 pt-32 sm:px-6 lg:px-8">
       <SectionTitle eyebrow={copy.eyebrow} title={copy.title} intro={copy.intro} isRtl={isRtl} tone="light" />
 
-      <div
-        className={`mt-8 rounded-[1.6rem] border border-[rgba(35,31,32,0.08)] bg-white p-4 shadow-[0_18px_50px_rgba(35,31,32,0.08)] sm:mt-10 sm:rounded-[2rem] sm:p-8 ${
-          isRtl ? 'text-right' : 'text-left'
-        }`}
-      >
+      <div className="mt-8 sm:mt-10">
         <button
           type="button"
           onClick={() => setFiltersOpen((open) => !open)}
           aria-expanded={filtersOpen}
-          className={`flex w-full items-center justify-between gap-3 sm:hidden ${isRtl ? 'flex-row-reverse' : ''}`}
+          className={`flex w-full items-center justify-between gap-3 rounded-full border border-[rgba(35,31,32,0.14)] bg-white px-5 py-3.5 shadow-[0_10px_28px_rgba(35,31,32,0.08)] transition active:scale-[0.98] active:shadow-[0_4px_14px_rgba(35,31,32,0.1)] sm:hidden ${
+            isRtl ? 'flex-row-reverse' : ''
+          }`}
         >
-          <div className={isRtl ? 'text-right' : 'text-left'}>
-            <h2 className="text-base font-semibold tracking-[0.04em] text-[#231F20]">{copy.filters.panelTitle}</h2>
-            <p className="mt-0.5 text-xs text-[rgba(35,31,32,0.6)]">{resultsLabel}</p>
-          </div>
+          <span className={`flex items-center gap-2.5 ${isRtl ? 'flex-row-reverse' : ''}`}>
+            <FunnelIcon className="text-[#B8860B]" />
+            <span className="text-sm font-semibold text-[#231F20]">{copy.filters.panelTitle}</span>
+            <span className="rounded-full bg-[#231F20] px-2 py-0.5 text-[10px] font-bold text-white">
+              {filtered.length}
+            </span>
+          </span>
           <ChevronIcon open={filtersOpen} />
         </button>
 
-        <div className={`hidden sm:flex sm:items-start sm:justify-between ${isRtl ? 'sm:flex-row-reverse' : ''}`}>
-          <div>
-            <h2 className="text-xl font-semibold tracking-[0.06em] text-[#231F20]">{copy.filters.panelTitle}</h2>
-            <p className="mt-1 text-sm text-[rgba(35,31,32,0.6)]">{copy.filters.panelSubtitle}</p>
+        <div
+          className={`${filtersOpen ? 'mt-3 block' : 'hidden'} rounded-[1.4rem] border border-[rgba(35,31,32,0.08)] bg-white p-4 shadow-[0_18px_50px_rgba(35,31,32,0.08)] sm:mt-0 sm:block sm:rounded-[2rem] sm:p-8 ${
+            isRtl ? 'text-right' : 'text-left'
+          }`}
+        >
+          <div className={`flex items-center justify-between gap-3 sm:items-start ${isRtl ? 'flex-row-reverse' : ''}`}>
+            <div className="hidden sm:block">
+              <h2 className="text-xl font-semibold tracking-[0.06em] text-[#231F20]">{copy.filters.panelTitle}</h2>
+              <p className="mt-1 text-sm text-[rgba(35,31,32,0.6)]">{copy.filters.panelSubtitle}</p>
+            </div>
+            <span className="text-sm font-semibold text-[#231F20] sm:hidden">{copy.filters.panelSubtitle}</span>
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="inline-flex flex-none items-center gap-2 rounded-full border border-[rgba(35,31,32,0.15)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#231F20] transition hover:border-[#B8860B] hover:text-[#B8860B]"
+            >
+              {copy.filters.resetLabel}
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={resetFilters}
-            className="inline-flex items-center gap-2 self-start rounded-full border border-[rgba(35,31,32,0.15)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#231F20] transition hover:border-[#B8860B] hover:text-[#B8860B]"
-          >
-            {copy.filters.resetLabel}
-          </button>
-        </div>
 
-        <div className={`${filtersOpen ? 'mt-5 block' : 'hidden'} space-y-5 sm:mt-8 sm:block sm:space-y-8`}>
-          <button
-            type="button"
-            onClick={resetFilters}
-            className="inline-flex items-center gap-2 rounded-full border border-[rgba(35,31,32,0.15)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#231F20] transition hover:border-[#B8860B] hover:text-[#B8860B] sm:hidden"
-          >
-            {copy.filters.resetLabel}
-          </button>
-
+          <div className="mt-5 space-y-5 sm:mt-8 sm:space-y-8">
           <div>
             <FilterLabel>{copy.filters.locationLabel}</FilterLabel>
             <select
@@ -328,6 +327,7 @@ export function PropertiesPageClient({
           </div>
         </div>
       </div>
+      </div>
 
       <div
         className={`mt-6 hidden text-sm font-medium uppercase tracking-[0.2em] text-[#58595B] sm:block sm:mt-8 ${
@@ -343,7 +343,7 @@ export function PropertiesPageClient({
           <p className="mt-2 text-sm text-[rgba(35,31,32,0.68)]">{copy.filters.noResultsBody}</p>
         </div>
       ) : (
-        <div className="mt-5 grid gap-5 sm:mt-6 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:mt-6 sm:gap-5 md:grid-cols-3 md:gap-6 xl:grid-cols-4">
           {filtered.map((property, index) => (
             <PropertyCard
               key={property.id}

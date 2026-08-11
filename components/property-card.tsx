@@ -32,9 +32,9 @@ export function PropertyCard({
       whileInView="show"
       viewport={{ once: true, margin: '-120px' }}
       transition={{ duration: 0.7, delay }}
-      className="group overflow-hidden rounded-[1.9rem] border border-[rgba(35,31,32,0.1)] bg-white shadow-[0_18px_50px_rgba(35,31,32,0.12)] transition hover:-translate-y-1 hover:border-[rgba(184,134,11,0.35)] hover:shadow-[0_24px_68px_rgba(35,31,32,0.16)]"
+      className="group overflow-hidden rounded-2xl border border-[rgba(35,31,32,0.1)] bg-white shadow-[0_8px_24px_rgba(35,31,32,0.08)] transition hover:-translate-y-1 hover:border-[rgba(184,134,11,0.35)] hover:shadow-[0_16px_36px_rgba(35,31,32,0.14)] sm:rounded-[1.5rem]"
     >
-      <div className="relative h-72 overflow-hidden">
+      <div className="relative aspect-[4/3] overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={property.image}
@@ -44,43 +44,46 @@ export function PropertyCard({
             property.tone === 'mono' ? 'grayscale contrast-110' : ''
           }`}
         />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(35,31,32,0.05),rgba(35,31,32,0.56))]" />
-        <div className="absolute left-6 top-6 rounded-full border border-white/20 bg-black/25 px-4 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.36em] text-white/90 backdrop-blur-sm">
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(35,31,32,0.02),rgba(35,31,32,0.32))]" />
+        <div className="absolute left-2 top-2 rounded-full border border-white/20 bg-black/30 px-2 py-0.5 text-[8px] font-semibold uppercase tracking-[0.14em] text-white/90 backdrop-blur-sm sm:left-3 sm:top-3 sm:px-3 sm:py-1 sm:text-[10px] sm:tracking-[0.2em]">
           {propertyTypeLabel(property.propertyType, locale)}
         </div>
-        <div className="absolute bottom-5 left-6 right-6 flex items-end justify-between gap-3">
-          <h3 className="text-xl font-semibold tracking-[0.06em] text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)]">
+      </div>
+      <div className="space-y-2 p-2.5 sm:space-y-3 sm:p-4">
+        <div className={`flex items-start justify-between gap-1.5 ${isRtl ? 'flex-row-reverse' : ''}`}>
+          <h3 className="min-w-0 flex-1 truncate text-xs font-semibold tracking-[0.01em] text-[#231F20] sm:text-base">
             {property.name}
           </h3>
-          <div className="whitespace-nowrap rounded-full bg-black/45 px-3.5 py-1.5 backdrop-blur-sm">
-            <span className="text-sm font-semibold tracking-[0.04em] text-[#E9C874]">
-              {formatPrice(property.price, locale)}
-            </span>
-          </div>
+          <span className="flex-none text-xs font-bold text-[#B8860B] sm:text-sm">
+            {formatPrice(property.price, locale)}
+          </span>
         </div>
-      </div>
-      <div className="space-y-5 p-6">
-        <p className="text-sm uppercase tracking-[0.24em] text-[#58595B]">
+
+        <p className="truncate text-[10px] uppercase tracking-[0.14em] text-[#58595B] sm:text-xs sm:tracking-[0.22em]">
           {unitTypeLabel(property.unitType, locale)} · {locationLabel(property.location, locale)}
         </p>
 
         {property.bedrooms > 0 || property.bathrooms > 0 || property.area > 0 ? (
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-y border-[rgba(35,31,32,0.08)] py-4 text-sm text-[#231F20]">
+          <div
+            className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 border-t border-[rgba(35,31,32,0.08)] pt-2 text-[10px] text-[#231F20] sm:gap-x-4 sm:pt-3 sm:text-sm ${
+              isRtl ? 'flex-row-reverse' : ''
+            }`}
+          >
             {property.bedrooms > 0 ? (
-              <span className="inline-flex items-center gap-2">
-                <StatIcon icon="bed" className="text-[#B8860B]" />
+              <span className="inline-flex items-center gap-1 sm:gap-1.5">
+                <StatIcon icon="bed" className="h-3 w-3 text-[#B8860B] sm:h-4 sm:w-4" />
                 {property.bedrooms}
               </span>
             ) : null}
             {property.bathrooms > 0 ? (
-              <span className="inline-flex items-center gap-2">
-                <StatIcon icon="bath" className="text-[#B8860B]" />
+              <span className="inline-flex items-center gap-1 sm:gap-1.5">
+                <StatIcon icon="bath" className="h-3 w-3 text-[#B8860B] sm:h-4 sm:w-4" />
                 {property.bathrooms}
               </span>
             ) : null}
             {property.area > 0 ? (
-              <span className="inline-flex items-center gap-2">
-                <StatIcon icon="area" className="text-[#B8860B]" />
+              <span className="inline-flex items-center gap-1 sm:gap-1.5">
+                <StatIcon icon="area" className="h-3 w-3 text-[#B8860B] sm:h-4 sm:w-4" />
                 {formatArea(property.area, locale)}
               </span>
             ) : null}
@@ -90,7 +93,7 @@ export function PropertyCard({
         <Link
           href={`/properties/${property.id}`}
           locale={locale}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[rgba(35,31,32,0.12)] px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.22em] text-[#231F20] transition hover:border-[#B8860B] hover:text-[#B8860B]"
+          className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-[rgba(35,31,32,0.12)] py-1.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-[#231F20] transition hover:border-[#B8860B] hover:text-[#B8860B] sm:gap-2 sm:py-2 sm:text-[11px] sm:tracking-[0.2em]"
         >
           {viewDetailsLabel}
           <ArrowIcon rtl={isRtl} />
