@@ -160,12 +160,14 @@ option {
 
 .gold-range::-webkit-slider-runnable-track {
   -webkit-appearance: none;
-  height: 0;
+  width: 100%;
+  height: 6px;
   background: transparent;
 }
 
 .gold-range::-moz-range-track {
-  height: 0;
+  width: 100%;
+  height: 6px;
   background: transparent;
   border: none;
 }
@@ -180,7 +182,7 @@ option {
   border: 3px solid #b8860b;
   box-shadow: 0 2px 8px rgba(35, 31, 32, 0.35);
   cursor: pointer;
-  margin-top: 0;
+  margin-top: -6px;
 }
 
 .gold-range::-moz-range-thumb {

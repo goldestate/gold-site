@@ -51,6 +51,23 @@ function FilterLabel({ children }: { children: ReactNode }) {
   return <div className="text-xs font-semibold uppercase tracking-[0.22em] text-[#58595B]">{children}</div>;
 }
 
+function ChevronIcon({ open }: { open: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={`h-4 w-4 flex-none transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
+
 export function PropertiesPageClient({
   copy,
   properties,
@@ -80,6 +97,7 @@ export function PropertiesPageClient({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [propertyType, setPropertyType] = useState(searchParams.get('type') ?? 'any');
   const [unitType, setUnitType] = useState(searchParams.get('unitType') ?? 'any');
   const [location, setLocation] = useState(searchParams.get('location') ?? 'any');
@@ -142,11 +160,24 @@ export function PropertiesPageClient({
       <SectionTitle eyebrow={copy.eyebrow} title={copy.title} intro={copy.intro} isRtl={isRtl} tone="light" />
 
       <div
-        className={`mt-10 rounded-[2rem] border border-[rgba(35,31,32,0.08)] bg-white p-6 shadow-[0_18px_50px_rgba(35,31,32,0.08)] sm:p-8 ${
+        className={`mt-8 rounded-[1.6rem] border border-[rgba(35,31,32,0.08)] bg-white p-4 shadow-[0_18px_50px_rgba(35,31,32,0.08)] sm:mt-10 sm:rounded-[2rem] sm:p-8 ${
           isRtl ? 'text-right' : 'text-left'
         }`}
       >
-        <div className={`flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between ${isRtl ? 'sm:flex-row-reverse' : ''}`}>
+        <button
+          type="button"
+          onClick={() => setFiltersOpen((open) => !open)}
+          aria-expanded={filtersOpen}
+          className={`flex w-full items-center justify-between gap-3 sm:hidden ${isRtl ? 'flex-row-reverse' : ''}`}
+        >
+          <div className={isRtl ? 'text-right' : 'text-left'}>
+            <h2 className="text-base font-semibold tracking-[0.04em] text-[#231F20]">{copy.filters.panelTitle}</h2>
+            <p className="mt-0.5 text-xs text-[rgba(35,31,32,0.6)]">{resultsLabel}</p>
+          </div>
+          <ChevronIcon open={filtersOpen} />
+        </button>
+
+        <div className={`hidden sm:flex sm:items-start sm:justify-between ${isRtl ? 'sm:flex-row-reverse' : ''}`}>
           <div>
             <h2 className="text-xl font-semibold tracking-[0.06em] text-[#231F20]">{copy.filters.panelTitle}</h2>
             <p className="mt-1 text-sm text-[rgba(35,31,32,0.6)]">{copy.filters.panelSubtitle}</p>
@@ -154,20 +185,28 @@ export function PropertiesPageClient({
           <button
             type="button"
             onClick={resetFilters}
-            className="mt-2 inline-flex items-center gap-2 self-start rounded-full border border-[rgba(35,31,32,0.15)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#231F20] transition hover:border-[#B8860B] hover:text-[#B8860B] sm:mt-0"
+            className="inline-flex items-center gap-2 self-start rounded-full border border-[rgba(35,31,32,0.15)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#231F20] transition hover:border-[#B8860B] hover:text-[#B8860B]"
           >
             {copy.filters.resetLabel}
           </button>
         </div>
 
-        <div className="mt-8 space-y-8">
+        <div className={`${filtersOpen ? 'mt-5 block' : 'hidden'} space-y-5 sm:mt-8 sm:block sm:space-y-8`}>
+          <button
+            type="button"
+            onClick={resetFilters}
+            className="inline-flex items-center gap-2 rounded-full border border-[rgba(35,31,32,0.15)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#231F20] transition hover:border-[#B8860B] hover:text-[#B8860B] sm:hidden"
+          >
+            {copy.filters.resetLabel}
+          </button>
+
           <div>
             <FilterLabel>{copy.filters.locationLabel}</FilterLabel>
             <select
               value={location}
               onChange={(event) => setLocation(event.target.value)}
               dir={isRtl ? 'rtl' : 'ltr'}
-              className={`${selectClass} mt-3`}
+              className={`${selectClass} mt-2.5 sm:mt-3`}
             >
               <option value="any">{copy.filters.anyLocation}</option>
               {LOCATIONS.map((item) => (
@@ -180,7 +219,7 @@ export function PropertiesPageClient({
 
           <div>
             <FilterLabel>{copy.filters.propertyTypeLabel}</FilterLabel>
-            <div className={`mt-3 flex flex-wrap gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
+            <div className={`mt-2.5 flex flex-wrap gap-1.5 sm:mt-3 sm:gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
               <Pill active={propertyType === 'any'} onClick={() => setPropertyType('any')}>
                 {copy.filters.anyPropertyType}
               </Pill>
@@ -194,11 +233,11 @@ export function PropertiesPageClient({
 
           <div>
             <FilterLabel>{copy.filters.unitTypeLabel}</FilterLabel>
-            <div className={`mt-3 flex flex-wrap gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
+            <div className={`mt-2.5 flex flex-wrap gap-1.5 sm:mt-3 sm:gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
               <button
                 type="button"
                 onClick={() => setUnitType('any')}
-                className={`inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.1em] transition ${
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] transition sm:gap-2 sm:px-4 sm:py-2.5 sm:text-xs ${
                   unitType === 'any'
                     ? 'border-transparent bg-[#231F20] text-white shadow-[0_10px_24px_rgba(35,31,32,0.18)]'
                     : 'border-[rgba(35,31,32,0.14)] bg-white text-[#231F20] hover:border-[#B8860B] hover:text-[#B8860B]'
@@ -211,23 +250,23 @@ export function PropertiesPageClient({
                   key={item.value}
                   type="button"
                   onClick={() => setUnitType(item.value)}
-                  className={`inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.1em] transition ${
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] transition sm:gap-2 sm:px-4 sm:py-2.5 sm:text-xs ${
                     unitType === item.value
                       ? 'border-transparent bg-[#231F20] text-white shadow-[0_10px_24px_rgba(35,31,32,0.18)]'
                       : 'border-[rgba(35,31,32,0.14)] bg-white text-[#231F20] hover:border-[#B8860B] hover:text-[#B8860B]'
                   }`}
                 >
-                  <UnitTypeIcon type={item.value} className="h-4 w-4" />
+                  <UnitTypeIcon type={item.value} className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   {item[locale]}
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="grid gap-8 sm:grid-cols-2">
+          <div className="grid gap-5 sm:grid-cols-2 sm:gap-8">
             <div>
               <FilterLabel>{copy.filters.bedroomsLabel}</FilterLabel>
-              <div className={`mt-3 flex flex-wrap gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
+              <div className={`mt-2.5 flex flex-wrap gap-1.5 sm:mt-3 sm:gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
                 <Pill active={bedrooms === 'any'} onClick={() => setBedrooms('any')}>
                   {copy.filters.anyCount}
                 </Pill>
@@ -240,7 +279,7 @@ export function PropertiesPageClient({
             </div>
             <div>
               <FilterLabel>{copy.filters.bathroomsLabel}</FilterLabel>
-              <div className={`mt-3 flex flex-wrap gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
+              <div className={`mt-2.5 flex flex-wrap gap-1.5 sm:mt-3 sm:gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
                 <Pill active={bathrooms === 'any'} onClick={() => setBathrooms('any')}>
                   {copy.filters.anyCount}
                 </Pill>
@@ -253,11 +292,11 @@ export function PropertiesPageClient({
             </div>
           </div>
 
-          <div className="grid gap-8 border-t border-[rgba(35,31,32,0.08)] pt-8 sm:grid-cols-2">
+          <div className="grid gap-5 border-t border-[rgba(35,31,32,0.08)] pt-5 sm:grid-cols-2 sm:gap-8 sm:pt-8">
             <div>
               <FilterLabel>{copy.filters.areaLabel}</FilterLabel>
               <p className="mt-1 text-xs text-[rgba(35,31,32,0.55)]">{copy.filters.areaHint}</p>
-              <div className="mt-5">
+              <div className="mt-4 sm:mt-5">
                 <RangeSlider
                   min={0}
                   max={areaBound}
@@ -273,7 +312,7 @@ export function PropertiesPageClient({
             <div>
               <FilterLabel>{copy.filters.priceLabel}</FilterLabel>
               <p className="mt-1 text-xs text-[rgba(35,31,32,0.55)]">{copy.filters.priceHint}</p>
-              <div className="mt-5">
+              <div className="mt-4 sm:mt-5">
                 <RangeSlider
                   min={0}
                   max={priceBound}
@@ -290,7 +329,11 @@ export function PropertiesPageClient({
         </div>
       </div>
 
-      <div className={`mt-8 text-sm font-medium uppercase tracking-[0.2em] text-[#58595B] ${isRtl ? 'text-right' : 'text-left'}`}>
+      <div
+        className={`mt-6 hidden text-sm font-medium uppercase tracking-[0.2em] text-[#58595B] sm:block sm:mt-8 ${
+          isRtl ? 'text-right' : 'text-left'
+        }`}
+      >
         {resultsLabel}
       </div>
 
@@ -300,7 +343,7 @@ export function PropertiesPageClient({
           <p className="mt-2 text-sm text-[rgba(35,31,32,0.68)]">{copy.filters.noResultsBody}</p>
         </div>
       ) : (
-        <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-5 grid gap-5 sm:mt-6 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((property, index) => (
             <PropertyCard
               key={property.id}
