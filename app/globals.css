@@ -147,3 +147,61 @@ button {
 option {
   color: #ffffff;
 }
+
+.gold-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 18px;
+  margin: 0;
+  background: transparent;
+  pointer-events: none;
+}
+
+.gold-range::-webkit-slider-runnable-track {
+  -webkit-appearance: none;
+  height: 0;
+  background: transparent;
+}
+
+.gold-range::-moz-range-track {
+  height: 0;
+  background: transparent;
+  border: none;
+}
+
+.gold-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  pointer-events: auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 3px solid #b8860b;
+  box-shadow: 0 2px 8px rgba(35, 31, 32, 0.35);
+  cursor: pointer;
+  margin-top: 0;
+}
+
+.gold-range::-moz-range-thumb {
+  pointer-events: auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 3px solid #b8860b;
+  box-shadow: 0 2px 8px rgba(35, 31, 32, 0.35);
+  cursor: pointer;
+}
+
+.gold-range:focus {
+  outline: none;
+}
+
+.gold-range:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 5px rgba(184, 134, 11, 0.22), 0 2px 8px rgba(35, 31, 32, 0.35);
+}
+
+.gold-range:focus::-moz-range-thumb {
+  box-shadow: 0 0 0 5px rgba(184, 134, 11, 0.22), 0 2px 8px rgba(35, 31, 32, 0.35);
+}

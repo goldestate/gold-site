@@ -30,6 +30,10 @@ export function PropertyForm({ property }: PropertyFormProps) {
   );
   const [unitType, setUnitType] = useState<UnitTypeValue>(property?.unitType ?? UNIT_TYPES[0].value);
   const [price, setPrice] = useState(property ? String(property.price) : '');
+  const [bedrooms, setBedrooms] = useState(property ? String(property.bedrooms) : '');
+  const [bathrooms, setBathrooms] = useState(property ? String(property.bathrooms) : '');
+  const [area, setArea] = useState(property ? String(property.area) : '');
+  const [description, setDescription] = useState(property?.description ?? '');
   const [tone, setTone] = useState<'color' | 'mono'>(property?.tone ?? 'color');
   const [published, setPublished] = useState(property?.published ?? true);
   const [imageUrl, setImageUrl] = useState(property?.image ?? '');
@@ -74,6 +78,21 @@ export function PropertyForm({ property }: PropertyFormProps) {
       setError('Enter a valid price.');
       return;
     }
+    const parsedBedrooms = Number(bedrooms);
+    if (!bedrooms || Number.isNaN(parsedBedrooms) || parsedBedrooms < 0) {
+      setError('Enter a valid number of bedrooms.');
+      return;
+    }
+    const parsedBathrooms = Number(bathrooms);
+    if (!bathrooms || Number.isNaN(parsedBathrooms) || parsedBathrooms < 0) {
+      setError('Enter a valid number of bathrooms.');
+      return;
+    }
+    const parsedArea = Number(area);
+    if (!area || Number.isNaN(parsedArea) || parsedArea <= 0) {
+      setError('Enter a valid area in m².');
+      return;
+    }
     if (!imageUrl) {
       setError('Upload a photo for this property.');
       return;
@@ -91,6 +110,10 @@ export function PropertyForm({ property }: PropertyFormProps) {
       propertyType,
       unitType,
       price: parsedPrice,
+      bedrooms: parsedBedrooms,
+      bathrooms: parsedBathrooms,
+      area: parsedArea,
+      description: description.trim(),
       image: imageUrl,
       tone,
       published
@@ -216,6 +239,61 @@ export function PropertyForm({ property }: PropertyFormProps) {
           </select>
         </label>
       </div>
+
+      <div className="grid gap-5 sm:grid-cols-3">
+        <label className="block">
+          <span className="mb-2 block text-sm font-medium uppercase tracking-[0.16em] text-white/72">
+            Bedrooms
+          </span>
+          <input
+            type="number"
+            min={0}
+            value={bedrooms}
+            onChange={(event) => setBedrooms(event.target.value)}
+            placeholder="3"
+            className="w-full rounded-[1rem] border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)]"
+          />
+        </label>
+        <label className="block">
+          <span className="mb-2 block text-sm font-medium uppercase tracking-[0.16em] text-white/72">
+            Bathrooms
+          </span>
+          <input
+            type="number"
+            min={0}
+            value={bathrooms}
+            onChange={(event) => setBathrooms(event.target.value)}
+            placeholder="2"
+            className="w-full rounded-[1rem] border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)]"
+          />
+        </label>
+        <label className="block">
+          <span className="mb-2 block text-sm font-medium uppercase tracking-[0.16em] text-white/72">
+            Area (m²)
+          </span>
+          <input
+            type="number"
+            min={0}
+            value={area}
+            onChange={(event) => setArea(event.target.value)}
+            placeholder="210"
+            className="w-full rounded-[1rem] border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)]"
+          />
+        </label>
+      </div>
+
+      <label className="block">
+        <span className="mb-2 block text-sm font-medium uppercase tracking-[0.16em] text-white/72">
+          Description
+        </span>
+        <textarea
+          value={description}
+          onChange={(event) => setDescription(event.target.value)}
+          rows={4}
+          placeholder="A short description highlighting what makes this property stand out."
+          className="w-full rounded-[1rem] border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)]"
+        />
+      </label>
 
       <label className="flex items-center gap-3">
         <input

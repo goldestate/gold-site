@@ -6,7 +6,12 @@ import { locationLabel, propertyTypeLabel, unitTypeLabel } from '@/lib/property-
 import { type Locale } from '@/i18n/routing';
 import { PageShell } from '@/components/page-shell';
 import { Link } from '@/i18n/navigation';
-import { ArrowIcon } from '@/components/section-ui';
+import { ArrowIcon, StatIcon } from '@/components/section-ui';
+
+function formatArea(area: number, locale: 'en' | 'ar'): string {
+  const number = area.toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US');
+  return locale === 'ar' ? `${number} م²` : `${number} m²`;
+}
 
 export async function generateMetadata({
   params
@@ -91,6 +96,33 @@ export default async function PropertyDetailPage({
                   {unitTypeLabel(property.unitType, locale)} · {locationLabel(property.location, locale)}
                 </p>
 
+                {property.bedrooms > 0 || property.bathrooms > 0 || property.area > 0 ? (
+                  <div
+                    className={`mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-medium text-[#231F20] ${
+                      isRtl ? 'flex-row-reverse' : ''
+                    }`}
+                  >
+                    {property.bedrooms > 0 ? (
+                      <span className="inline-flex items-center gap-2">
+                        <StatIcon icon="bed" className="text-[#B8860B]" />
+                        {property.bedrooms} {copy.propertyDetail.bedroomsLabel}
+                      </span>
+                    ) : null}
+                    {property.bathrooms > 0 ? (
+                      <span className="inline-flex items-center gap-2">
+                        <StatIcon icon="bath" className="text-[#B8860B]" />
+                        {property.bathrooms} {copy.propertyDetail.bathroomsLabel}
+                      </span>
+                    ) : null}
+                    {property.area > 0 ? (
+                      <span className="inline-flex items-center gap-2">
+                        <StatIcon icon="area" className="text-[#B8860B]" />
+                        {formatArea(property.area, locale)}
+                      </span>
+                    ) : null}
+                  </div>
+                ) : null}
+
                 <dl className="mt-8 grid grid-cols-2 gap-6 border-t border-[rgba(35,31,32,0.1)] pt-8 sm:grid-cols-3">
                   <div>
                     <dt className="text-xs uppercase tracking-[0.24em] text-[#58595B]">
@@ -116,7 +148,42 @@ export default async function PropertyDetailPage({
                       {locationLabel(property.location, locale)}
                     </dd>
                   </div>
+                  {property.bedrooms > 0 ? (
+                    <div>
+                      <dt className="text-xs uppercase tracking-[0.24em] text-[#58595B]">
+                        {copy.propertyDetail.bedroomsLabel}
+                      </dt>
+                      <dd className="mt-2 text-sm font-medium text-[#231F20]">{property.bedrooms}</dd>
+                    </div>
+                  ) : null}
+                  {property.bathrooms > 0 ? (
+                    <div>
+                      <dt className="text-xs uppercase tracking-[0.24em] text-[#58595B]">
+                        {copy.propertyDetail.bathroomsLabel}
+                      </dt>
+                      <dd className="mt-2 text-sm font-medium text-[#231F20]">{property.bathrooms}</dd>
+                    </div>
+                  ) : null}
+                  {property.area > 0 ? (
+                    <div>
+                      <dt className="text-xs uppercase tracking-[0.24em] text-[#58595B]">
+                        {copy.propertyDetail.areaLabel}
+                      </dt>
+                      <dd className="mt-2 text-sm font-medium text-[#231F20]">
+                        {formatArea(property.area, locale)}
+                      </dd>
+                    </div>
+                  ) : null}
                 </dl>
+
+                {property.description ? (
+                  <div className="mt-8 border-t border-[rgba(35,31,32,0.1)] pt-8">
+                    <h2 className="text-xs uppercase tracking-[0.24em] text-[#58595B]">
+                      {copy.propertyDetail.descriptionLabel}
+                    </h2>
+                    <p className="mt-3 text-sm leading-7 text-[rgba(35,31,32,0.78)]">{property.description}</p>
+                  </div>
+                ) : null}
               </div>
 
               <div className="flex flex-col justify-between gap-6 rounded-[1.6rem] bg-[#231F20] p-6 text-white sm:p-8">

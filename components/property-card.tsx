@@ -4,8 +4,13 @@ import { motion } from 'framer-motion';
 import type { Property } from '@/lib/properties-store';
 import { formatPrice } from '@/lib/format-price';
 import { locationLabel, propertyTypeLabel, unitTypeLabel } from '@/lib/property-taxonomy';
-import { fadeUp, ArrowIcon } from './section-ui';
+import { fadeUp, ArrowIcon, StatIcon } from './section-ui';
 import { Link } from '@/i18n/navigation';
+
+function formatArea(area: number, locale: 'en' | 'ar'): string {
+  const number = area.toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US');
+  return locale === 'ar' ? `${number} م²` : `${number} m²`;
+}
 
 export function PropertyCard({
   property,
@@ -43,30 +48,53 @@ export function PropertyCard({
         <div className="absolute left-6 top-6 rounded-full border border-white/20 bg-black/25 px-4 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.36em] text-white/90 backdrop-blur-sm">
           {propertyTypeLabel(property.propertyType, locale)}
         </div>
-      </div>
-      <div className="space-y-4 p-6">
-        <div>
-          <h3 className="text-2xl font-semibold tracking-[0.08em] text-[#231F20]">{property.name}</h3>
-          <p className="mt-2 text-sm uppercase tracking-[0.24em] text-[#58595B]">
-            {unitTypeLabel(property.unitType, locale)} · {locationLabel(property.location, locale)}
-          </p>
-        </div>
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <div className="text-xs uppercase tracking-[0.3em] text-[#58595B]">Price</div>
-            <div className="mt-2 text-lg font-semibold tracking-[0.08em] text-[#231F20]">
+        <div className="absolute bottom-5 left-6 right-6 flex items-end justify-between gap-3">
+          <h3 className="text-xl font-semibold tracking-[0.06em] text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)]">
+            {property.name}
+          </h3>
+          <div className="whitespace-nowrap rounded-full bg-black/45 px-3.5 py-1.5 backdrop-blur-sm">
+            <span className="text-sm font-semibold tracking-[0.04em] text-[#E9C874]">
               {formatPrice(property.price, locale)}
-            </div>
+            </span>
           </div>
-          <Link
-            href={`/properties/${property.id}`}
-            locale={locale}
-            className="inline-flex items-center gap-2 rounded-full border border-[rgba(35,31,32,0.12)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-[#231F20] transition hover:border-[#B8860B] hover:text-[#B8860B]"
-          >
-            {viewDetailsLabel}
-            <ArrowIcon rtl={isRtl} />
-          </Link>
         </div>
+      </div>
+      <div className="space-y-5 p-6">
+        <p className="text-sm uppercase tracking-[0.24em] text-[#58595B]">
+          {unitTypeLabel(property.unitType, locale)} · {locationLabel(property.location, locale)}
+        </p>
+
+        {property.bedrooms > 0 || property.bathrooms > 0 || property.area > 0 ? (
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-y border-[rgba(35,31,32,0.08)] py-4 text-sm text-[#231F20]">
+            {property.bedrooms > 0 ? (
+              <span className="inline-flex items-center gap-2">
+                <StatIcon icon="bed" className="text-[#B8860B]" />
+                {property.bedrooms}
+              </span>
+            ) : null}
+            {property.bathrooms > 0 ? (
+              <span className="inline-flex items-center gap-2">
+                <StatIcon icon="bath" className="text-[#B8860B]" />
+                {property.bathrooms}
+              </span>
+            ) : null}
+            {property.area > 0 ? (
+              <span className="inline-flex items-center gap-2">
+                <StatIcon icon="area" className="text-[#B8860B]" />
+                {formatArea(property.area, locale)}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
+
+        <Link
+          href={`/properties/${property.id}`}
+          locale={locale}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[rgba(35,31,32,0.12)] px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.22em] text-[#231F20] transition hover:border-[#B8860B] hover:text-[#B8860B]"
+        >
+          {viewDetailsLabel}
+          <ArrowIcon rtl={isRtl} />
+        </Link>
       </div>
     </motion.article>
   );

@@ -65,15 +65,23 @@ export type SiteCopy = {
     title: string;
     intro: string;
     filters: {
+      panelTitle: string;
+      panelSubtitle: string;
       propertyTypeLabel: string;
       anyPropertyType: string;
       unitTypeLabel: string;
       anyUnitType: string;
       locationLabel: string;
       anyLocation: string;
+      bedroomsLabel: string;
+      bathroomsLabel: string;
+      anyCount: string;
+      areaLabel: string;
+      areaHint: string;
       priceLabel: string;
-      anyPrice: string;
-      priceBuckets: PriceBucket[];
+      priceHint: string;
+      resetLabel: string;
+      resultsCount: string;
       noResultsTitle: string;
       noResultsBody: string;
       viewDetails: string;
@@ -85,6 +93,10 @@ export type SiteCopy = {
     locationLabel: string;
     typeLabel: string;
     unitLabel: string;
+    bedroomsLabel: string;
+    bathroomsLabel: string;
+    areaLabel: string;
+    descriptionLabel: string;
     enquireCta: string;
     notFoundTitle: string;
     notFoundBody: string;
@@ -156,14 +168,18 @@ const priceBucketsEn: PriceBucket[] = [
   { label: 'Up to EGP 10M', max: 10_000_000 },
   { label: 'Up to EGP 20M', max: 20_000_000 },
   { label: 'Up to EGP 30M', max: 30_000_000 },
-  { label: 'Up to EGP 50M', max: 50_000_000 }
+  { label: 'Up to EGP 50M', max: 50_000_000 },
+  { label: 'Up to EGP 75M', max: 75_000_000 },
+  { label: 'EGP 100M+', max: 500_000_000 }
 ];
 
 const priceBucketsAr: PriceBucket[] = [
   { label: 'حتى 10 مليون جنيه', max: 10_000_000 },
   { label: 'حتى 20 مليون جنيه', max: 20_000_000 },
   { label: 'حتى 30 مليون جنيه', max: 30_000_000 },
-  { label: 'حتى 50 مليون جنيه', max: 50_000_000 }
+  { label: 'حتى 50 مليون جنيه', max: 50_000_000 },
+  { label: 'حتى 75 مليون جنيه', max: 75_000_000 },
+  { label: '100 مليون جنيه فأكثر', max: 500_000_000 }
 ];
 
 const goldLifePartners = ['SAF', 'A-Line', 'Mobica Sharm', 'DRIVE Finance', 'FORSA', 'Contrast Designs'];
@@ -173,7 +189,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     seo: {
       title: 'GOLD Investment Opportunities',
       description:
-        'Buy, rent, or resell premium properties in New Cairo, North Coast, Sheikh Zayed, Ain Sokhna, and Gouna with GOLD — trusted real estate consultation and property management.'
+        'Buy primary, rental, and resale premium properties in New Cairo, North Coast, Sheikh Zayed, Ain Sokhna, and Gouna with GOLD — trusted real estate consultation and property management.'
     },
     nav: {
       home: 'Home',
@@ -183,7 +199,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     },
     home: {
       hero: {
-        eyebrow: 'Buy. Rent. Resell.',
+        eyebrow: 'Primary. Rental. Resale.',
         title: 'Find your next property',
         subtitle:
           'Verified primary, resale, and rental listings across Egypt’s top destinations — real prices, zero guesswork.',
@@ -249,17 +265,25 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     propertiesPage: {
       eyebrow: 'Properties',
       title: 'Find your next property',
-      intro: 'Filter by type, location, unit, and budget to see what is actually available.',
+      intro: 'Filter by type, location, unit, rooms, size, and budget to see what is actually available.',
       filters: {
+        panelTitle: 'Filter Properties',
+        panelSubtitle: 'Apply filters to find your perfect property.',
         propertyTypeLabel: 'Property Type',
         anyPropertyType: 'Any type',
         unitTypeLabel: 'Unit Type',
         anyUnitType: 'Any unit',
         locationLabel: 'Location',
         anyLocation: 'Any location',
-        priceLabel: 'Budget',
-        anyPrice: 'Any price',
-        priceBuckets: priceBucketsEn,
+        bedroomsLabel: 'Bedrooms',
+        bathroomsLabel: 'Bathrooms',
+        anyCount: 'Any',
+        areaLabel: 'Property Size',
+        areaHint: 'Area range (m²)',
+        priceLabel: 'Property Price',
+        priceHint: 'Set your budget range (EGP)',
+        resetLabel: 'Reset filters',
+        resultsCount: '{count} properties found',
         noResultsTitle: 'No properties match these filters.',
         noResultsBody: 'Try a different location, unit type, or a wider budget range.',
         viewDetails: 'View Details'
@@ -271,6 +295,10 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       locationLabel: 'Location',
       typeLabel: 'Property Type',
       unitLabel: 'Unit Type',
+      bedroomsLabel: 'Bedrooms',
+      bathroomsLabel: 'Bathrooms',
+      areaLabel: 'Area',
+      descriptionLabel: 'About this property',
       enquireCta: 'Enquire About This Property',
       notFoundTitle: 'Property not found',
       notFoundBody: 'This listing may have been removed or is no longer published.'
@@ -389,7 +417,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       }
     },
     footer: {
-      tagline: 'Golden opportunities. Leading domain. Quiet confidence.',
+      tagline: 'Golden Opportunity Of Leading Domain.',
       legal: '© 2026 GOLD Investment Opportunities. All rights reserved.'
     }
   },
@@ -397,7 +425,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     seo: {
       title: 'فرص استثمارية من GOLD',
       description:
-        'اشترِ أو أوجر أو أعد بيع عقارات مميزة في القاهرة الجديدة والساحل الشمالي والشيخ زايد والعين السخنة والجونة مع GOLD — استشارات عقارية موثوقة وإدارة احترافية للأملاك.'
+        'عقارات أساسية وإيجار وإعادة بيع مميزة في القاهرة الجديدة والساحل الشمالي والشيخ زايد والعين السخنة والجونة مع GOLD — استشارات عقارية موثوقة وإدارة احترافية للأملاك.'
     },
     nav: {
       home: 'الرئيسية',
@@ -407,7 +435,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     },
     home: {
       hero: {
-        eyebrow: 'اشترِ. أوجر. أعد البيع.',
+        eyebrow: 'أساسي. إيجار. إعادة بيع.',
         title: 'ابحث عن عقارك القادم',
         subtitle: 'عروض أساسية وإعادة بيع وإيجار موثقة في أفضل مناطق مصر — أسعار حقيقية دون تخمين.',
         search: {
@@ -472,17 +500,25 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     propertiesPage: {
       eyebrow: 'العقارات',
       title: 'ابحث عن عقارك القادم',
-      intro: 'صفِّ النتائج حسب النوع والموقع والوحدة والميزانية لترى ما هو متاح فعلاً.',
+      intro: 'صفِّ النتائج حسب النوع والموقع والوحدة والغرف والمساحة والميزانية لترى ما هو متاح فعلاً.',
       filters: {
+        panelTitle: 'تصفية العقارات',
+        panelSubtitle: 'طبّق الفلاتر للعثور على عقارك المثالي.',
         propertyTypeLabel: 'نوع العقار',
         anyPropertyType: 'أي نوع',
         unitTypeLabel: 'نوع الوحدة',
         anyUnitType: 'أي وحدة',
         locationLabel: 'الموقع',
         anyLocation: 'أي موقع',
-        priceLabel: 'الميزانية',
-        anyPrice: 'أي سعر',
-        priceBuckets: priceBucketsAr,
+        bedroomsLabel: 'غرف النوم',
+        bathroomsLabel: 'الحمامات',
+        anyCount: 'أي عدد',
+        areaLabel: 'مساحة العقار',
+        areaHint: 'نطاق المساحة (م²)',
+        priceLabel: 'سعر العقار',
+        priceHint: 'حدد نطاق ميزانيتك (جنيه)',
+        resetLabel: 'إعادة تعيين',
+        resultsCount: '{count} عقار متاح',
         noResultsTitle: 'لا توجد عقارات مطابقة لهذا البحث.',
         noResultsBody: 'جرّب موقعاً أو نوع وحدة مختلفاً أو نطاق ميزانية أوسع.',
         viewDetails: 'عرض التفاصيل'
@@ -494,6 +530,10 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       locationLabel: 'الموقع',
       typeLabel: 'نوع العقار',
       unitLabel: 'نوع الوحدة',
+      bedroomsLabel: 'غرف النوم',
+      bathroomsLabel: 'الحمامات',
+      areaLabel: 'المساحة',
+      descriptionLabel: 'عن هذا العقار',
       enquireCta: 'استفسر عن هذا العقار',
       notFoundTitle: 'العقار غير موجود',
       notFoundBody: 'ربما تم حذف هذا العرض أو لم يعد منشوراً.'
@@ -610,7 +650,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       }
     },
     footer: {
-      tagline: 'فرص ذهبية. مجال ريادي. ثقة هادئة.',
+      tagline: 'الفرصة الذهبية لمجال ريادي.',
       legal: '© 2026 GOLD Investment Opportunities. جميع الحقوق محفوظة.'
     }
   }

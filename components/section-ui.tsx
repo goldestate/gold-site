@@ -195,6 +195,144 @@ export function LineIcon({
   );
 }
 
+export function UnitTypeIcon({ type, className = '' }: { type: string; className?: string }) {
+  const shared = {
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 1.6,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const
+  };
+  const base = `h-6 w-6 ${className}`;
+
+  if (type === 'chalet') {
+    return (
+      <svg className={base} viewBox="0 0 24 24" aria-hidden="true">
+        <path {...shared} d="M4 12 12 5l8 7" />
+        <path {...shared} d="M6 11v8h12v-8" />
+        <path {...shared} d="M10 19v-5h4v5" />
+      </svg>
+    );
+  }
+
+  if (type === 'townhouse') {
+    return (
+      <svg className={base} viewBox="0 0 24 24" aria-hidden="true">
+        <path {...shared} d="M2 10 6 6l4 4" />
+        <path {...shared} d="M10 8l4-4 4 4" />
+        <path {...shared} d="M3 10v9h6v-9" />
+        <path {...shared} d="M9 8v11" />
+        <path {...shared} d="M11 8v11h10v-9" />
+      </svg>
+    );
+  }
+
+  if (type === 'twinhouse') {
+    return (
+      <svg className={base} viewBox="0 0 24 24" aria-hidden="true">
+        <path {...shared} d="M2 11 7 6l5 5" />
+        <path {...shared} d="M12 11l5-5 5 5" />
+        <path {...shared} d="M3 11v8h8v-8" />
+        <path {...shared} d="M13 11v8h8v-8" />
+        <path {...shared} d="M7 19v-4" />
+        <path {...shared} d="M17 19v-4" />
+      </svg>
+    );
+  }
+
+  if (type === 'villa') {
+    return (
+      <svg className={base} viewBox="0 0 24 24" aria-hidden="true">
+        <path {...shared} d="M4 11 12 4l8 7" />
+        <path {...shared} d="M6 10v6h12v-6" />
+        <path {...shared} d="M2 20c1.4-1.2 2.6-1.2 4 0 1.4-1.2 2.6-1.2 4 0 1.4-1.2 2.6-1.2 4 0 1.4-1.2 2.6-1.2 4 0 1.4-1.2 2.6-1.2 4 0" />
+      </svg>
+    );
+  }
+
+  if (type === 'commercial') {
+    return (
+      <svg className={base} viewBox="0 0 24 24" aria-hidden="true">
+        <rect {...shared} x="4" y="8" width="16" height="12" rx="1" />
+        <path {...shared} d="M9 8V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V8" />
+        <path {...shared} d="M4 13h16" />
+      </svg>
+    );
+  }
+
+  if (type === 'administrative') {
+    return (
+      <svg className={base} viewBox="0 0 24 24" aria-hidden="true">
+        <path {...shared} d="M4 10 12 4l8 6" />
+        <path {...shared} d="M5 10v10h14V10" />
+        <path {...shared} d="M9 20v-6h6v6" />
+        <path {...shared} d="M9 14V10" />
+        <path {...shared} d="M15 14V10" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg className={base} viewBox="0 0 24 24" aria-hidden="true">
+      <rect {...shared} x="4" y="9" width="16" height="11" />
+      <path {...shared} d="M4 9 12 4l8 5" />
+      <path {...shared} d="M8 20v-5h3v5" />
+      <path {...shared} d="M9 12h2" />
+      <path {...shared} d="M13 12h2" />
+      <path {...shared} d="M13 16h2" />
+    </svg>
+  );
+}
+
+export function StatIcon({
+  icon,
+  className = ''
+}: {
+  icon: 'bed' | 'bath' | 'area';
+  className?: string;
+}) {
+  const shared = {
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 1.6,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const
+  };
+  const base = `h-4 w-4 ${className}`;
+
+  if (icon === 'bed') {
+    return (
+      <svg className={base} viewBox="0 0 24 24" aria-hidden="true">
+        <path {...shared} d="M3 18v-7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v7" />
+        <path {...shared} d="M3 18v2" />
+        <path {...shared} d="M21 18v2" />
+        <path {...shared} d="M3 13v-1a2 2 0 0 1 2-2h6v4" />
+        <path {...shared} d="M13 13v-3h6a2 2 0 0 1 2 2v1" />
+      </svg>
+    );
+  }
+
+  if (icon === 'bath') {
+    return (
+      <svg className={base} viewBox="0 0 24 24" aria-hidden="true">
+        <path {...shared} d="M4 12h16v3a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5v-3Z" />
+        <path {...shared} d="M4 12V7a2 2 0 0 1 2-2c1.2 0 2 .8 2 2" />
+        <path {...shared} d="M8 20v2" />
+        <path {...shared} d="M16 20v2" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg className={base} viewBox="0 0 24 24" aria-hidden="true">
+      <path {...shared} d="M4 9V4h5" />
+      <path {...shared} d="M20 9V4h-5" />
+      <path {...shared} d="M4 15v5h5" />
+      <path {...shared} d="M20 15v5h-5" />
+    </svg>
+  );
+}
+
 export function ArrowIcon({ rtl = false }: { rtl?: boolean }) {
   return (
     <svg

@@ -28,6 +28,22 @@ function pickPatch(body: unknown): Partial<PropertyInput> | null {
     if (typeof value.price !== 'number' || !Number.isFinite(value.price) || value.price < 0) return null;
     patch.price = value.price;
   }
+  if (value.bedrooms !== undefined) {
+    if (typeof value.bedrooms !== 'number' || !Number.isFinite(value.bedrooms) || value.bedrooms < 0) return null;
+    patch.bedrooms = value.bedrooms;
+  }
+  if (value.bathrooms !== undefined) {
+    if (typeof value.bathrooms !== 'number' || !Number.isFinite(value.bathrooms) || value.bathrooms < 0) return null;
+    patch.bathrooms = value.bathrooms;
+  }
+  if (value.area !== undefined) {
+    if (typeof value.area !== 'number' || !Number.isFinite(value.area) || value.area < 0) return null;
+    patch.area = value.area;
+  }
+  if (value.description !== undefined) {
+    if (typeof value.description !== 'string') return null;
+    patch.description = value.description.trim();
+  }
   if (value.image !== undefined) {
     if (typeof value.image !== 'string' || value.image.trim().length === 0) return null;
     patch.image = value.image.trim();

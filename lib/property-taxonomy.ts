@@ -43,6 +43,9 @@ export const PROPERTY_TYPE_VALUES = PROPERTY_TYPES.map((item) => item.value);
 export const UNIT_TYPE_VALUES = UNIT_TYPES.map((item) => item.value);
 export const LOCATION_VALUES = LOCATIONS.map((item) => item.value);
 
+export const BEDROOM_OPTIONS = [1, 2, 3, 4, 5, 6, 7] as const;
+export const BATHROOM_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
+
 export function isPropertyType(value: unknown): value is PropertyTypeValue {
   return typeof value === 'string' && (PROPERTY_TYPE_VALUES as string[]).includes(value);
 }
