@@ -15,6 +15,16 @@ function isValidInput(body: unknown): body is PropertyInput {
     typeof value.price === 'number' &&
     Number.isFinite(value.price) &&
     value.price >= 0 &&
+    typeof value.bedrooms === 'number' &&
+    Number.isFinite(value.bedrooms) &&
+    value.bedrooms >= 0 &&
+    typeof value.bathrooms === 'number' &&
+    Number.isFinite(value.bathrooms) &&
+    value.bathrooms >= 0 &&
+    typeof value.area === 'number' &&
+    Number.isFinite(value.area) &&
+    value.area >= 0 &&
+    typeof value.description === 'string' &&
     typeof value.image === 'string' &&
     value.image.trim().length > 0 &&
     (value.tone === 'color' || value.tone === 'mono') &&
@@ -50,6 +60,10 @@ export async function POST(request: NextRequest) {
     propertyType: body.propertyType,
     unitType: body.unitType,
     price: body.price,
+    bedrooms: body.bedrooms,
+    bathrooms: body.bathrooms,
+    area: body.area,
+    description: body.description.trim(),
     image: body.image.trim(),
     tone: body.tone,
     published: body.published

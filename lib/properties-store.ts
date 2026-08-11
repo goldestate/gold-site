@@ -16,6 +16,10 @@ export type Property = {
   propertyType: PropertyTypeValue;
   unitType: UnitTypeValue;
   price: number;
+  bedrooms: number;
+  bathrooms: number;
+  area: number;
+  description: string;
   image: string;
   tone: 'color' | 'mono';
   published: boolean;
@@ -28,6 +32,10 @@ export type PropertyInput = {
   propertyType: PropertyTypeValue;
   unitType: UnitTypeValue;
   price: number;
+  bedrooms: number;
+  bathrooms: number;
+  area: number;
+  description: string;
   image: string;
   tone: 'color' | 'mono';
   published: boolean;
@@ -45,6 +53,11 @@ const DEFAULT_PROPERTIES: Property[] = [
     propertyType: 'primary',
     unitType: 'apartment',
     price: 18_000_000,
+    bedrooms: 3,
+    bathrooms: 3,
+    area: 210,
+    description:
+      'A refined apartment residence overlooking New Cairo, finished to a premium standard with private balconies and dedicated concierge service.',
     image:
       'https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1400&q=80',
     tone: 'color',
@@ -58,6 +71,11 @@ const DEFAULT_PROPERTIES: Property[] = [
     propertyType: 'resale',
     unitType: 'townhouse',
     price: 9_000_000,
+    bedrooms: 4,
+    bathrooms: 4,
+    area: 260,
+    description:
+      'A resale townhouse with a private garden and flexible layout, ready to move in within one of New Cairo’s most established communities.',
     image:
       'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1400&q=80',
     tone: 'mono',
@@ -71,6 +89,11 @@ const DEFAULT_PROPERTIES: Property[] = [
     propertyType: 'primary',
     unitType: 'villa',
     price: 24_000_000,
+    bedrooms: 5,
+    bathrooms: 5,
+    area: 380,
+    description:
+      'A beachside villa with direct sea views, a private pool, and landscaped grounds designed for year-round coastal living.',
     image:
       'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80',
     tone: 'color',
@@ -114,6 +137,10 @@ function normalizeRecord(raw: Record<string, unknown>): Property {
     propertyType: isPropertyType(raw.propertyType) ? raw.propertyType : 'resale',
     unitType: isUnitType(raw.unitType) ? raw.unitType : 'apartment',
     price: typeof raw.price === 'number' ? raw.price : legacyPrice,
+    bedrooms: typeof raw.bedrooms === 'number' ? raw.bedrooms : 0,
+    bathrooms: typeof raw.bathrooms === 'number' ? raw.bathrooms : 0,
+    area: typeof raw.area === 'number' ? raw.area : 0,
+    description: typeof raw.description === 'string' ? raw.description : '',
     image: String(raw.image ?? ''),
     tone: raw.tone === 'mono' ? 'mono' : 'color',
     published: Boolean(raw.published),
