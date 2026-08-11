@@ -11,6 +11,13 @@ type SiteFooterProps = {
 export function SiteFooter({ copy, locale }: SiteFooterProps) {
   const switchLocale = locale === 'en' ? 'ar' : 'en';
 
+  const navItems = [
+    { label: copy.nav.home, href: '/' },
+    { label: copy.nav.properties, href: '/properties' },
+    { label: copy.nav.about, href: '/about' },
+    { label: copy.nav.contact, href: '/contact' }
+  ];
+
   return (
     <footer className="relative overflow-hidden border-t border-white/10 bg-[#171314] px-4 py-10 sm:px-6 lg:px-8">
       <GMark
@@ -29,17 +36,21 @@ export function SiteFooter({ copy, locale }: SiteFooterProps) {
             <p className="mt-6 max-w-sm text-sm leading-7 text-white/68">{copy.footer.tagline}</p>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {copy.footer.sublinks.map((item) => (
-              <a
-                key={item}
-                href="#subbrands"
+          <nav
+            aria-label="Footer"
+            className={`flex flex-wrap gap-x-8 gap-y-3 ${locale === 'ar' ? 'flex-row-reverse' : ''}`}
+          >
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                locale={locale}
                 className="text-sm tracking-[0.18em] text-white/72 transition hover:text-[#D9B355]"
               >
-                {item}
-              </a>
+                {item.label}
+              </Link>
             ))}
-          </div>
+          </nav>
         </div>
 
         <div
@@ -51,7 +62,7 @@ export function SiteFooter({ copy, locale }: SiteFooterProps) {
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              locale={locale}
+              locale="en"
               className={`rounded-full px-3 py-1 text-xs font-semibold tracking-[0.24em] ${
                 locale === 'en' ? 'btn-gold' : 'border border-white/15 text-white/75'
               }`}
@@ -60,7 +71,7 @@ export function SiteFooter({ copy, locale }: SiteFooterProps) {
             </Link>
             <Link
               href="/"
-              locale={switchLocale}
+              locale="ar"
               className={`rounded-full px-3 py-1 text-xs font-semibold tracking-[0.24em] ${
                 locale === 'ar' ? 'btn-gold' : 'border border-white/15 text-white/75'
               }`}

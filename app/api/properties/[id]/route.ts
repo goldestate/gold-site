@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/require-admin';
 import { deleteProperty, updateProperty, type PropertyInput } from '@/lib/properties-store';
+import { isLocation, isPropertyType, isUnitType } from '@/lib/property-taxonomy';
 
 function pickPatch(body: unknown): Partial<PropertyInput> | null {
   if (!body || typeof body !== 'object') return null;
@@ -12,18 +13,20 @@ function pickPatch(body: unknown): Partial<PropertyInput> | null {
     patch.name = value.name.trim();
   }
   if (value.location !== undefined) {
-    if (typeof value.location !== 'string' || value.location.trim().length === 0) return null;
-    patch.location = value.location.trim();
+    if (!isLocation(value.location)) return null;
+    patch.location = value.location;
   }
-  if (value.priceMin !== undefined) {
-    if (typeof value.priceMin !== 'number' || !Number.isFinite(value.priceMin) || value.priceMin < 0) return null;
-    patch.priceMin = value.priceMin;
+  if (value.propertyType !== undefined) {
+    if (!isPropertyType(value.propertyType)) return null;
+    patch.propertyType = value.propertyType;
   }
-  if (value.priceMax !== undefined) {
-    if (value.priceMax !== null && (typeof value.priceMax !== 'number' || !Number.isFinite(value.priceMax))) {
-      return null;
-    }
-    patch.priceMax = value.priceMax as number | null;
+  if (value.unitType !== undefined) {
+    if (!isUnitType(value.unitType)) return null;
+    patch.unitType = value.unitType;
+  }
+  if (value.price !== undefined) {
+    if (typeof value.price !== 'number' || !Number.isFinite(value.price) || value.price < 0) return null;
+    patch.price = value.price;
   }
   if (value.image !== undefined) {
     if (typeof value.image !== 'string' || value.image.trim().length === 0) return null;

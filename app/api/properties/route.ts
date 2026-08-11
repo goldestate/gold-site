@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/require-admin';
 import { createProperty, readProperties, readPublishedProperties, type PropertyInput } from '@/lib/properties-store';
+import { isLocation, isPropertyType, isUnitType } from '@/lib/property-taxonomy';
 
 function isValidInput(body: unknown): body is PropertyInput {
   if (!body || typeof body !== 'object') return false;
@@ -8,13 +9,12 @@ function isValidInput(body: unknown): body is PropertyInput {
   return (
     typeof value.name === 'string' &&
     value.name.trim().length > 0 &&
-    typeof value.location === 'string' &&
-    value.location.trim().length > 0 &&
-    typeof value.priceMin === 'number' &&
-    Number.isFinite(value.priceMin) &&
-    value.priceMin >= 0 &&
-    (value.priceMax === null ||
-      (typeof value.priceMax === 'number' && Number.isFinite(value.priceMax))) &&
+    isLocation(value.location) &&
+    isPropertyType(value.propertyType) &&
+    isUnitType(value.unitType) &&
+    typeof value.price === 'number' &&
+    Number.isFinite(value.price) &&
+    value.price >= 0 &&
     typeof value.image === 'string' &&
     value.image.trim().length > 0 &&
     (value.tone === 'color' || value.tone === 'mono') &&
@@ -46,9 +46,10 @@ export async function POST(request: NextRequest) {
 
   const property = await createProperty({
     name: body.name.trim(),
-    location: body.location.trim(),
-    priceMin: body.priceMin,
-    priceMax: body.priceMax,
+    location: body.location,
+    propertyType: body.propertyType,
+    unitType: body.unitType,
+    price: body.price,
     image: body.image.trim(),
     tone: body.tone,
     published: body.published

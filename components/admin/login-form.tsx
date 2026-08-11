@@ -27,7 +27,7 @@ export function LoginForm() {
         return;
       }
 
-      router.push('/admin/properties');
+      router.push('/goldenadmin2026/properties');
       router.refresh();
     } catch {
       setError('Could not reach the server. Please try again.');
@@ -47,7 +47,7 @@ export function LoginForm() {
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           autoFocus
-          className="w-full rounded-[1rem] border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#D9B355] focus:ring-2 focus:ring-[#D9B355]/22"
+          className="w-full rounded-[1rem] border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)]"
         />
       </label>
       {error ? <p className="text-sm text-red-300">{error}</p> : null}

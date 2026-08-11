@@ -25,7 +25,8 @@ export async function GET(_request: NextRequest, { params }: { params: { filenam
     return new NextResponse(data, {
       headers: {
         'Content-Type': contentType,
-        'Cache-Control': 'public, max-age=31536000, immutable'
+        'Cache-Control': 'public, max-age=31536000, immutable',
+        'X-Content-Type-Options': 'nosniff'
       }
     });
   } catch {

@@ -3,19 +3,33 @@
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import type { Property } from '@/lib/properties-store';
+import {
+  LOCATIONS,
+  PROPERTY_TYPES,
+  UNIT_TYPES,
+  type LocationValue,
+  type PropertyTypeValue,
+  type UnitTypeValue
+} from '@/lib/property-taxonomy';
 
 type PropertyFormProps = {
   property?: Property;
 };
+
+const selectClass =
+  'w-full rounded-[1rem] border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none transition focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)]';
 
 export function PropertyForm({ property }: PropertyFormProps) {
   const router = useRouter();
   const isEditing = Boolean(property);
 
   const [name, setName] = useState(property?.name ?? '');
-  const [location, setLocation] = useState(property?.location ?? '');
-  const [priceMin, setPriceMin] = useState(property ? String(property.priceMin) : '');
-  const [priceMax, setPriceMax] = useState(property?.priceMax ? String(property.priceMax) : '');
+  const [location, setLocation] = useState<LocationValue>(property?.location ?? LOCATIONS[0].value);
+  const [propertyType, setPropertyType] = useState<PropertyTypeValue>(
+    property?.propertyType ?? PROPERTY_TYPES[0].value
+  );
+  const [unitType, setUnitType] = useState<UnitTypeValue>(property?.unitType ?? UNIT_TYPES[0].value);
+  const [price, setPrice] = useState(property ? String(property.price) : '');
   const [tone, setTone] = useState<'color' | 'mono'>(property?.tone ?? 'color');
   const [published, setPublished] = useState(property?.published ?? true);
   const [imageUrl, setImageUrl] = useState(property?.image ?? '');
@@ -55,22 +69,17 @@ export function PropertyForm({ property }: PropertyFormProps) {
     event.preventDefault();
     setError('');
 
-    const parsedMin = Number(priceMin);
-    if (!priceMin || Number.isNaN(parsedMin) || parsedMin < 0) {
-      setError('Enter a valid starting price.');
-      return;
-    }
-    const parsedMax = priceMax ? Number(priceMax) : null;
-    if (priceMax && (Number.isNaN(parsedMax as number) || (parsedMax as number) < parsedMin)) {
-      setError('Max price must be a number greater than the starting price.');
+    const parsedPrice = Number(price);
+    if (!price || Number.isNaN(parsedPrice) || parsedPrice < 0) {
+      setError('Enter a valid price.');
       return;
     }
     if (!imageUrl) {
       setError('Upload a photo for this property.');
       return;
     }
-    if (!name.trim() || !location.trim()) {
-      setError('Name and location are required.');
+    if (!name.trim()) {
+      setError('Property name is required.');
       return;
     }
 
@@ -78,9 +87,10 @@ export function PropertyForm({ property }: PropertyFormProps) {
 
     const payload = {
       name: name.trim(),
-      location: location.trim(),
-      priceMin: parsedMin,
-      priceMax: parsedMax,
+      location,
+      propertyType,
+      unitType,
+      price: parsedPrice,
       image: imageUrl,
       tone,
       published
@@ -99,7 +109,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
         return;
       }
 
-      router.push('/admin/properties');
+      router.push(`/goldenadmin2026/properties?${isEditing ? 'updated' : 'created'}=1`);
       router.refresh();
     } catch {
       setError('Could not reach the server. Please try again.');
@@ -118,52 +128,76 @@ export function PropertyForm({ property }: PropertyFormProps) {
           <input
             value={name}
             onChange={(event) => setName(event.target.value)}
-            className="w-full rounded-[1rem] border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none transition focus:border-[#D9B355] focus:ring-2 focus:ring-[#D9B355]/22"
+            className="w-full rounded-[1rem] border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none transition focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)]"
           />
         </label>
         <label className="block">
           <span className="mb-2 block text-sm font-medium uppercase tracking-[0.16em] text-white/72">
             Location
           </span>
-          <input
+          <select
             value={location}
-            onChange={(event) => setLocation(event.target.value)}
-            placeholder="e.g. New Cairo, Egypt"
-            className="w-full rounded-[1rem] border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#D9B355] focus:ring-2 focus:ring-[#D9B355]/22"
-          />
+            onChange={(event) => setLocation(event.target.value as LocationValue)}
+            className={selectClass}
+          >
+            {LOCATIONS.map((item) => (
+              <option key={item.value} value={item.value} className="bg-[#231F20]">
+                {item.en}
+              </option>
+            ))}
+          </select>
         </label>
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="block">
           <span className="mb-2 block text-sm font-medium uppercase tracking-[0.16em] text-white/72">
-            Starting price (EGP)
+            Property type
+          </span>
+          <select
+            value={propertyType}
+            onChange={(event) => setPropertyType(event.target.value as PropertyTypeValue)}
+            className={selectClass}
+          >
+            {PROPERTY_TYPES.map((item) => (
+              <option key={item.value} value={item.value} className="bg-[#231F20]">
+                {item.en}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block">
+          <span className="mb-2 block text-sm font-medium uppercase tracking-[0.16em] text-white/72">
+            Unit type
+          </span>
+          <select
+            value={unitType}
+            onChange={(event) => setUnitType(event.target.value as UnitTypeValue)}
+            className={selectClass}
+          >
+            {UNIT_TYPES.map((item) => (
+              <option key={item.value} value={item.value} className="bg-[#231F20]">
+                {item.en}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-2">
+        <label className="block">
+          <span className="mb-2 block text-sm font-medium uppercase tracking-[0.16em] text-white/72">
+            Price (EGP)
           </span>
           <input
             type="number"
             min={0}
-            value={priceMin}
-            onChange={(event) => setPriceMin(event.target.value)}
+            value={price}
+            onChange={(event) => setPrice(event.target.value)}
             placeholder="18000000"
-            className="w-full rounded-[1rem] border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#D9B355] focus:ring-2 focus:ring-[#D9B355]/22"
+            className="w-full rounded-[1rem] border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)]"
           />
         </label>
-        <label className="block">
-          <span className="mb-2 block text-sm font-medium uppercase tracking-[0.16em] text-white/72">
-            Max price (optional)
-          </span>
-          <input
-            type="number"
-            min={0}
-            value={priceMax}
-            onChange={(event) => setPriceMax(event.target.value)}
-            placeholder="26000000"
-            className="w-full rounded-[1rem] border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#D9B355] focus:ring-2 focus:ring-[#D9B355]/22"
-          />
-        </label>
-      </div>
-
-      <div className="grid gap-5 sm:grid-cols-2">
         <label className="block">
           <span className="mb-2 block text-sm font-medium uppercase tracking-[0.16em] text-white/72">
             Photo treatment
@@ -171,7 +205,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
           <select
             value={tone}
             onChange={(event) => setTone(event.target.value as 'color' | 'mono')}
-            className="w-full rounded-[1rem] border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none transition focus:border-[#D9B355] focus:ring-2 focus:ring-[#D9B355]/22"
+            className={selectClass}
           >
             <option value="color" className="bg-[#231F20]">
               Color
@@ -181,16 +215,17 @@ export function PropertyForm({ property }: PropertyFormProps) {
             </option>
           </select>
         </label>
-        <label className="flex items-center gap-3 pt-8">
-          <input
-            type="checkbox"
-            checked={published}
-            onChange={(event) => setPublished(event.target.checked)}
-            className="h-5 w-5 rounded border-white/20 bg-white/5 accent-[#D9B355]"
-          />
-          <span className="text-sm text-white/80">Published (visible on the public site)</span>
-        </label>
       </div>
+
+      <label className="flex items-center gap-3">
+        <input
+          type="checkbox"
+          checked={published}
+          onChange={(event) => setPublished(event.target.checked)}
+          className="h-5 w-5 rounded border-white/20 bg-white/5 accent-[#D9B355]"
+        />
+        <span className="text-sm text-white/80">Published (visible on the public site)</span>
+      </label>
 
       <div className="block">
         <span className="mb-2 block text-sm font-medium uppercase tracking-[0.16em] text-white/72">
@@ -225,7 +260,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
         </button>
         <button
           type="button"
-          onClick={() => router.push('/admin/properties')}
+          onClick={() => router.push('/goldenadmin2026/properties')}
           className="rounded-full border border-white/15 px-6 py-3 text-sm font-medium uppercase tracking-[0.2em] text-white/75 transition hover:border-white/30"
         >
           Cancel

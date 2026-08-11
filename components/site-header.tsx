@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { BrandLogo } from './brand-logo';
@@ -13,36 +13,21 @@ type SiteHeaderProps = {
 };
 
 export function SiteHeader({ copy, locale, isRtl }: SiteHeaderProps) {
-  const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const t = useTranslations('common');
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
   const navItems = [
-    { label: copy.nav.home, href: '#hero' },
-    { label: copy.nav.about, href: '#about' },
-    { label: copy.nav.usps, href: '#why-gold' },
-    { label: copy.nav.properties, href: '#properties' },
-    { label: copy.nav.contact, href: '#contact' }
+    { label: copy.nav.home, href: '/' },
+    { label: copy.nav.properties, href: '/properties' },
+    { label: copy.nav.about, href: '/about' },
+    { label: copy.nav.contact, href: '/contact' }
   ];
   const orderedNavItems = isRtl ? [...navItems].reverse() : navItems;
 
   const switchLocale = locale === 'en' ? 'ar' : 'en';
 
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-50 border-b border-white/10 transition-all duration-300 ${
-        scrolled
-          ? 'bg-[#231F20]/96 shadow-[0_14px_40px_rgba(0,0,0,0.3)] backdrop-blur-xl'
-          : 'bg-transparent'
-      }`}
-    >
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[rgba(35,31,32,0.96)] shadow-[0_14px_40px_rgba(0,0,0,0.3)] backdrop-blur-xl">
       <div
         className={`mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8 ${
           isRtl ? 'flex-row-reverse' : ''
@@ -55,13 +40,14 @@ export function SiteHeader({ copy, locale, isRtl }: SiteHeaderProps) {
         <div className="hidden items-center gap-8 lg:flex">
           <nav aria-label="Primary" className="flex items-center gap-7 text-sm font-medium">
             {orderedNavItems.map((item) => (
-              <a
+              <Link
                 key={item.href}
                 href={item.href}
+                locale={locale}
                 className="tracking-[0.16em] text-white/80 transition hover:text-[#D9B355]"
               >
                 {item.label}
-              </a>
+              </Link>
             ))}
           </nav>
 
@@ -104,7 +90,7 @@ export function SiteHeader({ copy, locale, isRtl }: SiteHeaderProps) {
       </div>
 
       {menuOpen ? (
-        <div className="border-t border-white/10 bg-[#231F20]/98 px-4 pb-5 pt-2 backdrop-blur-xl lg:hidden">
+        <div className="border-t border-white/10 bg-[rgba(35,31,32,0.98)] px-4 pb-5 pt-2 backdrop-blur-xl lg:hidden">
           <nav
             aria-label="Mobile"
             className={`mx-auto flex max-w-7xl flex-col gap-4 text-base font-medium ${
@@ -112,20 +98,21 @@ export function SiteHeader({ copy, locale, isRtl }: SiteHeaderProps) {
             }`}
           >
             {orderedNavItems.map((item) => (
-              <a
+              <Link
                 key={item.href}
                 href={item.href}
+                locale={locale}
                 onClick={() => setMenuOpen(false)}
                 className="tracking-[0.12em] text-white/85 transition hover:text-[#D9B355]"
               >
                 {item.label}
-              </a>
+              </Link>
             ))}
             <div className="mt-3 flex gap-2">
               <Link
                 href="/"
                 locale={switchLocale}
-                className="rounded-full border border-[#D9B355]/30 px-4 py-2 text-xs font-semibold tracking-[0.22em] text-[#D9B355]"
+                className="rounded-full border border-[rgba(217,179,85,0.3)] px-4 py-2 text-xs font-semibold tracking-[0.22em] text-[#D9B355]"
               >
                 {switchLocale === 'en' ? t('english') : t('arabic')}
               </Link>

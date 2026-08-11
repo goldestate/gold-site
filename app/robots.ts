@@ -4,8 +4,9 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: '*',
-      allow: '/'
+      allow: '/',
+      disallow: ['/goldenadmin2026', '/api']
     },
-    sitemap: 'https://gold-investment-opportunities.example/sitemap.xml'
+    sitemap: 'https://gold-eg.com/sitemap.xml'
   };
 }

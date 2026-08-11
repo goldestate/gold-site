@@ -8,8 +8,8 @@ const intlMiddleware = createMiddleware(routing);
 export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (pathname.startsWith('/admin')) {
-    if (pathname === '/admin/login') {
+  if (pathname.startsWith('/goldenadmin2026')) {
+    if (pathname === '/goldenadmin2026/login') {
       return NextResponse.next();
     }
 
@@ -18,7 +18,7 @@ export default async function middleware(request: NextRequest) {
 
     if (!isValid) {
       const loginUrl = request.nextUrl.clone();
-      loginUrl.pathname = '/admin/login';
+      loginUrl.pathname = '/goldenadmin2026/login';
       return NextResponse.redirect(loginUrl);
     }
 

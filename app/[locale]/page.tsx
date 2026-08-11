@@ -2,11 +2,8 @@ import type { Metadata } from 'next';
 import { getSiteCopy } from '@/lib/site-content';
 import { readPublishedProperties } from '@/lib/properties-store';
 import { type Locale } from '@/i18n/routing';
-import { LandingPage } from '@/components/landing-page';
-
-export function generateStaticParams() {
-  return ['en', 'ar'].map((locale) => ({ locale }));
-}
+import { PageShell } from '@/components/page-shell';
+import { HeroSearch, TrustStrip, FeaturedProperties, HomePartners, ContactCta } from '@/components/home-sections';
 
 export async function generateMetadata({
   params
@@ -42,16 +39,28 @@ export async function generateMetadata({
   };
 }
 
-export default async function LocalePage({
-  params
-}: {
-  params: { locale: Locale };
-}) {
+export function generateStaticParams() {
+  return ['en', 'ar'].map((locale) => ({ locale }));
+}
+
+export default async function HomePage({ params }: { params: { locale: Locale } }) {
   const { locale } = params;
   const copy = getSiteCopy(locale);
   const properties = await readPublishedProperties();
+  const featured = properties.slice(0, 3);
+  const isRtl = locale === 'ar';
 
-  return <LandingPage locale={locale} copy={copy} properties={properties} />;
+  return (
+    <PageShell locale={locale} copy={copy}>
+      <HeroSearch copy={copy.home.hero} locale={locale} isRtl={isRtl} />
+      <HomePartners copy={copy.home.partners} isRtl={isRtl} />
+      <TrustStrip copy={copy.home.trust} isRtl={isRtl} />
+      {featured.length > 0 ? (
+        <FeaturedProperties copy={copy.home.featured} properties={featured} locale={locale} isRtl={isRtl} />
+      ) : null}
+      <ContactCta copy={copy.home.contactCta} locale={locale} isRtl={isRtl} />
+    </PageShell>
+  );
 }
 
 export const dynamic = 'force-dynamic';

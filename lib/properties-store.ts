@@ -1,12 +1,21 @@
 import { promises as fs } from 'fs';
 import path from 'path';
+import {
+  isPropertyType,
+  isUnitType,
+  normalizeLegacyLocation,
+  type LocationValue,
+  type PropertyTypeValue,
+  type UnitTypeValue
+} from './property-taxonomy';
 
 export type Property = {
   id: string;
   name: string;
-  location: string;
-  priceMin: number;
-  priceMax: number | null;
+  location: LocationValue;
+  propertyType: PropertyTypeValue;
+  unitType: UnitTypeValue;
+  price: number;
   image: string;
   tone: 'color' | 'mono';
   published: boolean;
@@ -15,9 +24,10 @@ export type Property = {
 
 export type PropertyInput = {
   name: string;
-  location: string;
-  priceMin: number;
-  priceMax: number | null;
+  location: LocationValue;
+  propertyType: PropertyTypeValue;
+  unitType: UnitTypeValue;
+  price: number;
   image: string;
   tone: 'color' | 'mono';
   published: boolean;
@@ -31,9 +41,10 @@ const DEFAULT_PROPERTIES: Property[] = [
   {
     id: 'seed-observatory',
     name: 'The Observatory Residence',
-    location: 'New Cairo, Egypt',
-    priceMin: 18_000_000,
-    priceMax: 26_000_000,
+    location: 'new-cairo',
+    propertyType: 'primary',
+    unitType: 'apartment',
+    price: 18_000_000,
     image:
       'https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1400&q=80',
     tone: 'color',
@@ -43,9 +54,10 @@ const DEFAULT_PROPERTIES: Property[] = [
   {
     id: 'seed-atelier',
     name: 'The Atelier House',
-    location: '5th Settlement, Egypt',
-    priceMin: 9_000_000,
-    priceMax: 14_000_000,
+    location: 'new-cairo',
+    propertyType: 'resale',
+    unitType: 'townhouse',
+    price: 9_000_000,
     image:
       'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1400&q=80',
     tone: 'mono',
@@ -55,9 +67,10 @@ const DEFAULT_PROPERTIES: Property[] = [
   {
     id: 'seed-palm-court',
     name: 'Palm Court Villas',
-    location: 'North Coast, Egypt',
-    priceMin: 24_000_000,
-    priceMax: 42_000_000,
+    location: 'north-coast',
+    propertyType: 'primary',
+    unitType: 'villa',
+    price: 24_000_000,
     image:
       'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80',
     tone: 'color',
@@ -86,11 +99,34 @@ async function ensureDataFile() {
   }
 }
 
+/**
+ * Older records (created before the type/unit/location taxonomy existed)
+ * may be missing these fields or store location as free text. Normalize
+ * on read so nothing breaks; saving the record again through the admin
+ * form persists the corrected values.
+ */
+function normalizeRecord(raw: Record<string, unknown>): Property {
+  const legacyPrice = typeof raw.priceMin === 'number' ? raw.priceMin : 0;
+  return {
+    id: String(raw.id),
+    name: String(raw.name ?? ''),
+    location: normalizeLegacyLocation(raw.location),
+    propertyType: isPropertyType(raw.propertyType) ? raw.propertyType : 'resale',
+    unitType: isUnitType(raw.unitType) ? raw.unitType : 'apartment',
+    price: typeof raw.price === 'number' ? raw.price : legacyPrice,
+    image: String(raw.image ?? ''),
+    tone: raw.tone === 'mono' ? 'mono' : 'color',
+    published: Boolean(raw.published),
+    createdAt: typeof raw.createdAt === 'string' ? raw.createdAt : new Date(0).toISOString()
+  };
+}
+
 async function loadAll(): Promise<Property[]> {
   await ensureDataFile();
   const raw = await fs.readFile(DATA_FILE, 'utf-8');
   try {
-    return JSON.parse(raw) as Property[];
+    const parsed = JSON.parse(raw) as Record<string, unknown>[];
+    return parsed.map(normalizeRecord);
   } catch {
     return [];
   }
