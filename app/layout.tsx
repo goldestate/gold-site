@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { Jost, Libre_Baskerville, Tajawal } from 'next/font/google';
+import { getLocale } from 'next-intl/server';
 import './globals.css';
 
 const jost = Jost({
@@ -43,14 +44,18 @@ export const metadata: Metadata = {
   }
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children
 }: Readonly<{
   children: ReactNode;
 }>) {
+  const locale = await getLocale();
+  const isRtl = locale === 'ar';
+
   return (
     <html
-      lang="en"
+      lang={locale}
+      dir={isRtl ? 'rtl' : 'ltr'}
       suppressHydrationWarning
       className={`${jost.variable} ${libreBaskerville.variable} ${tajawal.variable}`}
     >

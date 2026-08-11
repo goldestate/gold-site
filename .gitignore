@@ -1,0 +1,10 @@
+.env*
+!.env.example
+.next/
+node_modules/
+*.tsbuildinfo
+.DS_Store
+data/*
+!data/uploads
+data/uploads/*
+!data/uploads/.gitkeep
