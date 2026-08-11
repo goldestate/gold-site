@@ -89,7 +89,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
       return;
     }
     const parsedArea = Number(area);
-    if (!area || Number.isNaN(parsedArea) || parsedArea <= 0) {
+    if (!area || Number.isNaN(parsedArea) || parsedArea < 0) {
       setError('Enter a valid area in m².');
       return;
     }
