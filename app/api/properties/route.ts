@@ -25,8 +25,9 @@ function isValidInput(body: unknown): body is PropertyInput {
     Number.isFinite(value.area) &&
     value.area >= 0 &&
     typeof value.description === 'string' &&
-    typeof value.image === 'string' &&
-    value.image.trim().length > 0 &&
+    Array.isArray(value.images) &&
+    value.images.length > 0 &&
+    value.images.every((item) => typeof item === 'string' && item.trim().length > 0) &&
     (value.tone === 'color' || value.tone === 'mono') &&
     typeof value.published === 'boolean'
   );
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
     bathrooms: body.bathrooms,
     area: body.area,
     description: body.description.trim(),
-    image: body.image.trim(),
+    images: body.images.map((url) => url.trim()),
     tone: body.tone,
     published: body.published
   });

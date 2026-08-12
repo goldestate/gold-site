@@ -207,3 +207,12 @@ option {
 .gold-range:focus::-moz-range-thumb {
   box-shadow: 0 0 0 5px rgba(184, 134, 11, 0.22), 0 2px 8px rgba(35, 31, 32, 0.35);
 }
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

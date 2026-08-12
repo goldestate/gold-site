@@ -37,7 +37,7 @@ export function PropertyCard({
       <div className="relative aspect-[4/3] overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={property.image}
+          src={property.images[0]}
           alt={property.name}
           loading="lazy"
           className={`h-full w-full object-cover object-center transition duration-700 group-hover:scale-[1.04] ${

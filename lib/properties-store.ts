@@ -20,7 +20,7 @@ export type Property = {
   bathrooms: number;
   area: number;
   description: string;
-  image: string;
+  images: string[];
   tone: 'color' | 'mono';
   published: boolean;
   createdAt: string;
@@ -36,7 +36,7 @@ export type PropertyInput = {
   bathrooms: number;
   area: number;
   description: string;
-  image: string;
+  images: string[];
   tone: 'color' | 'mono';
   published: boolean;
 };
@@ -58,8 +58,9 @@ const DEFAULT_PROPERTIES: Property[] = [
     area: 210,
     description:
       'A refined apartment residence overlooking New Cairo, finished to a premium standard with private balconies and dedicated concierge service.',
-    image:
-      'https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1400&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1400&q=80'
+    ],
     tone: 'color',
     published: true,
     createdAt: '2026-01-01T00:00:00.000Z'
@@ -76,8 +77,9 @@ const DEFAULT_PROPERTIES: Property[] = [
     area: 260,
     description:
       'A resale townhouse with a private garden and flexible layout, ready to move in within one of New Cairo’s most established communities.',
-    image:
-      'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1400&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1400&q=80'
+    ],
     tone: 'mono',
     published: true,
     createdAt: '2026-01-02T00:00:00.000Z'
@@ -94,8 +96,9 @@ const DEFAULT_PROPERTIES: Property[] = [
     area: 380,
     description:
       'A beachside villa with direct sea views, a private pool, and landscaped grounds designed for year-round coastal living.',
-    image:
-      'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80'
+    ],
     tone: 'color',
     published: true,
     createdAt: '2026-01-03T00:00:00.000Z'
@@ -122,6 +125,18 @@ async function ensureDataFile() {
   }
 }
 
+/** Older records stored a single `image` string instead of an `images` array. */
+function normalizeImages(raw: Record<string, unknown>): string[] {
+  if (Array.isArray(raw.images)) {
+    const urls = raw.images.filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
+    if (urls.length > 0) return urls;
+  }
+  if (typeof raw.image === 'string' && raw.image.trim().length > 0) {
+    return [raw.image];
+  }
+  return [];
+}
+
 /**
  * Older records (created before the type/unit/location taxonomy existed)
  * may be missing these fields or store location as free text. Normalize
@@ -141,7 +156,7 @@ function normalizeRecord(raw: Record<string, unknown>): Property {
     bathrooms: typeof raw.bathrooms === 'number' ? raw.bathrooms : 0,
     area: typeof raw.area === 'number' ? raw.area : 0,
     description: typeof raw.description === 'string' ? raw.description : '',
-    image: String(raw.image ?? ''),
+    images: normalizeImages(raw),
     tone: raw.tone === 'mono' ? 'mono' : 'color',
     published: Boolean(raw.published),
     createdAt: typeof raw.createdAt === 'string' ? raw.createdAt : new Date(0).toISOString()

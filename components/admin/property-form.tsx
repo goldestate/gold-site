@@ -16,6 +16,14 @@ type PropertyFormProps = {
   property?: Property;
 };
 
+type PhotoItem = {
+  key: string;
+  previewUrl: string;
+  uploadedUrl: string | null;
+  status: 'uploading' | 'done' | 'error';
+  error?: string;
+};
+
 const selectClass =
   'w-full rounded-[1rem] border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none transition focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)]';
 
@@ -36,37 +44,90 @@ export function PropertyForm({ property }: PropertyFormProps) {
   const [description, setDescription] = useState(property?.description ?? '');
   const [tone, setTone] = useState<'color' | 'mono'>(property?.tone ?? 'color');
   const [published, setPublished] = useState(property?.published ?? true);
-  const [imageUrl, setImageUrl] = useState(property?.image ?? '');
-  const [imagePreview, setImagePreview] = useState(property?.image ?? '');
-  const [isUploading, setIsUploading] = useState(false);
+  const [photos, setPhotos] = useState<PhotoItem[]>(() =>
+    (property?.images ?? []).map((url) => ({
+      key: crypto.randomUUID(),
+      previewUrl: url,
+      uploadedUrl: url,
+      status: 'done' as const
+    }))
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const isUploading = photos.some((photo) => photo.status === 'uploading');
 
-    setImagePreview(URL.createObjectURL(file));
-    setIsUploading(true);
+  const handleFilesSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+    event.target.value = '';
+    if (files.length === 0) return;
+
     setError('');
 
-    try {
-      const form = new FormData();
-      form.append('file', file);
-      const response = await fetch('/api/upload', { method: 'POST', body: form });
-      const body = await response.json();
+    const newItems: PhotoItem[] = files.map((file) => ({
+      key: crypto.randomUUID(),
+      previewUrl: URL.createObjectURL(file),
+      uploadedUrl: null,
+      status: 'uploading'
+    }));
+    setPhotos((prev) => [...prev, ...newItems]);
 
-      if (!response.ok) {
-        setError(body.error || 'Image upload failed.');
-        return;
-      }
+    await Promise.all(
+      files.map(async (file, index) => {
+        const item = newItems[index];
+        try {
+          const form = new FormData();
+          form.append('file', file);
+          const response = await fetch('/api/upload', { method: 'POST', body: form });
+          const body = await response.json();
 
-      setImageUrl(body.url);
-    } catch {
-      setError('Image upload failed. Please try again.');
-    } finally {
-      setIsUploading(false);
-    }
+          if (!response.ok) {
+            setPhotos((prev) =>
+              prev.map((photo) =>
+                photo.key === item.key ? { ...photo, status: 'error', error: body.error || 'Upload failed.' } : photo
+              )
+            );
+            return;
+          }
+
+          setPhotos((prev) =>
+            prev.map((photo) => (photo.key === item.key ? { ...photo, uploadedUrl: body.url, status: 'done' } : photo))
+          );
+        } catch {
+          setPhotos((prev) =>
+            prev.map((photo) =>
+              photo.key === item.key ? { ...photo, status: 'error', error: 'Upload failed. Please try again.' } : photo
+            )
+          );
+        }
+      })
+    );
+  };
+
+  const removePhoto = (key: string) => {
+    setPhotos((prev) => prev.filter((photo) => photo.key !== key));
+  };
+
+  const movePhoto = (key: string, direction: -1 | 1) => {
+    setPhotos((prev) => {
+      const index = prev.findIndex((photo) => photo.key === key);
+      const target = index + direction;
+      if (index === -1 || target < 0 || target >= prev.length) return prev;
+      const next = [...prev];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  };
+
+  const makeCoverPhoto = (key: string) => {
+    setPhotos((prev) => {
+      const index = prev.findIndex((photo) => photo.key === key);
+      if (index <= 0) return prev;
+      const next = [...prev];
+      const [item] = next.splice(index, 1);
+      next.unshift(item);
+      return next;
+    });
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -93,8 +154,15 @@ export function PropertyForm({ property }: PropertyFormProps) {
       setError('Enter a valid area in m².');
       return;
     }
-    if (!imageUrl) {
-      setError('Upload a photo for this property.');
+    if (isUploading) {
+      setError('Please wait for photo uploads to finish.');
+      return;
+    }
+    const uploadedImages = photos.filter((photo) => photo.status === 'done' && photo.uploadedUrl).map(
+      (photo) => photo.uploadedUrl as string
+    );
+    if (uploadedImages.length === 0) {
+      setError('Upload at least one photo for this property.');
       return;
     }
     if (!name.trim()) {
@@ -114,7 +182,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
       bathrooms: parsedBathrooms,
       area: parsedArea,
       description: description.trim(),
-      image: imageUrl,
+      images: uploadedImages,
       tone,
       published
     };
@@ -307,23 +375,101 @@ export function PropertyForm({ property }: PropertyFormProps) {
 
       <div className="block">
         <span className="mb-2 block text-sm font-medium uppercase tracking-[0.16em] text-white/72">
-          Photo
+          Photos
         </span>
-        {imagePreview ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={imagePreview}
-            alt="Property preview"
-            className="mb-3 h-48 w-full max-w-sm rounded-[1rem] object-cover"
-          />
+        <p className="mb-3 text-xs text-white/50">
+          The first photo is the cover shown on listing cards. The rest appear as a swipeable gallery on the
+          property page.
+        </p>
+
+        {photos.length > 0 ? (
+          <div className="mb-4 grid grid-cols-3 gap-3 sm:grid-cols-4">
+            {photos.map((photo, index) => (
+              <div
+                key={photo.key}
+                className="relative aspect-square overflow-hidden rounded-[0.75rem] border border-white/12 bg-white/5"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={photo.previewUrl} alt="" className="h-full w-full object-cover" />
+
+                {index === 0 ? (
+                  <span className="absolute left-1.5 top-1.5 rounded-full bg-[#D9B355] px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] text-[#231F20]">
+                    Cover
+                  </span>
+                ) : null}
+
+                {photo.status === 'uploading' ? (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/55 text-[10px] font-medium text-white">
+                    Uploading...
+                  </div>
+                ) : null}
+                {photo.status === 'error' ? (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-red-900/70 p-1 text-center text-[9px] font-medium text-red-100">
+                    {photo.error || 'Upload failed'}
+                  </div>
+                ) : null}
+
+                {photo.status === 'done' ? (
+                  <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-0.5 bg-black/65 px-1 py-1">
+                    <button
+                      type="button"
+                      onClick={() => movePhoto(photo.key, -1)}
+                      disabled={index === 0}
+                      aria-label="Move left"
+                      className="rounded px-1 text-xs text-white/80 transition hover:text-[#D9B355] disabled:opacity-25"
+                    >
+                      ‹
+                    </button>
+                    {index !== 0 ? (
+                      <button
+                        type="button"
+                        onClick={() => makeCoverPhoto(photo.key)}
+                        aria-label="Set as cover photo"
+                        className="rounded px-1 text-xs text-white/80 transition hover:text-[#D9B355]"
+                      >
+                        ★
+                      </button>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={() => movePhoto(photo.key, 1)}
+                      disabled={index === photos.length - 1}
+                      aria-label="Move right"
+                      className="rounded px-1 text-xs text-white/80 transition hover:text-[#D9B355] disabled:opacity-25"
+                    >
+                      ›
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removePhoto(photo.key)}
+                      aria-label="Remove photo"
+                      className="rounded px-1 text-xs text-red-300 transition hover:text-red-200"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => removePhoto(photo.key)}
+                    aria-label="Remove photo"
+                    className="absolute right-1 top-1 rounded-full bg-black/60 px-1.5 text-xs text-white/80 transition hover:text-red-300"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
         ) : null}
+
         <input
           type="file"
           accept="image/png,image/jpeg,image/webp,image/avif"
-          onChange={handleFileChange}
+          multiple
+          onChange={handleFilesSelected}
           className="block w-full text-sm text-white/70 file:mr-4 file:rounded-full file:border-0 file:bg-white/10 file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-[0.18em] file:text-white hover:file:bg-white/15"
         />
-        {isUploading ? <p className="mt-2 text-xs text-white/50">Uploading...</p> : null}
       </div>
 
       {error ? <p className="text-sm text-red-300">{error}</p> : null}

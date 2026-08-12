@@ -10,7 +10,9 @@
     "bathrooms": 3,
     "area": 210,
     "description": "A refined apartment residence overlooking New Cairo, finished to a premium standard with private balconies and dedicated concierge service.",
-    "image": "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1400&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1400&q=80"
+    ],
     "tone": "color",
     "published": true,
     "createdAt": "2026-01-01T00:00:00.000Z"
@@ -26,7 +28,9 @@
     "bathrooms": 2,
     "area": 145,
     "description": "A resale apartment with a flexible layout, ready to move in within one of New Cairo’s most established communities.",
-    "image": "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1400&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1400&q=80"
+    ],
     "tone": "mono",
     "published": true,
     "createdAt": "2026-01-02T00:00:00.000Z"
@@ -42,7 +46,9 @@
     "bathrooms": 4,
     "area": 320,
     "description": "A beachside residence with direct sea views and landscaped grounds designed for year-round coastal living.",
-    "image": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80"
+    ],
     "tone": "color",
     "published": true,
     "createdAt": "2026-01-03T00:00:00.000Z"
@@ -58,7 +64,7 @@
     "bathrooms": 2,
     "area": 165,
     "description": "",
-    "image": "/api/uploads/f931c160-1d6c-4f55-aa7b-358cbd9d7749.png",
+    "images": ["/api/uploads/f931c160-1d6c-4f55-aa7b-358cbd9d7749.png"],
     "tone": "color",
     "published": true,
     "createdAt": "2026-08-11T00:48:30.752Z"

@@ -7,6 +7,7 @@ import { type Locale } from '@/i18n/routing';
 import { PageShell } from '@/components/page-shell';
 import { Link } from '@/i18n/navigation';
 import { ArrowIcon, StatIcon } from '@/components/section-ui';
+import { PropertyGallery } from '@/components/property-gallery';
 
 function formatArea(area: number, locale: 'en' | 'ar'): string {
   const number = area.toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US');
@@ -73,19 +74,16 @@ export default async function PropertyDetailPage({
           </Link>
 
           <div className="mt-6 overflow-hidden rounded-[2rem] border border-[rgba(35,31,32,0.1)] bg-white shadow-[0_24px_64px_rgba(35,31,32,0.14)]">
-            <div className="relative h-[26rem] overflow-hidden">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={property.image}
-                alt={property.name}
-                className={`h-full w-full object-cover object-center ${
-                  property.tone === 'mono' ? 'grayscale contrast-110' : ''
-                }`}
-              />
-              <div className="absolute left-6 top-6 rounded-full border border-white/20 bg-black/25 px-4 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.36em] text-white/90 backdrop-blur-sm">
-                {propertyTypeLabel(property.propertyType, locale)}
-              </div>
-            </div>
+            <PropertyGallery
+              images={property.images}
+              alt={property.name}
+              mono={property.tone === 'mono'}
+              badge={
+                <div className="absolute left-6 top-6 rounded-full border border-white/20 bg-black/25 px-4 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.36em] text-white/90 backdrop-blur-sm">
+                  {propertyTypeLabel(property.propertyType, locale)}
+                </div>
+              }
+            />
 
             <div className="grid gap-8 p-8 lg:grid-cols-[1.3fr_1fr] sm:p-10">
               <div className={isRtl ? 'text-right' : ''}>
