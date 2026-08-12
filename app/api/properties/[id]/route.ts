@@ -44,9 +44,15 @@ function pickPatch(body: unknown): Partial<PropertyInput> | null {
     if (typeof value.description !== 'string') return null;
     patch.description = value.description.trim();
   }
-  if (value.image !== undefined) {
-    if (typeof value.image !== 'string' || value.image.trim().length === 0) return null;
-    patch.image = value.image.trim();
+  if (value.images !== undefined) {
+    if (
+      !Array.isArray(value.images) ||
+      value.images.length === 0 ||
+      !value.images.every((item) => typeof item === 'string' && item.trim().length > 0)
+    ) {
+      return null;
+    }
+    patch.images = (value.images as string[]).map((url) => url.trim());
   }
   if (value.tone !== undefined) {
     if (value.tone !== 'color' && value.tone !== 'mono') return null;

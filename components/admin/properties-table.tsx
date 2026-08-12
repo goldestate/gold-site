@@ -115,7 +115,7 @@ export function PropertiesTable({ properties }: { properties: Property[] }) {
                 <div className="flex items-start gap-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={property.image}
+                    src={property.images[0]}
                     alt=""
                     className="h-14 w-16 flex-none rounded-[0.6rem] object-cover"
                   />
@@ -185,7 +185,7 @@ export function PropertiesTable({ properties }: { properties: Property[] }) {
                     <td className="flex items-center gap-3 px-5 py-4">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={property.image}
+                        src={property.images[0]}
                         alt=""
                         className="h-12 w-16 flex-none rounded-[0.6rem] object-cover"
                       />
