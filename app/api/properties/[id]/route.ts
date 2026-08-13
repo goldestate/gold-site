@@ -83,12 +83,16 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     return NextResponse.json({ error: 'Invalid fields.' }, { status: 400 });
   }
 
-  const property = await updateProperty(params.id, patch);
-  if (!property) {
-    return NextResponse.json({ error: 'Property not found.' }, { status: 404 });
+  try {
+    const property = await updateProperty(params.id, patch);
+    if (!property) {
+      return NextResponse.json({ error: 'Property not found.' }, { status: 404 });
+    }
+    return NextResponse.json({ property });
+  } catch (error) {
+    console.error('Failed to save property', error);
+    return NextResponse.json({ error: 'Could not save this property. Please try again.' }, { status: 500 });
   }
-
-  return NextResponse.json({ property });
 }
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
@@ -96,10 +100,14 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
   }
 
-  const deleted = await deleteProperty(params.id);
-  if (!deleted) {
-    return NextResponse.json({ error: 'Property not found.' }, { status: 404 });
+  try {
+    const deleted = await deleteProperty(params.id);
+    if (!deleted) {
+      return NextResponse.json({ error: 'Property not found.' }, { status: 404 });
+    }
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error('Failed to delete property', error);
+    return NextResponse.json({ error: 'Could not delete this property. Please try again.' }, { status: 500 });
   }
-
-  return NextResponse.json({ ok: true });
 }
