@@ -104,12 +104,11 @@ export type SiteCopy = {
   about: {
     eyebrow: string;
     title: string;
-    story: { eyebrow: string; title: string; body: string };
+    story: { eyebrow: string; title: string; quote: string; body: string };
     missionVision: { missionLabel: string; mission: string; visionLabel: string; vision: string };
     whatWeDo: { eyebrow: string; title: string; body: string };
     whyChooseUs: { eyebrow: string; title: string; items: string[] };
     achievements: { eyebrow: string; title: string; body: string; stat: string; statLabel: string };
-    partners: { eyebrow: string; title: string };
     rentalProgram: { eyebrow: string; title: string; body: string };
     goldLife: {
       eyebrow: string;
@@ -309,7 +308,8 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       story: {
         eyebrow: 'Our Story',
         title: 'GOLD',
-        body: 'Everyone understands what this word represents — you can almost feel its value as soon as you hear it. In our brand, we take the word gold to another level and give it a unique perspective. For us, GOLD stands for Golden Opportunities of Leading Domain. It reflects the essence of what we offer: services as valuable and rare as gold itself. Every solution we provide carries exceptional quality, unmatched expertise, and a premium standard that sets us apart.'
+        quote: 'GOLD stands for Golden Opportunities of Leading Domain.',
+        body: 'Everyone understands what this word represents — you can almost feel its value as soon as you hear it. In our brand, we take the word gold to another level and give it a unique perspective. It reflects the essence of what we offer: services as valuable and rare as gold itself. Every solution we provide carries exceptional quality, unmatched expertise, and a premium standard that sets us apart.'
       },
       missionVision: {
         missionLabel: 'Mission',
@@ -342,10 +342,6 @@ export const siteCopy: Record<Locale, SiteCopy> = {
         body: 'Since our beginning, we have built strong relationships with a large number of satisfied customers by delivering exceptional real estate services and premium property opportunities. Through dedication, professionalism, and commitment to excellence, GOLD Real Estate continues to grow as a trusted name and a golden choice for property investment and living.',
         stat: 'EGP 1B+',
         statLabel: 'In sales achieved'
-      },
-      partners: {
-        eyebrow: 'Our Partners',
-        title: "We work with Egypt's leading developers"
       },
       rentalProgram: {
         eyebrow: 'Gold Rental & Facility Management',
@@ -544,7 +540,8 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       story: {
         eyebrow: 'قصتنا',
         title: 'GOLD',
-        body: 'يفهم الجميع ما تمثله هذه الكلمة — يمكنك أن تشعر بقيمتها فور سماعها. في علامتنا، نأخذ كلمة الذهب إلى مستوى آخر ونمنحها منظوراً فريداً. بالنسبة لنا، GOLD اختصار لعبارة Golden Opportunities of Leading Domain. إنها تعكس جوهر ما نقدمه: خدمات ثمينة ونادرة كالذهب نفسه. كل حل نقدمه يحمل جودة استثنائية وخبرة لا مثيل لها ومعياراً راقياً يميزنا.'
+        quote: 'GOLD اختصار لعبارة Golden Opportunities of Leading Domain.',
+        body: 'يفهم الجميع ما تمثله هذه الكلمة — يمكنك أن تشعر بقيمتها فور سماعها. في علامتنا، نأخذ كلمة الذهب إلى مستوى آخر ونمنحها منظوراً فريداً. إنها تعكس جوهر ما نقدمه: خدمات ثمينة ونادرة كالذهب نفسه. كل حل نقدمه يحمل جودة استثنائية وخبرة لا مثيل لها ومعياراً راقياً يميزنا.'
       },
       missionVision: {
         missionLabel: 'الرسالة',
@@ -575,10 +572,6 @@ export const siteCopy: Record<Locale, SiteCopy> = {
         body: 'منذ انطلاقتنا، بنينا علاقات قوية مع عدد كبير من العملاء الراضين من خلال تقديم خدمات عقارية استثنائية وفرص عقارية فاخرة. من خلال التفاني والاحترافية والالتزام بالتميز، تواصل GOLD للعقارات نموها كاسم موثوق واختيار ذهبي للاستثمار العقاري والسكن.',
         stat: '1 مليار+ جنيه',
         statLabel: 'مبيعات محققة'
-      },
-      partners: {
-        eyebrow: 'شركاؤنا',
-        title: 'نتعامل مع كبرى شركات التطوير العقاري في مصر'
       },
       rentalProgram: {
         eyebrow: 'برنامج GOLD للإيجار وإدارة المرافق',

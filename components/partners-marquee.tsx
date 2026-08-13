@@ -28,16 +28,31 @@ export function PartnersMarquee({
 
   const track = (keySuffix: string) => (
     <div className="flex shrink-0 items-center gap-16 pr-16" aria-hidden={keySuffix === 'b'}>
-      {PARTNER_LOGOS.map((logo) => (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          key={`${logo.slug}-${keySuffix}`}
-          src={`/partners/${logo.slug}-${tint}.png`}
-          alt={keySuffix === 'a' ? logo.name : ''}
-          style={{ height: logo.height }}
-          className="w-auto flex-none opacity-80 transition duration-300 hover:opacity-100"
-        />
-      ))}
+      {PARTNER_LOGOS.map((logo) =>
+        isLight ? (
+          <div
+            key={`${logo.slug}-${keySuffix}`}
+            className="flex flex-none items-center justify-center rounded-xl bg-white px-6 py-4 shadow-[0_8px_24px_rgba(35,31,32,0.08)] transition duration-300 hover:shadow-[0_10px_28px_rgba(35,31,32,0.14)]"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`/partners/${logo.slug}-${tint}.png`}
+              alt={keySuffix === 'a' ? logo.name : ''}
+              style={{ height: logo.height * 0.72 }}
+              className="w-auto"
+            />
+          </div>
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            key={`${logo.slug}-${keySuffix}`}
+            src={`/partners/${logo.slug}-${tint}.png`}
+            alt={keySuffix === 'a' ? logo.name : ''}
+            style={{ height: logo.height }}
+            className="w-auto flex-none opacity-80 transition duration-300 hover:opacity-100"
+          />
+        )
+      )}
     </div>
   );
 

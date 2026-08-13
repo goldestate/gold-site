@@ -13,7 +13,10 @@ export function StorySection({ copy, isRtl }: { copy: SiteCopy['about']; isRtl: 
             <div className="font-serif text-xs uppercase tracking-[0.38em] text-[#B8860B]">
               {copy.story.eyebrow}
             </div>
-            <p className="mt-4 text-base leading-8 text-[rgba(35,31,32,0.82)]">{copy.story.body}</p>
+            <p className="mt-5 font-serif text-2xl leading-snug text-[#231F20] sm:text-3xl">
+              {copy.story.quote}
+            </p>
+            <p className="mt-6 text-base leading-8 text-[rgba(35,31,32,0.82)]">{copy.story.body}</p>
           </div>
         </div>
 
@@ -119,16 +122,18 @@ export function RentalAndGoldLifeSection({ copy, isRtl }: { copy: SiteCopy['abou
   return (
     <SurfaceShell variant="light" className="px-4 py-16 sm:px-6 lg:px-8">
       <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-2">
-        <div className={`rounded-[1.6rem] border border-[rgba(35,31,32,0.1)] bg-white p-7 shadow-[0_18px_50px_rgba(35,31,32,0.08)] ${isRtl ? 'text-right' : ''}`}>
-          <div className="font-serif text-xs uppercase tracking-[0.38em] text-[#B8860B]">
+        <div className={`rounded-[1.6rem] border border-[rgba(35,31,32,0.1)] bg-white p-8 shadow-[0_18px_50px_rgba(35,31,32,0.08)] ${isRtl ? 'text-right' : ''}`}>
+          <LineIcon icon="key" className="h-10 w-10" gold />
+          <div className="mt-5 font-serif text-xs uppercase tracking-[0.38em] text-[#B8860B]">
             {copy.rentalProgram.eyebrow}
           </div>
           <h3 className="mt-3 text-xl font-medium text-[#231F20]">{copy.rentalProgram.title}</h3>
           <p className="mt-4 text-sm leading-7 text-[rgba(35,31,32,0.78)]">{copy.rentalProgram.body}</p>
         </div>
 
-        <div className={`rounded-[1.6rem] border border-[rgba(35,31,32,0.1)] bg-white p-7 shadow-[0_18px_50px_rgba(35,31,32,0.08)] ${isRtl ? 'text-right' : ''}`}>
-          <div className="font-serif text-xs uppercase tracking-[0.38em] text-[#B8860B]">
+        <div className={`rounded-[1.6rem] border border-[rgba(35,31,32,0.1)] bg-white p-8 shadow-[0_18px_50px_rgba(35,31,32,0.08)] ${isRtl ? 'text-right' : ''}`}>
+          <LineIcon icon="life" className="h-10 w-10" gold />
+          <div className="mt-5 font-serif text-xs uppercase tracking-[0.38em] text-[#B8860B]">
             {copy.goldLife.eyebrow}
           </div>
           <h3 className="mt-3 text-xl font-medium text-[#231F20]">{copy.goldLife.title}</h3>
@@ -154,23 +159,31 @@ export function RentalAndGoldLifeSection({ copy, isRtl }: { copy: SiteCopy['abou
 
 export function SubbrandStrip({ copy, isRtl }: { copy: SiteCopy['about']['subbrands']; isRtl: boolean }) {
   return (
-    <section id="subbrands" className="relative overflow-hidden border-y border-white/10 bg-[#1a1718] px-4 py-12 sm:px-6 lg:px-8">
-      <GMark tone="gold" size={420} className={`-top-16 opacity-[0.05] ${isRtl ? '-left-16' : '-right-16'}`} />
+    <section
+      id="subbrands"
+      className="relative overflow-hidden border-y border-white/10 bg-[#1a1718] px-4 py-20 sm:px-6 lg:px-8"
+    >
+      <GMark tone="gold" size={520} className={`-top-24 opacity-[0.05] ${isRtl ? '-left-24' : '-right-24'}`} />
       <div className="relative mx-auto max-w-7xl">
         <div className={isRtl ? 'text-right' : ''}>
           <div className="font-serif text-xs uppercase tracking-[0.42em] text-[rgba(217,179,85,0.88)]">
             {copy.eyebrow}
           </div>
-          <h2 className="mt-4 text-2xl font-medium uppercase tracking-[0.18em] text-white">
+          <h2 className="mt-4 text-3xl font-medium uppercase tracking-[0.16em] text-white sm:text-4xl">
             {copy.title}
           </h2>
         </div>
-        <div className="mt-10 grid gap-8 border-t border-white/10 pt-8 sm:grid-cols-2 sm:gap-x-10 sm:gap-y-8 xl:grid-cols-4">
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
           {copy.items.map((item) => (
-            <div key={item.name}>
-              <LineIcon icon={item.icon} gold className="h-9 w-9" />
-              <div className="mt-4 text-sm font-semibold tracking-[0.18em] text-white">{item.name}</div>
-              <p className="mt-2 text-xs leading-6 text-white/58">{item.description}</p>
+            <div
+              key={item.name}
+              className={`group rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-7 transition hover:-translate-y-1 hover:border-[rgba(217,179,85,0.4)] hover:bg-white/[0.06] ${
+                isRtl ? 'text-right' : ''
+              }`}
+            >
+              <LineIcon icon={item.icon} gold className="h-11 w-11 transition group-hover:scale-110" />
+              <div className="mt-6 text-base font-semibold tracking-[0.1em] text-white">{item.name}</div>
+              <p className="mt-3 text-sm leading-6 text-white/58">{item.description}</p>
             </div>
           ))}
         </div>
