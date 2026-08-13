@@ -128,6 +128,32 @@ export type SiteCopy = {
       }>;
     };
   };
+  subbrandPages: {
+    backLabel: string;
+    goldLife: {
+      eyebrow: string;
+      title: string;
+      body: string;
+      servicesLabel: string;
+      services: string[];
+      partnersLabel: string;
+      partners: string[];
+      ctaLabel: string;
+    };
+    goldManagement: {
+      eyebrow: string;
+      title: string;
+      body: string;
+      ctaLabel: string;
+    };
+    goldExport: {
+      eyebrow: string;
+      title: string;
+      body: string;
+      comingSoonLabel: string;
+      ctaLabel: string;
+    };
+  };
   contact: {
     eyebrow: string;
     title: string;
@@ -383,6 +409,32 @@ export const siteCopy: Record<Locale, SiteCopy> = {
         ]
       }
     },
+    subbrandPages: {
+      backLabel: 'Back to About',
+      goldLife: {
+        eyebrow: 'Gold Life',
+        title: 'Lifestyle services, curated',
+        body: 'Beyond real estate, Gold Life brings a curated set of services to make property ownership effortless — from finishing touches to financing.',
+        servicesLabel: 'Services',
+        services: ['Finishing', 'Furnishing', 'Car Dealership', 'Financial Funding'],
+        partnersLabel: 'In partnership with',
+        partners: goldLifePartners,
+        ctaLabel: 'Talk to the Gold Life team'
+      },
+      goldManagement: {
+        eyebrow: 'Gold Management',
+        title: 'Rent a unit, or rent and manage your unit',
+        body: 'Our Rental & Facility Management Program delivers a premium investment and lifestyle experience across distinguished destinations such as Cairo and the North Coast. Created to serve both property owners and tenants, the program enables owners to maximize the value of their units through professional rental and management services, while offering tenants access to carefully selected properties that combine comfort, quality, and convenience.',
+        ctaLabel: 'Talk to the Gold Management team'
+      },
+      goldExport: {
+        eyebrow: 'Gold Export',
+        title: 'Cross-border opportunities, coming soon',
+        body: 'Gold Export is the newest of our four Golden Ways to invest, focused on cross-border export opportunities with global reach. We are currently building this offering — get in touch if you would like to be the first to hear more.',
+        comingSoonLabel: 'Coming Soon',
+        ctaLabel: 'Get in touch'
+      }
+    },
     contact: {
       eyebrow: 'Contact / Inquiry',
       title: 'Speak with the team behind GOLD.',
@@ -611,6 +663,32 @@ export const siteCopy: Record<Locale, SiteCopy> = {
             icon: 'export'
           }
         ]
+      }
+    },
+    subbrandPages: {
+      backLabel: 'العودة إلى من نحن',
+      goldLife: {
+        eyebrow: 'Gold Life',
+        title: 'خدمات نمط حياة منتقاة',
+        body: 'بعيداً عن العقارات، يقدم Gold Life مجموعة منتقاة من الخدمات لجعل امتلاك العقار أمراً سهلاً — من التشطيب إلى التمويل.',
+        servicesLabel: 'الخدمات',
+        services: ['تشطيب', 'فرش وأثاث', 'وكالة سيارات', 'تمويل مالي'],
+        partnersLabel: 'بالشراكة مع',
+        partners: goldLifePartners,
+        ctaLabel: 'تواصل مع فريق Gold Life'
+      },
+      goldManagement: {
+        eyebrow: 'Gold Management',
+        title: 'أوجر وحدتك، أو أوجرها وأدرها معنا',
+        body: 'يقدم برنامج الإيجار وإدارة المرافق لدينا تجربة استثمارية ومعيشية فاخرة عبر وجهات مميزة مثل القاهرة والساحل الشمالي. صُمم البرنامج لخدمة الملاك والمستأجرين معاً، حيث يمكّن الملاك من تعظيم قيمة وحداتهم من خلال خدمات إيجار وإدارة احترافية، بينما يمنح المستأجرين وصولاً إلى عقارات مختارة بعناية تجمع بين الراحة والجودة والملاءمة.',
+        ctaLabel: 'تواصل مع فريق Gold Management'
+      },
+      goldExport: {
+        eyebrow: 'Gold Export',
+        title: 'فرص عالمية عابرة للحدود، قريباً',
+        body: 'Gold Export هو أحدث طرقنا الذهبية الأربع للاستثمار، ويركز على فرص التصدير عبر الحدود بنطاق عالمي. نعمل حالياً على تطوير هذه الخدمة — تواصل معنا إذا كنت ترغب في أن تكون أول من يعلم بالمستجدات.',
+        comingSoonLabel: 'قريباً',
+        ctaLabel: 'تواصل معنا'
       }
     },
     contact: {

@@ -1,7 +1,15 @@
 import Image from 'next/image';
 import type { SiteCopy } from '@/lib/site-content';
+import { Link } from '@/i18n/navigation';
 import { GMark } from './gmark';
 import { SectionTitle, SurfaceShell, LineIcon } from './section-ui';
+
+const SUBBRAND_HREFS: Record<'estate' | 'life' | 'management' | 'export', string> = {
+  estate: '/properties',
+  life: '/gold-life',
+  management: '/gold-management',
+  export: '/gold-export'
+};
 
 export function StorySection({ copy, isRtl }: { copy: SiteCopy['about']; isRtl: boolean }) {
   return (
@@ -157,7 +165,15 @@ export function RentalAndGoldLifeSection({ copy, isRtl }: { copy: SiteCopy['abou
   );
 }
 
-export function SubbrandStrip({ copy, isRtl }: { copy: SiteCopy['about']['subbrands']; isRtl: boolean }) {
+export function SubbrandStrip({
+  copy,
+  isRtl,
+  locale
+}: {
+  copy: SiteCopy['about']['subbrands'];
+  isRtl: boolean;
+  locale: 'en' | 'ar';
+}) {
   return (
     <section
       id="subbrands"
@@ -175,8 +191,10 @@ export function SubbrandStrip({ copy, isRtl }: { copy: SiteCopy['about']['subbra
         </div>
         <div className="mt-12 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
           {copy.items.map((item) => (
-            <div
+            <Link
               key={item.name}
+              href={SUBBRAND_HREFS[item.icon]}
+              locale={locale}
               className={`group rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-7 transition hover:-translate-y-1 hover:border-[rgba(217,179,85,0.4)] hover:bg-white/[0.06] ${
                 isRtl ? 'text-right' : ''
               }`}
@@ -184,7 +202,7 @@ export function SubbrandStrip({ copy, isRtl }: { copy: SiteCopy['about']['subbra
               <LineIcon icon={item.icon} gold className="h-11 w-11 transition group-hover:scale-110" />
               <div className="mt-6 text-base font-semibold tracking-[0.1em] text-white">{item.name}</div>
               <p className="mt-3 text-sm leading-6 text-white/58">{item.description}</p>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
