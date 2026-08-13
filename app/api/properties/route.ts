@@ -55,20 +55,24 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Missing or invalid fields.' }, { status: 400 });
   }
 
-  const property = await createProperty({
-    name: body.name.trim(),
-    location: body.location,
-    propertyType: body.propertyType,
-    unitType: body.unitType,
-    price: body.price,
-    bedrooms: body.bedrooms,
-    bathrooms: body.bathrooms,
-    area: body.area,
-    description: body.description.trim(),
-    images: body.images.map((url) => url.trim()),
-    tone: body.tone,
-    published: body.published
-  });
-
-  return NextResponse.json({ property }, { status: 201 });
+  try {
+    const property = await createProperty({
+      name: body.name.trim(),
+      location: body.location,
+      propertyType: body.propertyType,
+      unitType: body.unitType,
+      price: body.price,
+      bedrooms: body.bedrooms,
+      bathrooms: body.bathrooms,
+      area: body.area,
+      description: body.description.trim(),
+      images: body.images.map((url) => url.trim()),
+      tone: body.tone,
+      published: body.published
+    });
+    return NextResponse.json({ property }, { status: 201 });
+  } catch (error) {
+    console.error('Failed to create property', error);
+    return NextResponse.json({ error: 'Could not save this property. Please try again.' }, { status: 500 });
+  }
 }
