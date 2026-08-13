@@ -32,7 +32,7 @@ export default function AboutPage({ params }: { params: { locale: Locale } }) {
     <PageShell locale={locale} copy={copy}>
       <StorySection copy={copy.about} isRtl={isRtl} />
       <MissionVisionSection copy={copy.about} isRtl={isRtl} />
-      <SubbrandStrip copy={copy.about.subbrands} isRtl={isRtl} />
+      <SubbrandStrip copy={copy.about.subbrands} isRtl={isRtl} locale={locale} />
       <WhatWeDoAndWhyChooseUsSection copy={copy.about} isRtl={isRtl} />
       <AchievementsSection copy={copy.about} isRtl={isRtl} />
       <RentalAndGoldLifeSection copy={copy.about} isRtl={isRtl} />
