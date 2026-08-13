@@ -105,10 +105,35 @@ const DEFAULT_PROPERTIES: Property[] = [
   }
 ];
 
+const WRITE_TIMEOUT_MS = 15_000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`Timed out after ${ms}ms.`)), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      }
+    );
+  });
+}
+
 let writeQueue: Promise<unknown> = Promise.resolve();
 
+/**
+ * Writes are serialized through this queue so concurrent create/update/delete
+ * calls can't corrupt the JSON file. Each task is time-boxed: if a write ever
+ * hangs (e.g. a stalled filesystem/volume) instead of failing outright, it
+ * still rejects instead of blocking every future write forever.
+ */
 function withQueue<T>(task: () => Promise<T>): Promise<T> {
-  const result = writeQueue.then(task, task);
+  const run = () => withTimeout(task(), WRITE_TIMEOUT_MS);
+  const result = writeQueue.then(run, run);
   writeQueue = result.then(
     () => undefined,
     () => undefined
