@@ -125,7 +125,8 @@ export function PropertiesPageClient({
         const matchesBedrooms = bedrooms === 'any' || item.bedrooms >= Number(bedrooms);
         const matchesBathrooms = bathrooms === 'any' || item.bathrooms >= Number(bathrooms);
         const matchesPrice = item.price >= priceRange[0] && item.price <= priceRange[1];
-        const matchesArea = item.area >= areaRange[0] && item.area <= areaRange[1];
+        const matchesArea =
+          propertyType === 'rental' || (item.area >= areaRange[0] && item.area <= areaRange[1]);
         return (
           matchesType &&
           matchesUnit &&
@@ -291,23 +292,29 @@ export function PropertiesPageClient({
             </div>
           </div>
 
-          <div className="grid gap-5 border-t border-[rgba(35,31,32,0.08)] pt-5 sm:grid-cols-2 sm:gap-8 sm:pt-8">
-            <div>
-              <FilterLabel>{copy.filters.areaLabel}</FilterLabel>
-              <p className="mt-1 text-xs text-[rgba(35,31,32,0.55)]">{copy.filters.areaHint}</p>
-              <div className="mt-4 sm:mt-5">
-                <RangeSlider
-                  min={0}
-                  max={areaBound}
-                  step={AREA_STEP}
-                  value={areaRange}
-                  onChange={setAreaRange}
-                  formatValue={formatAreaLabel}
-                  ariaLabelMin={`${copy.filters.areaLabel} min`}
-                  ariaLabelMax={`${copy.filters.areaLabel} max`}
-                />
+          <div
+            className={`grid gap-5 border-t border-[rgba(35,31,32,0.08)] pt-5 sm:gap-8 sm:pt-8 ${
+              propertyType === 'rental' ? 'sm:grid-cols-1' : 'sm:grid-cols-2'
+            }`}
+          >
+            {propertyType !== 'rental' && (
+              <div>
+                <FilterLabel>{copy.filters.areaLabel}</FilterLabel>
+                <p className="mt-1 text-xs text-[rgba(35,31,32,0.55)]">{copy.filters.areaHint}</p>
+                <div className="mt-4 sm:mt-5">
+                  <RangeSlider
+                    min={0}
+                    max={areaBound}
+                    step={AREA_STEP}
+                    value={areaRange}
+                    onChange={setAreaRange}
+                    formatValue={formatAreaLabel}
+                    ariaLabelMin={`${copy.filters.areaLabel} min`}
+                    ariaLabelMax={`${copy.filters.areaLabel} max`}
+                  />
+                </div>
               </div>
-            </div>
+            )}
             <div>
               <FilterLabel>{copy.filters.priceLabel}</FilterLabel>
               <p className="mt-1 text-xs text-[rgba(35,31,32,0.55)]">{copy.filters.priceHint}</p>
