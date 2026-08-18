@@ -1,11 +1,17 @@
-import { promises as fs } from 'fs';
-import path from 'path';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/require-admin';
-import { UPLOADS_DIR } from '@/lib/properties-store';
+import { supabase, PROPERTY_PHOTOS_BUCKET } from '@/lib/supabase';
 import { sniffImageExtension } from '@/lib/sniff-image';
 
 const MAX_SIZE_BYTES = 8 * 1024 * 1024;
+
+const CONTENT_TYPES: Record<string, string> = {
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  webp: 'image/webp',
+  avif: 'image/avif'
+};
 
 export async function POST(request: NextRequest) {
   if (!(await requireAdmin(request))) {
@@ -32,9 +38,17 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  await fs.mkdir(UPLOADS_DIR, { recursive: true });
   const filename = `${crypto.randomUUID()}.${ext}`;
-  await fs.writeFile(path.join(UPLOADS_DIR, filename), buffer);
+  const { error } = await supabase.storage.from(PROPERTY_PHOTOS_BUCKET).upload(filename, buffer, {
+    contentType: CONTENT_TYPES[ext],
+    cacheControl: '31536000'
+  });
 
-  return NextResponse.json({ url: `/api/uploads/${filename}` });
+  if (error) {
+    console.error('Failed to upload photo', error);
+    return NextResponse.json({ error: 'Could not upload this photo. Please try again.' }, { status: 500 });
+  }
+
+  const { data } = supabase.storage.from(PROPERTY_PHOTOS_BUCKET).getPublicUrl(filename);
+  return NextResponse.json({ url: data.publicUrl });
 }
