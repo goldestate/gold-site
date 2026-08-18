@@ -14,6 +14,17 @@ function formatArea(area: number, locale: 'en' | 'ar'): string {
   return locale === 'ar' ? `${number} م²` : `${number} m²`;
 }
 
+/** Descriptions typed as "- item - item - item" (with or without line breaks) render as a bullet list instead of a run-on paragraph. */
+function descriptionItems(description: string): string[] | null {
+  const trimmed = description.trim();
+  if (!/^-\s/.test(trimmed)) return null;
+  const items = trimmed
+    .split(/\s-\s+/)
+    .map((item) => item.replace(/^-\s*/, '').trim())
+    .filter(Boolean);
+  return items.length > 1 ? items : null;
+}
+
 export async function generateMetadata({
   params
 }: {
@@ -60,6 +71,7 @@ export default async function PropertyDetailPage({
   const callHref = `tel:${copy.contact.hotline.replace(/[^+\d]/g, '')}`;
   const propertyShowsArea = showsArea(property.propertyType) && property.area > 0;
   const priceSuffix = priceSuffixLabel(property.propertyType, property.unitType);
+  const descriptionBullets = descriptionItems(property.description);
 
   return (
     <PageShell locale={locale} copy={copy}>
@@ -154,7 +166,23 @@ export default async function PropertyDetailPage({
                     <h2 className="text-xs uppercase tracking-[0.24em] text-[#58595B]">
                       {copy.propertyDetail.descriptionLabel}
                     </h2>
-                    <p className="mt-3 text-sm leading-7 text-[rgba(35,31,32,0.78)]">{property.description}</p>
+                    {descriptionBullets ? (
+                      <ul className={`mt-4 grid gap-x-8 gap-y-2.5 sm:grid-cols-2 ${isRtl ? 'text-right' : ''}`}>
+                        {descriptionBullets.map((item, index) => (
+                          <li
+                            key={index}
+                            className={`flex items-start gap-2.5 text-sm leading-6 text-[rgba(35,31,32,0.78)] ${
+                              isRtl ? 'flex-row-reverse' : ''
+                            }`}
+                          >
+                            <span className="mt-[0.45rem] h-1.5 w-1.5 flex-none rounded-full bg-[#B8860B]" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="mt-3 text-sm leading-7 text-[rgba(35,31,32,0.78)]">{property.description}</p>
+                    )}
                   </div>
                 ) : null}
               </div>
