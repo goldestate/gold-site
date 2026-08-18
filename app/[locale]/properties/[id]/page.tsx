@@ -55,7 +55,12 @@ function PriceCard({
           {formatPrice(property.price, locale)}
         </div>
         {priceSuffix ? (
-          <div className="mt-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-white/50">{priceSuffix}</div>
+          <div
+            dir="ltr"
+            className={`mt-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-white/50 ${isRtl ? 'text-right' : ''}`}
+          >
+            {priceSuffix}
+          </div>
         ) : null}
         <div className="mt-7 flex flex-col gap-3">
           <Link
