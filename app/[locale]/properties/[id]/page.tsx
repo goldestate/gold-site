@@ -123,63 +123,30 @@ export default async function PropertyDetailPage({
                   </div>
                 ) : null}
 
-                <dl className="mt-8 grid grid-cols-2 gap-6 border-t border-[rgba(35,31,32,0.1)] pt-8 sm:grid-cols-3">
-                  <div>
-                    <dt className="text-xs uppercase tracking-[0.24em] text-[#58595B]">
-                      {copy.propertyDetail.typeLabel}
-                    </dt>
-                    <dd className="mt-2 text-sm font-medium text-[#231F20]">
-                      {propertyTypeLabel(property.propertyType, locale)}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs uppercase tracking-[0.24em] text-[#58595B]">
-                      {copy.propertyDetail.unitLabel}
-                    </dt>
-                    <dd className="mt-2 text-sm font-medium text-[#231F20]">
-                      {unitTypeLabel(property.unitType, locale)}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs uppercase tracking-[0.24em] text-[#58595B]">
-                      {copy.propertyDetail.locationLabel}
-                    </dt>
-                    <dd className="mt-2 text-sm font-medium text-[#231F20]">
-                      {locationLabel(property.location, locale)}
-                    </dd>
-                  </div>
+                <dl className="mt-8 divide-y divide-[rgba(35,31,32,0.08)] border-t border-[rgba(35,31,32,0.1)]">
+                  {[
+                    { label: copy.propertyDetail.typeLabel, value: propertyTypeLabel(property.propertyType, locale) },
+                    { label: copy.propertyDetail.unitLabel, value: unitTypeLabel(property.unitType, locale) },
+                    { label: copy.propertyDetail.locationLabel, value: locationLabel(property.location, locale) },
+                    ...(property.bedrooms > 0
+                      ? [{ label: copy.propertyDetail.bedroomsLabel, value: String(property.bedrooms) }]
+                      : []),
+                    ...(property.bathrooms > 0
+                      ? [{ label: copy.propertyDetail.bathroomsLabel, value: String(property.bathrooms) }]
+                      : []),
+                    ...(propertyShowsArea
+                      ? [{ label: copy.propertyDetail.areaLabel, value: formatArea(property.area, locale) }]
+                      : [])
+                  ].map((spec) => (
+                    <div
+                      key={spec.label}
+                      className={`flex items-center justify-between gap-4 py-3.5 ${isRtl ? 'flex-row-reverse' : ''}`}
+                    >
+                      <dt className="text-xs uppercase tracking-[0.24em] text-[#58595B]">{spec.label}</dt>
+                      <dd className="text-sm font-medium text-[#231F20]">{spec.value}</dd>
+                    </div>
+                  ))}
                 </dl>
-
-                {property.bedrooms > 0 || property.bathrooms > 0 || propertyShowsArea ? (
-                  <dl className="mt-6 grid grid-cols-2 gap-6 sm:grid-cols-3">
-                    {property.bedrooms > 0 ? (
-                      <div>
-                        <dt className="text-xs uppercase tracking-[0.24em] text-[#58595B]">
-                          {copy.propertyDetail.bedroomsLabel}
-                        </dt>
-                        <dd className="mt-2 text-sm font-medium text-[#231F20]">{property.bedrooms}</dd>
-                      </div>
-                    ) : null}
-                    {property.bathrooms > 0 ? (
-                      <div>
-                        <dt className="text-xs uppercase tracking-[0.24em] text-[#58595B]">
-                          {copy.propertyDetail.bathroomsLabel}
-                        </dt>
-                        <dd className="mt-2 text-sm font-medium text-[#231F20]">{property.bathrooms}</dd>
-                      </div>
-                    ) : null}
-                    {propertyShowsArea ? (
-                      <div>
-                        <dt className="text-xs uppercase tracking-[0.24em] text-[#58595B]">
-                          {copy.propertyDetail.areaLabel}
-                        </dt>
-                        <dd className="mt-2 text-sm font-medium text-[#231F20]">
-                          {formatArea(property.area, locale)}
-                        </dd>
-                      </div>
-                    ) : null}
-                  </dl>
-                ) : null}
 
                 {property.description ? (
                   <div className="mt-8 border-t border-[rgba(35,31,32,0.1)] pt-8">
@@ -196,11 +163,15 @@ export default async function PropertyDetailPage({
                   <div className="text-xs uppercase tracking-[0.28em] text-white/56">
                     {copy.propertyDetail.priceLabel}
                   </div>
-                  <div className="mt-3 flex items-baseline gap-1.5">
-                    <span className="gold-gradient-text text-3xl font-medium tracking-[0.06em]">
+                  <div className="mt-3">
+                    <div className="gold-gradient-text text-3xl font-medium tracking-[0.06em]">
                       {formatPrice(property.price, locale)}
-                    </span>
-                    {priceSuffix ? <span className="text-sm font-medium text-white/56">{priceSuffix}</span> : null}
+                    </div>
+                    {priceSuffix ? (
+                      <div className="mt-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
+                        {priceSuffix}
+                      </div>
+                    ) : null}
                   </div>
                 </div>
                 <Link
