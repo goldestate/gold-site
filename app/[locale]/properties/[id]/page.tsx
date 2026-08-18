@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { getSiteCopy } from '@/lib/site-content';
 import { getProperty } from '@/lib/properties-store';
 import { formatPrice } from '@/lib/format-price';
-import { locationLabel, propertyTypeLabel, unitTypeLabel } from '@/lib/property-taxonomy';
+import { locationLabel, priceSuffixLabel, propertyTypeLabel, showsArea, unitTypeLabel } from '@/lib/property-taxonomy';
 import { type Locale } from '@/i18n/routing';
 import { PageShell } from '@/components/page-shell';
 import { Link } from '@/i18n/navigation';
@@ -57,6 +57,8 @@ export default async function PropertyDetailPage({
   }
 
   const enquireHref = `/contact?interest=${encodeURIComponent(property.name)}`;
+  const propertyShowsArea = showsArea(property.propertyType) && property.area > 0;
+  const priceSuffix = priceSuffixLabel(property.propertyType, property.unitType);
 
   return (
     <PageShell locale={locale} copy={copy}>
@@ -94,7 +96,7 @@ export default async function PropertyDetailPage({
                   {unitTypeLabel(property.unitType, locale)} · {locationLabel(property.location, locale)}
                 </p>
 
-                {property.bedrooms > 0 || property.bathrooms > 0 || property.area > 0 ? (
+                {property.bedrooms > 0 || property.bathrooms > 0 || propertyShowsArea ? (
                   <div
                     className={`mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-medium text-[#231F20] ${
                       isRtl ? 'flex-row-reverse' : ''
@@ -112,7 +114,7 @@ export default async function PropertyDetailPage({
                         {property.bathrooms} {copy.propertyDetail.bathroomsLabel}
                       </span>
                     ) : null}
-                    {property.area > 0 ? (
+                    {propertyShowsArea ? (
                       <span className="inline-flex items-center gap-2">
                         <StatIcon icon="area" className="text-[#B8860B]" />
                         {formatArea(property.area, locale)}
@@ -146,33 +148,38 @@ export default async function PropertyDetailPage({
                       {locationLabel(property.location, locale)}
                     </dd>
                   </div>
-                  {property.bedrooms > 0 ? (
-                    <div>
-                      <dt className="text-xs uppercase tracking-[0.24em] text-[#58595B]">
-                        {copy.propertyDetail.bedroomsLabel}
-                      </dt>
-                      <dd className="mt-2 text-sm font-medium text-[#231F20]">{property.bedrooms}</dd>
-                    </div>
-                  ) : null}
-                  {property.bathrooms > 0 ? (
-                    <div>
-                      <dt className="text-xs uppercase tracking-[0.24em] text-[#58595B]">
-                        {copy.propertyDetail.bathroomsLabel}
-                      </dt>
-                      <dd className="mt-2 text-sm font-medium text-[#231F20]">{property.bathrooms}</dd>
-                    </div>
-                  ) : null}
-                  {property.area > 0 ? (
-                    <div>
-                      <dt className="text-xs uppercase tracking-[0.24em] text-[#58595B]">
-                        {copy.propertyDetail.areaLabel}
-                      </dt>
-                      <dd className="mt-2 text-sm font-medium text-[#231F20]">
-                        {formatArea(property.area, locale)}
-                      </dd>
-                    </div>
-                  ) : null}
                 </dl>
+
+                {property.bedrooms > 0 || property.bathrooms > 0 || propertyShowsArea ? (
+                  <dl className="mt-6 grid grid-cols-2 gap-6 sm:grid-cols-3">
+                    {property.bedrooms > 0 ? (
+                      <div>
+                        <dt className="text-xs uppercase tracking-[0.24em] text-[#58595B]">
+                          {copy.propertyDetail.bedroomsLabel}
+                        </dt>
+                        <dd className="mt-2 text-sm font-medium text-[#231F20]">{property.bedrooms}</dd>
+                      </div>
+                    ) : null}
+                    {property.bathrooms > 0 ? (
+                      <div>
+                        <dt className="text-xs uppercase tracking-[0.24em] text-[#58595B]">
+                          {copy.propertyDetail.bathroomsLabel}
+                        </dt>
+                        <dd className="mt-2 text-sm font-medium text-[#231F20]">{property.bathrooms}</dd>
+                      </div>
+                    ) : null}
+                    {propertyShowsArea ? (
+                      <div>
+                        <dt className="text-xs uppercase tracking-[0.24em] text-[#58595B]">
+                          {copy.propertyDetail.areaLabel}
+                        </dt>
+                        <dd className="mt-2 text-sm font-medium text-[#231F20]">
+                          {formatArea(property.area, locale)}
+                        </dd>
+                      </div>
+                    ) : null}
+                  </dl>
+                ) : null}
 
                 {property.description ? (
                   <div className="mt-8 border-t border-[rgba(35,31,32,0.1)] pt-8">
@@ -189,8 +196,11 @@ export default async function PropertyDetailPage({
                   <div className="text-xs uppercase tracking-[0.28em] text-white/56">
                     {copy.propertyDetail.priceLabel}
                   </div>
-                  <div className="gold-gradient-text mt-3 text-3xl font-medium tracking-[0.06em]">
-                    {formatPrice(property.price, locale)}
+                  <div className="mt-3 flex items-baseline gap-1.5">
+                    <span className="gold-gradient-text text-3xl font-medium tracking-[0.06em]">
+                      {formatPrice(property.price, locale)}
+                    </span>
+                    {priceSuffix ? <span className="text-sm font-medium text-white/56">{priceSuffix}</span> : null}
                   </div>
                 </div>
                 <Link

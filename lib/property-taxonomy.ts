@@ -66,6 +66,18 @@ export function unitTypeLabel(value: UnitTypeValue, locale: 'en' | 'ar'): string
   return UNIT_TYPES.find((item) => item.value === value)?.[locale] ?? value;
 }
 
+/** Rentals are quoted per day; primary and admin/commercial units are quoted on a quarterly-then-annual schedule. */
+export function priceSuffixLabel(propertyType: PropertyTypeValue, unitType: UnitTypeValue): string {
+  if (propertyType === 'rental') return '/Day';
+  if (propertyType === 'primary') return '/Q-Annual';
+  if (unitType === 'administrative' || unitType === 'commercial') return '/Q-Annual';
+  return '';
+}
+
+export function showsArea(propertyType: PropertyTypeValue): boolean {
+  return propertyType !== 'rental';
+}
+
 export function locationLabel(value: LocationValue, locale: 'en' | 'ar'): string {
   return LOCATIONS.find((item) => item.value === value)?.[locale] ?? value;
 }
