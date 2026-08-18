@@ -6,7 +6,7 @@ import { locationLabel, priceSuffixLabel, propertyTypeLabel, showsArea, unitType
 import { type Locale } from '@/i18n/routing';
 import { PageShell } from '@/components/page-shell';
 import { Link } from '@/i18n/navigation';
-import { ArrowIcon, StatIcon } from '@/components/section-ui';
+import { ArrowIcon, PhoneIcon, StatIcon } from '@/components/section-ui';
 import { PropertyGallery } from '@/components/property-gallery';
 
 function formatArea(area: number, locale: 'en' | 'ar'): string {
@@ -57,6 +57,7 @@ export default async function PropertyDetailPage({
   }
 
   const enquireHref = `/contact?interest=${encodeURIComponent(property.name)}`;
+  const callHref = `tel:${copy.contact.hotline.replace(/[^+\d]/g, '')}`;
   const propertyShowsArea = showsArea(property.propertyType) && property.area > 0;
   const priceSuffix = priceSuffixLabel(property.propertyType, property.unitType);
 
@@ -174,14 +175,23 @@ export default async function PropertyDetailPage({
                     ) : null}
                   </div>
                 </div>
-                <Link
-                  href={enquireHref}
-                  locale={locale}
-                  className="btn-gold inline-flex items-center justify-center gap-3 rounded-full px-6 py-3 text-sm font-medium uppercase tracking-[0.18em]"
-                >
-                  {copy.propertyDetail.enquireCta}
-                  <ArrowIcon rtl={isRtl} />
-                </Link>
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <Link
+                    href={enquireHref}
+                    locale={locale}
+                    className="btn-gold inline-flex flex-1 items-center justify-center gap-3 rounded-full px-6 py-3 text-sm font-medium uppercase tracking-[0.18em]"
+                  >
+                    {copy.propertyDetail.enquireCta}
+                    <ArrowIcon rtl={isRtl} />
+                  </Link>
+                  <a
+                    href={callHref}
+                    className="inline-flex flex-1 items-center justify-center gap-2.5 rounded-full border border-white/25 px-6 py-3 text-sm font-medium uppercase tracking-[0.18em] text-white transition hover:border-[#D9B355] hover:text-[#D9B355]"
+                  >
+                    <PhoneIcon />
+                    {copy.propertyDetail.callCta}
+                  </a>
+                </div>
               </div>
             </div>
           </div>

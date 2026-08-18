@@ -203,11 +203,17 @@ function Field({
   );
 }
 
-function InfoCard({ label, value }: { label: string; value: string }) {
+function InfoCard({ label, value, href }: { label: string; value: string; href?: string }) {
   return (
     <div className="rounded-[1.2rem] border border-white/10 bg-black/22 px-4 py-4">
       <div className="text-xs uppercase tracking-[0.26em] text-white/52">{label}</div>
-      <div className="mt-3 text-sm font-medium leading-6 text-white">{value}</div>
+      {href ? (
+        <a href={href} className="mt-3 block text-sm font-medium leading-6 text-white transition hover:text-[#D9B355]">
+          {value}
+        </a>
+      ) : (
+        <div className="mt-3 text-sm font-medium leading-6 text-white">{value}</div>
+      )}
     </div>
   );
 }
@@ -248,8 +254,12 @@ export function ContactSection({
               </div>
               <p className="mt-4 max-w-md text-sm leading-7 text-white/74">{copy.address}</p>
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                <InfoCard label={copy.hotlineLabel} value={copy.hotline} />
-                <InfoCard label={copy.emailLabel} value={copy.emailValue} />
+                <InfoCard
+                  label={copy.hotlineLabel}
+                  value={copy.hotline}
+                  href={`tel:${copy.hotline.replace(/[^+\d]/g, '')}`}
+                />
+                <InfoCard label={copy.emailLabel} value={copy.emailValue} href={`mailto:${copy.emailValue}`} />
               </div>
               <a
                 href={`https://www.google.com/maps?q=${MAP_QUERY}`}

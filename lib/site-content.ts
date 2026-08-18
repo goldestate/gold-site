@@ -98,6 +98,7 @@ export type SiteCopy = {
     areaLabel: string;
     descriptionLabel: string;
     enquireCta: string;
+    callCta: string;
     notFoundTitle: string;
     notFoundBody: string;
   };
@@ -226,8 +227,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       hero: {
         eyebrow: 'Primary. Rental. Resale.',
         title: 'Find your next property',
-        subtitle:
-          'Verified primary, resale, and rental listings across Egypt’s top destinations — real prices, zero guesswork.',
+        subtitle: 'Browse live primary, resale, and rental listings in New Cairo, the North Coast, Sheikh Zayed, Ain Sokhna, and Gouna.',
         search: {
           propertyTypeLabel: 'Property Type',
           anyPropertyType: 'Any type',
@@ -325,6 +325,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       areaLabel: 'Area',
       descriptionLabel: 'About this property',
       enquireCta: 'Enquire About This Property',
+      callCta: 'Call Now',
       notFoundTitle: 'Property not found',
       notFoundBody: 'This listing may have been removed or is no longer published.'
     },
@@ -335,15 +336,14 @@ export const siteCopy: Record<Locale, SiteCopy> = {
         eyebrow: 'Our Story',
         title: 'GOLD',
         quote: 'GOLD stands for Golden Opportunities of Leading Domain.',
-        body: 'Everyone understands what this word represents — you can almost feel its value as soon as you hear it. In our brand, we take the word gold to another level and give it a unique perspective. It reflects the essence of what we offer: services as valuable and rare as gold itself. Every solution we provide carries exceptional quality, unmatched expertise, and a premium standard that sets us apart.'
+        body: 'Everyone understands what this word represents — you can almost feel its value as soon as you hear it. In our brand, we take the word gold to another level and give it a unique perspective. It reflects the essence of what we offer: services as valuable and rare as gold itself.'
       },
       missionVision: {
         missionLabel: 'Mission',
         mission:
-          'Deliver trusted, high-quality real estate solutions while creating meaningful value for clients through expert consultation, transparency, and exceptional service.',
+          'Give clients real estate advice they can trust, with transparent pricing and no pressure to decide before they are ready.',
         visionLabel: 'Vision',
-        vision:
-          'Become a leading multi-sector group recognized for innovation, integrity, and long-term impact, growing into a diversified organization across investment and management sectors.'
+        vision: 'Grow GOLD into a group that spans real estate, lifestyle, and management — built to last, not just to sell.'
       },
       whatWeDo: {
         eyebrow: 'What We Do',
@@ -365,7 +365,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       achievements: {
         eyebrow: 'What We Achieve',
         title: 'A trusted name in Egyptian real estate',
-        body: 'Since our beginning, we have built strong relationships with a large number of satisfied customers by delivering exceptional real estate services and premium property opportunities. Through dedication, professionalism, and commitment to excellence, GOLD Real Estate continues to grow as a trusted name and a golden choice for property investment and living.',
+        body: 'Since we started, we have worked with a growing number of clients across primary, resale, and rental deals. That track record — not just the pitch — is what keeps GOLD growing as a name people come back to.',
         stat: 'EGP 1B+',
         statLabel: 'In sales achieved'
       },
@@ -485,7 +485,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       hero: {
         eyebrow: 'أساسي. إيجار. إعادة بيع.',
         title: 'ابحث عن عقارك القادم',
-        subtitle: 'عروض أساسية وإعادة بيع وإيجار موثقة في أفضل مناطق مصر — أسعار حقيقية دون تخمين.',
+        subtitle: 'تصفح عقارات أساسية وإعادة بيع وإيجار في القاهرة الجديدة والساحل الشمالي والشيخ زايد والعين السخنة والجونة.',
         search: {
           propertyTypeLabel: 'نوع العقار',
           anyPropertyType: 'أي نوع',
@@ -583,6 +583,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       areaLabel: 'المساحة',
       descriptionLabel: 'عن هذا العقار',
       enquireCta: 'استفسر عن هذا العقار',
+      callCta: 'اتصل الآن',
       notFoundTitle: 'العقار غير موجود',
       notFoundBody: 'ربما تم حذف هذا العرض أو لم يعد منشوراً.'
     },
@@ -593,13 +594,13 @@ export const siteCopy: Record<Locale, SiteCopy> = {
         eyebrow: 'قصتنا',
         title: 'GOLD',
         quote: 'GOLD اختصار لعبارة Golden Opportunities of Leading Domain.',
-        body: 'يفهم الجميع ما تمثله هذه الكلمة — يمكنك أن تشعر بقيمتها فور سماعها. في علامتنا، نأخذ كلمة الذهب إلى مستوى آخر ونمنحها منظوراً فريداً. إنها تعكس جوهر ما نقدمه: خدمات ثمينة ونادرة كالذهب نفسه. كل حل نقدمه يحمل جودة استثنائية وخبرة لا مثيل لها ومعياراً راقياً يميزنا.'
+        body: 'يفهم الجميع ما تمثله هذه الكلمة — يمكنك أن تشعر بقيمتها فور سماعها. في علامتنا، نأخذ كلمة الذهب إلى مستوى آخر ونمنحها منظوراً فريداً. إنها تعكس جوهر ما نقدمه: خدمات ثمينة ونادرة كالذهب نفسه.'
       },
       missionVision: {
         missionLabel: 'الرسالة',
-        mission: 'تقديم حلول عقارية موثوقة وعالية الجودة مع خلق قيمة حقيقية لعملائنا من خلال استشارات خبيرة وشفافية وخدمة استثنائية.',
+        mission: 'نقدم لعملائنا استشارة عقارية يثقون بها، بأسعار شفافة ودون أي ضغط لاتخاذ قرار قبل أن يكونوا جاهزين.',
         visionLabel: 'الرؤية',
-        vision: 'أن نصبح مجموعة رائدة متعددة القطاعات معروفة بالابتكار والنزاهة والأثر طويل الأمد، ونتوسع كمنظمة متنوعة عبر قطاعات الاستثمار والإدارة.'
+        vision: 'أن تنمو GOLD لتشمل العقارات ونمط الحياة والإدارة — مجموعة مبنية لتستمر، لا لتبيع فقط.'
       },
       whatWeDo: {
         eyebrow: 'ماذا نقدم',
@@ -621,7 +622,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       achievements: {
         eyebrow: 'ما حققناه',
         title: 'اسم موثوق في العقارات المصرية',
-        body: 'منذ انطلاقتنا، بنينا علاقات قوية مع عدد كبير من العملاء الراضين من خلال تقديم خدمات عقارية استثنائية وفرص عقارية فاخرة. من خلال التفاني والاحترافية والالتزام بالتميز، تواصل GOLD للعقارات نموها كاسم موثوق واختيار ذهبي للاستثمار العقاري والسكن.',
+        body: 'منذ انطلاقتنا، تعاملنا مع عدد متزايد من العملاء في صفقات أساسية وإعادة بيع وإيجار. هذا السجل — لا الكلام التسويقي — هو ما يجعل GOLD اسماً يعود إليه العملاء.',
         stat: '1 مليار+ جنيه',
         statLabel: 'مبيعات محققة'
       },

@@ -53,11 +53,11 @@ export default async function HomePage({ params }: { params: { locale: Locale } 
   return (
     <PageShell locale={locale} copy={copy}>
       <HeroSearch copy={copy.home.hero} locale={locale} isRtl={isRtl} />
+      <HomePartners copy={copy.home.partners} isRtl={isRtl} />
       {featured.length > 0 ? (
         <FeaturedProperties copy={copy.home.featured} properties={featured} locale={locale} isRtl={isRtl} />
       ) : null}
       <TrustStrip copy={copy.home.trust} isRtl={isRtl} />
-      <HomePartners copy={copy.home.partners} isRtl={isRtl} />
       <ContactCta copy={copy.home.contactCta} locale={locale} isRtl={isRtl} />
     </PageShell>
   );
