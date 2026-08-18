@@ -7,6 +7,7 @@ import {
   LOCATIONS,
   PROPERTY_TYPES,
   UNIT_TYPES,
+  showsArea,
   type LocationValue,
   type PropertyTypeValue,
   type UnitTypeValue
@@ -56,6 +57,8 @@ export function PropertyForm({ property }: PropertyFormProps) {
   const [error, setError] = useState('');
 
   const isUploading = photos.some((photo) => photo.status === 'uploading');
+  const propertyHasArea = showsArea(propertyType);
+  const [draggedKey, setDraggedKey] = useState<string | null>(null);
 
   const handleFilesSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []);
@@ -119,6 +122,19 @@ export function PropertyForm({ property }: PropertyFormProps) {
     });
   };
 
+  const reorderPhoto = (draggedPhotoKey: string, targetKey: string) => {
+    if (draggedPhotoKey === targetKey) return;
+    setPhotos((prev) => {
+      const fromIndex = prev.findIndex((photo) => photo.key === draggedPhotoKey);
+      const toIndex = prev.findIndex((photo) => photo.key === targetKey);
+      if (fromIndex === -1 || toIndex === -1) return prev;
+      const next = [...prev];
+      const [item] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, item);
+      return next;
+    });
+  };
+
   const makeCoverPhoto = (key: string) => {
     setPhotos((prev) => {
       const index = prev.findIndex((photo) => photo.key === key);
@@ -149,10 +165,13 @@ export function PropertyForm({ property }: PropertyFormProps) {
       setError('Enter a valid number of bathrooms.');
       return;
     }
-    const parsedArea = Number(area);
-    if (!area || Number.isNaN(parsedArea) || parsedArea < 0) {
-      setError('Enter a valid area in m².');
-      return;
+    let parsedArea = 0;
+    if (propertyHasArea) {
+      parsedArea = Number(area);
+      if (!area || Number.isNaN(parsedArea) || parsedArea < 0) {
+        setError('Enter a valid area in m².');
+        return;
+      }
     }
     if (isUploading) {
       setError('Please wait for photo uploads to finish.');
@@ -308,7 +327,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
         </label>
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-3">
+      <div className={`grid gap-5 ${propertyHasArea ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
         <label className="block">
           <span className="mb-2 block text-sm font-medium uppercase tracking-[0.16em] text-white/72">
             Bedrooms
@@ -335,19 +354,21 @@ export function PropertyForm({ property }: PropertyFormProps) {
             className="w-full rounded-[1rem] border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)]"
           />
         </label>
-        <label className="block">
-          <span className="mb-2 block text-sm font-medium uppercase tracking-[0.16em] text-white/72">
-            Area (m²)
-          </span>
-          <input
-            type="number"
-            min={0}
-            value={area}
-            onChange={(event) => setArea(event.target.value)}
-            placeholder="210"
-            className="w-full rounded-[1rem] border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)]"
-          />
-        </label>
+        {propertyHasArea ? (
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium uppercase tracking-[0.16em] text-white/72">
+              Area (m²)
+            </span>
+            <input
+              type="number"
+              min={0}
+              value={area}
+              onChange={(event) => setArea(event.target.value)}
+              placeholder="210"
+              className="w-full rounded-[1rem] border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)]"
+            />
+          </label>
+        ) : null}
       </div>
 
       <label className="block">
@@ -378,8 +399,8 @@ export function PropertyForm({ property }: PropertyFormProps) {
           Photos
         </span>
         <p className="mb-3 text-xs text-white/50">
-          The first photo is the cover shown on listing cards. The rest appear as a swipeable gallery on the
-          property page.
+          The first photo is the cover shown on listing cards. Select as many as you like at once, then drag them
+          into order (or use the arrows below each one) — the first spot is the cover.
         </p>
 
         {photos.length > 0 ? (
@@ -387,7 +408,20 @@ export function PropertyForm({ property }: PropertyFormProps) {
             {photos.map((photo, index) => (
               <div
                 key={photo.key}
-                className="relative aspect-square overflow-hidden rounded-[0.75rem] border border-white/12 bg-white/5"
+                draggable={photo.status === 'done'}
+                onDragStart={() => setDraggedKey(photo.key)}
+                onDragOver={(event) => {
+                  if (draggedKey && draggedKey !== photo.key) event.preventDefault();
+                }}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  if (draggedKey) reorderPhoto(draggedKey, photo.key);
+                  setDraggedKey(null);
+                }}
+                onDragEnd={() => setDraggedKey(null)}
+                className={`relative aspect-square overflow-hidden rounded-[0.75rem] border bg-white/5 transition ${
+                  draggedKey === photo.key ? 'opacity-40' : ''
+                } ${photo.status === 'done' ? 'cursor-grab border-white/12 active:cursor-grabbing' : 'border-white/12'}`}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={photo.previewUrl} alt="" className="h-full w-full object-cover" />

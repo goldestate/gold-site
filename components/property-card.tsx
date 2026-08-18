@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import type { Property } from '@/lib/properties-store';
 import { formatPrice } from '@/lib/format-price';
-import { locationLabel, propertyTypeLabel, unitTypeLabel } from '@/lib/property-taxonomy';
+import { locationLabel, priceSuffixLabel, propertyTypeLabel, showsArea, unitTypeLabel } from '@/lib/property-taxonomy';
 import { fadeUp, ArrowIcon, StatIcon } from './section-ui';
 import { Link } from '@/i18n/navigation';
 
@@ -25,6 +25,9 @@ export function PropertyCard({
   viewDetailsLabel: string;
   delay?: number;
 }) {
+  const propertyShowsArea = showsArea(property.propertyType) && property.area > 0;
+  const priceSuffix = priceSuffixLabel(property.propertyType, property.unitType);
+
   return (
     <motion.article
       variants={fadeUp}
@@ -54,8 +57,11 @@ export function PropertyCard({
           <h3 className="min-w-0 flex-1 truncate text-xs font-semibold tracking-[0.01em] text-[#231F20] sm:text-base">
             {property.name}
           </h3>
-          <span className="flex-none text-xs font-bold text-[#B8860B] sm:text-sm">
-            {formatPrice(property.price, locale)}
+          <span className={`flex flex-none flex-col ${isRtl ? 'items-start' : 'items-end'}`}>
+            <span className="text-xs font-bold text-[#B8860B] sm:text-sm">{formatPrice(property.price, locale)}</span>
+            {priceSuffix ? (
+              <span className="text-[8px] font-medium text-[#58595B] sm:text-[10px]">{priceSuffix}</span>
+            ) : null}
           </span>
         </div>
 
@@ -63,7 +69,7 @@ export function PropertyCard({
           {unitTypeLabel(property.unitType, locale)} · {locationLabel(property.location, locale)}
         </p>
 
-        {property.bedrooms > 0 || property.bathrooms > 0 || property.area > 0 ? (
+        {property.bedrooms > 0 || property.bathrooms > 0 || propertyShowsArea ? (
           <div
             className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 border-t border-[rgba(35,31,32,0.08)] pt-2 text-[10px] text-[#231F20] sm:gap-x-4 sm:pt-3 sm:text-sm ${
               isRtl ? 'flex-row-reverse' : ''
@@ -81,7 +87,7 @@ export function PropertyCard({
                 {property.bathrooms}
               </span>
             ) : null}
-            {property.area > 0 ? (
+            {propertyShowsArea ? (
               <span className="inline-flex items-center gap-1 sm:gap-1.5">
                 <StatIcon icon="area" className="h-3 w-3 text-[#B8860B] sm:h-4 sm:w-4" />
                 {formatArea(property.area, locale)}
