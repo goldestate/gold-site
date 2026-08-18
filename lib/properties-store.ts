@@ -1,5 +1,4 @@
-import { promises as fs } from 'fs';
-import path from 'path';
+import { supabase } from './supabase';
 import {
   isPropertyType,
   isUnitType,
@@ -41,219 +40,120 @@ export type PropertyInput = {
   published: boolean;
 };
 
-const DATA_DIR = path.join(process.cwd(), 'data');
-const DATA_FILE = path.join(DATA_DIR, 'properties.json');
-export const UPLOADS_DIR = path.join(DATA_DIR, 'uploads');
+type PropertyRow = {
+  id: string;
+  name: string;
+  location: string;
+  property_type: string;
+  unit_type: string;
+  price: number;
+  bedrooms: number;
+  bathrooms: number;
+  area: number;
+  description: string;
+  images: unknown;
+  tone: string;
+  published: boolean;
+  created_at: string;
+};
 
-const DEFAULT_PROPERTIES: Property[] = [
-  {
-    id: 'seed-observatory',
-    name: 'The Observatory Residence',
-    location: 'new-cairo',
-    propertyType: 'primary',
-    unitType: 'apartment',
-    price: 18_000_000,
-    bedrooms: 3,
-    bathrooms: 3,
-    area: 210,
-    description:
-      'A refined apartment residence overlooking New Cairo, finished to a premium standard with private balconies and dedicated concierge service.',
-    images: [
-      'https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1400&q=80'
-    ],
-    tone: 'color',
-    published: true,
-    createdAt: '2026-01-01T00:00:00.000Z'
-  },
-  {
-    id: 'seed-atelier',
-    name: 'The Atelier House',
-    location: 'new-cairo',
-    propertyType: 'resale',
-    unitType: 'townhouse',
-    price: 9_000_000,
-    bedrooms: 4,
-    bathrooms: 4,
-    area: 260,
-    description:
-      'A resale townhouse with a private garden and flexible layout, ready to move in within one of New Cairo’s most established communities.',
-    images: [
-      'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1400&q=80'
-    ],
-    tone: 'mono',
-    published: true,
-    createdAt: '2026-01-02T00:00:00.000Z'
-  },
-  {
-    id: 'seed-palm-court',
-    name: 'Palm Court Villas',
-    location: 'north-coast',
-    propertyType: 'primary',
-    unitType: 'villa',
-    price: 24_000_000,
-    bedrooms: 5,
-    bathrooms: 5,
-    area: 380,
-    description:
-      'A beachside villa with direct sea views, a private pool, and landscaped grounds designed for year-round coastal living.',
-    images: [
-      'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80'
-    ],
-    tone: 'color',
-    published: true,
-    createdAt: '2026-01-03T00:00:00.000Z'
-  }
-];
-
-const WRITE_TIMEOUT_MS = 15_000;
-
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error(`Timed out after ${ms}ms.`)), ms);
-    promise.then(
-      (value) => {
-        clearTimeout(timer);
-        resolve(value);
-      },
-      (error) => {
-        clearTimeout(timer);
-        reject(error);
-      }
-    );
-  });
-}
-
-let writeQueue: Promise<unknown> = Promise.resolve();
-
-/**
- * Writes are serialized through this queue so concurrent create/update/delete
- * calls can't corrupt the JSON file. Each task is time-boxed: if a write ever
- * hangs (e.g. a stalled filesystem/volume) instead of failing outright, it
- * still rejects instead of blocking every future write forever.
- */
-function withQueue<T>(task: () => Promise<T>): Promise<T> {
-  const run = () => withTimeout(task(), WRITE_TIMEOUT_MS);
-  const result = writeQueue.then(run, run);
-  writeQueue = result.then(
-    () => undefined,
-    () => undefined
-  );
-  return result;
-}
-
-async function ensureDataFile() {
-  await fs.mkdir(UPLOADS_DIR, { recursive: true });
-  try {
-    await fs.access(DATA_FILE);
-  } catch {
-    await fs.writeFile(DATA_FILE, JSON.stringify(DEFAULT_PROPERTIES, null, 2));
-  }
-}
-
-/** Older records stored a single `image` string instead of an `images` array. */
-function normalizeImages(raw: Record<string, unknown>): string[] {
-  if (Array.isArray(raw.images)) {
-    const urls = raw.images.filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
-    if (urls.length > 0) return urls;
-  }
-  if (typeof raw.image === 'string' && raw.image.trim().length > 0) {
-    return [raw.image];
-  }
-  return [];
-}
-
-/**
- * Older records (created before the type/unit/location taxonomy existed)
- * may be missing these fields or store location as free text. Normalize
- * on read so nothing breaks; saving the record again through the admin
- * form persists the corrected values.
- */
-function normalizeRecord(raw: Record<string, unknown>): Property {
-  const legacyPrice = typeof raw.priceMin === 'number' ? raw.priceMin : 0;
+function rowToProperty(row: PropertyRow): Property {
   return {
-    id: String(raw.id),
-    name: String(raw.name ?? ''),
-    location: normalizeLegacyLocation(raw.location),
-    propertyType: isPropertyType(raw.propertyType) ? raw.propertyType : 'resale',
-    unitType: isUnitType(raw.unitType) ? raw.unitType : 'apartment',
-    price: typeof raw.price === 'number' ? raw.price : legacyPrice,
-    bedrooms: typeof raw.bedrooms === 'number' ? raw.bedrooms : 0,
-    bathrooms: typeof raw.bathrooms === 'number' ? raw.bathrooms : 0,
-    area: typeof raw.area === 'number' ? raw.area : 0,
-    description: typeof raw.description === 'string' ? raw.description : '',
-    images: normalizeImages(raw),
-    tone: raw.tone === 'mono' ? 'mono' : 'color',
-    published: Boolean(raw.published),
-    createdAt: typeof raw.createdAt === 'string' ? raw.createdAt : new Date(0).toISOString()
+    id: row.id,
+    name: row.name,
+    location: normalizeLegacyLocation(row.location),
+    propertyType: isPropertyType(row.property_type) ? row.property_type : 'resale',
+    unitType: isUnitType(row.unit_type) ? row.unit_type : 'apartment',
+    price: row.price,
+    bedrooms: row.bedrooms,
+    bathrooms: row.bathrooms,
+    area: row.area,
+    description: row.description,
+    images: Array.isArray(row.images) ? row.images.filter((item): item is string => typeof item === 'string') : [],
+    tone: row.tone === 'mono' ? 'mono' : 'color',
+    published: row.published,
+    createdAt: row.created_at
   };
 }
 
-async function loadAll(): Promise<Property[]> {
-  await ensureDataFile();
-  const raw = await fs.readFile(DATA_FILE, 'utf-8');
-  try {
-    const parsed = JSON.parse(raw) as Record<string, unknown>[];
-    return parsed.map(normalizeRecord);
-  } catch {
-    return [];
-  }
+function inputToRow(input: PropertyInput) {
+  return {
+    name: input.name,
+    location: input.location,
+    property_type: input.propertyType,
+    unit_type: input.unitType,
+    price: input.price,
+    bedrooms: input.bedrooms,
+    bathrooms: input.bathrooms,
+    area: input.area,
+    description: input.description,
+    images: input.images,
+    tone: input.tone,
+    published: input.published
+  };
 }
 
-async function saveAll(list: Property[]) {
-  const tmpFile = `${DATA_FILE}.tmp`;
-  await fs.writeFile(tmpFile, JSON.stringify(list, null, 2));
-  await fs.rename(tmpFile, DATA_FILE);
+function patchToRow(patch: Partial<PropertyInput>) {
+  const row: Record<string, unknown> = {};
+  if (patch.name !== undefined) row.name = patch.name;
+  if (patch.location !== undefined) row.location = patch.location;
+  if (patch.propertyType !== undefined) row.property_type = patch.propertyType;
+  if (patch.unitType !== undefined) row.unit_type = patch.unitType;
+  if (patch.price !== undefined) row.price = patch.price;
+  if (patch.bedrooms !== undefined) row.bedrooms = patch.bedrooms;
+  if (patch.bathrooms !== undefined) row.bathrooms = patch.bathrooms;
+  if (patch.area !== undefined) row.area = patch.area;
+  if (patch.description !== undefined) row.description = patch.description;
+  if (patch.images !== undefined) row.images = patch.images;
+  if (patch.tone !== undefined) row.tone = patch.tone;
+  if (patch.published !== undefined) row.published = patch.published;
+  return row;
 }
 
 export async function readProperties(): Promise<Property[]> {
-  const list = await loadAll();
-  return [...list].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const { data, error } = await supabase
+    .from('properties')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return (data as PropertyRow[]).map(rowToProperty);
 }
 
 export async function readPublishedProperties(): Promise<Property[]> {
-  const list = await readProperties();
-  return list.filter((item) => item.published);
+  const { data, error } = await supabase
+    .from('properties')
+    .select('*')
+    .eq('published', true)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return (data as PropertyRow[]).map(rowToProperty);
 }
 
 export async function getProperty(id: string): Promise<Property | null> {
-  const list = await loadAll();
-  return list.find((item) => item.id === id) ?? null;
+  const { data, error } = await supabase.from('properties').select('*').eq('id', id).maybeSingle();
+  if (error) throw error;
+  return data ? rowToProperty(data as PropertyRow) : null;
 }
 
-export function createProperty(input: PropertyInput): Promise<Property> {
-  return withQueue(async () => {
-    const list = await loadAll();
-    const property: Property = {
-      ...input,
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString()
-    };
-    list.push(property);
-    await saveAll(list);
-    return property;
-  });
+export async function createProperty(input: PropertyInput): Promise<Property> {
+  const { data, error } = await supabase.from('properties').insert(inputToRow(input)).select('*').single();
+  if (error) throw error;
+  return rowToProperty(data as PropertyRow);
 }
 
-export function updateProperty(
-  id: string,
-  patch: Partial<PropertyInput>
-): Promise<Property | null> {
-  return withQueue(async () => {
-    const list = await loadAll();
-    const index = list.findIndex((item) => item.id === id);
-    if (index === -1) return null;
-    list[index] = { ...list[index], ...patch };
-    await saveAll(list);
-    return list[index];
-  });
+export async function updateProperty(id: string, patch: Partial<PropertyInput>): Promise<Property | null> {
+  const { data, error } = await supabase
+    .from('properties')
+    .update(patchToRow(patch))
+    .eq('id', id)
+    .select('*')
+    .maybeSingle();
+  if (error) throw error;
+  return data ? rowToProperty(data as PropertyRow) : null;
 }
 
-export function deleteProperty(id: string): Promise<boolean> {
-  return withQueue(async () => {
-    const list = await loadAll();
-    const next = list.filter((item) => item.id !== id);
-    if (next.length === list.length) return false;
-    await saveAll(next);
-    return true;
-  });
+export async function deleteProperty(id: string): Promise<boolean> {
+  const { data, error } = await supabase.from('properties').delete().eq('id', id).select('id').maybeSingle();
+  if (error) throw error;
+  return Boolean(data);
 }

@@ -1,6 +1,8 @@
 import type { MetadataRoute } from 'next';
 import { readPublishedProperties } from '@/lib/properties-store';
 
+export const dynamic = 'force-dynamic';
+
 const BASE_URL = 'https://gold-eg.com';
 const LOCALES = ['en', 'ar'] as const;
 const STATIC_PATHS = ['', '/properties', '/about', '/contact'];
