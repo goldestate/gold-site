@@ -1,12 +1,5 @@
-export type PropertyTypeValue = 'primary' | 'rental' | 'resale';
-export type UnitTypeValue =
-  | 'chalet'
-  | 'apartment'
-  | 'townhouse'
-  | 'twinhouse'
-  | 'villa'
-  | 'commercial'
-  | 'administrative';
+export type PropertyTypeValue = 'primary' | 'rental' | 'resale' | 'commercial' | 'administrative';
+export type UnitTypeValue = 'chalet' | 'apartment' | 'townhouse' | 'twinhouse' | 'villa';
 export type LocationValue = 'north-coast' | 'sheikh-zayed' | 'new-cairo' | 'ain-sokhna' | 'gouna';
 
 type TaxonomyOption<T extends string> = {
@@ -18,7 +11,9 @@ type TaxonomyOption<T extends string> = {
 export const PROPERTY_TYPES: TaxonomyOption<PropertyTypeValue>[] = [
   { value: 'primary', en: 'Primary', ar: 'أساسي' },
   { value: 'rental', en: 'Rental', ar: 'إيجار' },
-  { value: 'resale', en: 'Resale', ar: 'إعادة بيع' }
+  { value: 'resale', en: 'Resale', ar: 'إعادة بيع' },
+  { value: 'commercial', en: 'Commercial', ar: 'تجاري' },
+  { value: 'administrative', en: 'Administrative', ar: 'إداري' }
 ];
 
 export const UNIT_TYPES: TaxonomyOption<UnitTypeValue>[] = [
@@ -26,9 +21,7 @@ export const UNIT_TYPES: TaxonomyOption<UnitTypeValue>[] = [
   { value: 'apartment', en: 'Apartment', ar: 'شقة' },
   { value: 'townhouse', en: 'Townhouse', ar: 'تاون هاوس' },
   { value: 'twinhouse', en: 'Twinhouse', ar: 'توين هاوس' },
-  { value: 'villa', en: 'Villa', ar: 'فيلا' },
-  { value: 'commercial', en: 'Commercial', ar: 'تجاري' },
-  { value: 'administrative', en: 'Administrative', ar: 'إداري' }
+  { value: 'villa', en: 'Villa', ar: 'فيلا' }
 ];
 
 export const LOCATIONS: TaxonomyOption<LocationValue>[] = [
@@ -66,11 +59,12 @@ export function unitTypeLabel(value: UnitTypeValue, locale: 'en' | 'ar'): string
   return UNIT_TYPES.find((item) => item.value === value)?.[locale] ?? value;
 }
 
-/** Rentals are quoted per day; primary and admin/commercial units are quoted on a quarterly-then-annual schedule. */
-export function priceSuffixLabel(propertyType: PropertyTypeValue, unitType: UnitTypeValue): string {
+/** Rentals are quoted per day; primary, commercial, and administrative properties are quoted on a quarterly-then-annual schedule. */
+export function priceSuffixLabel(propertyType: PropertyTypeValue): string {
   if (propertyType === 'rental') return '/Day';
-  if (propertyType === 'primary') return '/Q-Annual';
-  if (unitType === 'administrative' || unitType === 'commercial') return '/Q-Annual';
+  if (propertyType === 'primary' || propertyType === 'commercial' || propertyType === 'administrative') {
+    return '/Q-Annual';
+  }
   return '';
 }
 

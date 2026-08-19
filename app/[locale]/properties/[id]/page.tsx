@@ -129,7 +129,7 @@ export default async function PropertyDetailPage({
   const enquireHref = `/contact?interest=${encodeURIComponent(property.name)}`;
   const callHref = `tel:${copy.contact.hotline.replace(/[^+\d]/g, '')}`;
   const propertyShowsArea = showsArea(property.propertyType) && property.area > 0;
-  const priceSuffix = priceSuffixLabel(property.propertyType, property.unitType);
+  const priceSuffix = priceSuffixLabel(property.propertyType);
   const descriptionBullets = descriptionItems(property.description);
 
   const specs = [
