@@ -12,6 +12,7 @@ export type SiteCopy = {
     properties: string;
     about: string;
     contact: string;
+    forBrokers: string;
   };
   home: {
     hero: {
@@ -58,6 +59,13 @@ export type SiteCopy = {
       title: string;
       subtitle: string;
       cta: string;
+    };
+    rentalDesk: {
+      eyebrow: string;
+      title: string;
+      subtitle: string;
+      brokerCard: { title: string; body: string; cta: string };
+      ownerCard: { title: string; body: string; cta: string };
     };
   };
   propertiesPage: {
@@ -188,6 +196,79 @@ export type SiteCopy = {
     tagline: string;
     legal: string;
   };
+  rentalRequestPage: {
+    eyebrow: string;
+    title: string;
+    intro: string;
+    brokerSectionTitle: string;
+    requestSectionTitle: string;
+    name: string;
+    company: string;
+    phone: string;
+    whatsapp: string;
+    email: string;
+    propertyTypeLabel: string;
+    locationLabel: string;
+    budgetMinLabel: string;
+    budgetMaxLabel: string;
+    bedroomsLabel: string;
+    furnishedLabel: string;
+    furnishedAny: string;
+    furnishedYes: string;
+    furnishedNo: string;
+    moveInDateLabel: string;
+    rentalPeriodLabel: string;
+    rentalPeriodAny: string;
+    notesLabel: string;
+    submit: string;
+    submitting: string;
+    successTitle: string;
+    successBody: string;
+    referenceLabel: string;
+    submitAnother: string;
+    errors: {
+      name: string;
+      phone: string;
+      propertyType: string;
+      location: string;
+      generic: string;
+    };
+  };
+  listPropertyPage: {
+    eyebrow: string;
+    title: string;
+    intro: string;
+    ownerSectionTitle: string;
+    listingSectionTitle: string;
+    name: string;
+    phone: string;
+    whatsapp: string;
+    email: string;
+    propertyTypeLabel: string;
+    locationLabel: string;
+    priceLabel: string;
+    bedroomsLabel: string;
+    furnishedLabel: string;
+    furnishedYes: string;
+    furnishedNo: string;
+    availableFromLabel: string;
+    photosLabel: string;
+    photosHint: string;
+    submit: string;
+    submitting: string;
+    successTitle: string;
+    successBody: string;
+    submitAnother: string;
+    errors: {
+      name: string;
+      phone: string;
+      propertyType: string;
+      location: string;
+      price: string;
+      photos: string;
+      generic: string;
+    };
+  };
 };
 
 const priceBucketsEn: PriceBucket[] = [
@@ -221,7 +302,8 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       home: 'Home',
       properties: 'Properties',
       about: 'About',
-      contact: 'Contact'
+      contact: 'Contact',
+      forBrokers: 'For Brokers'
     },
     home: {
       hero: {
@@ -285,6 +367,22 @@ export const siteCopy: Record<Locale, SiteCopy> = {
         title: 'Speak with the GOLD team',
         subtitle: 'Tell us what you are looking for and we will respond with a tailored recommendation.',
         cta: 'Contact Us'
+      },
+      rentalDesk: {
+        eyebrow: 'Rental Desk',
+        title: 'A faster way to match rentals',
+        subtitle:
+          'Our B2B desk connects broker requirements with owner listings directly, so both sides move faster.',
+        brokerCard: {
+          title: 'For Brokers',
+          body: 'Submit a client’s rental requirement and we will match it against active listings and reach back out.',
+          cta: 'Submit a Rental Request'
+        },
+        ownerCard: {
+          title: 'For Property Owners',
+          body: 'List your property for rent and our team will review it, then match it with brokers looking for exactly that.',
+          cta: 'List Your Property'
+        }
       }
     },
     propertiesPage: {
@@ -467,6 +565,80 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     footer: {
       tagline: 'Golden Opportunity Of Leading Domain.',
       legal: '© 2026 GOLD Investment Opportunities. All rights reserved.'
+    },
+    rentalRequestPage: {
+      eyebrow: 'Rental Desk / For Brokers',
+      title: 'Submit a Rental Request',
+      intro:
+        'Tell us what your client needs and we will match it against active rental listings and reach back out with options.',
+      brokerSectionTitle: 'Your details',
+      requestSectionTitle: 'What your client needs',
+      name: 'Full name',
+      company: 'Company (optional)',
+      phone: 'Phone',
+      whatsapp: 'WhatsApp (optional)',
+      email: 'Email (optional)',
+      propertyTypeLabel: 'Property type',
+      locationLabel: 'Location',
+      budgetMinLabel: 'Budget min (EGP)',
+      budgetMaxLabel: 'Budget max (EGP)',
+      bedroomsLabel: 'Bedrooms (min)',
+      furnishedLabel: 'Furnished',
+      furnishedAny: 'No preference',
+      furnishedYes: 'Furnished',
+      furnishedNo: 'Unfurnished',
+      moveInDateLabel: 'Move-in date',
+      rentalPeriodLabel: 'Rental period',
+      rentalPeriodAny: 'Any',
+      notesLabel: 'Notes (optional)',
+      submit: 'Submit Rental Request',
+      submitting: 'Submitting...',
+      successTitle: 'Request received',
+      successBody: 'Your rental request has been submitted. The GOLD team will match it against active listings and reach out.',
+      referenceLabel: 'Your reference code',
+      submitAnother: 'Submit another request',
+      errors: {
+        name: 'Please enter your full name.',
+        phone: 'Please enter a valid phone number.',
+        propertyType: 'Please select a property type.',
+        location: 'Please select a location.',
+        generic: 'We could not submit your request right now. Please try again later.'
+      }
+    },
+    listPropertyPage: {
+      eyebrow: 'Rental Desk / For Owners',
+      title: 'List Your Property for Rent',
+      intro: 'Add your property to our rental desk and our team will review it, then match it with brokers looking for exactly that.',
+      ownerSectionTitle: 'Your details',
+      listingSectionTitle: 'Property details',
+      name: 'Full name',
+      phone: 'Phone',
+      whatsapp: 'WhatsApp (optional)',
+      email: 'Email (optional)',
+      propertyTypeLabel: 'Property type',
+      locationLabel: 'Location',
+      priceLabel: 'Monthly rent (EGP)',
+      bedroomsLabel: 'Bedrooms',
+      furnishedLabel: 'Furnished',
+      furnishedYes: 'Furnished',
+      furnishedNo: 'Unfurnished',
+      availableFromLabel: 'Available from',
+      photosLabel: 'Photos',
+      photosHint: 'Upload at least one photo of the property.',
+      submit: 'Submit Listing',
+      submitting: 'Submitting...',
+      successTitle: 'Listing submitted',
+      successBody: 'Your property has been submitted for review. Our team will approve it and start matching it with broker requests.',
+      submitAnother: 'List another property',
+      errors: {
+        name: 'Please enter your full name.',
+        phone: 'Please enter a valid phone number.',
+        propertyType: 'Please select a property type.',
+        location: 'Please select a location.',
+        price: 'Please enter a valid monthly rent.',
+        photos: 'Please upload at least one photo.',
+        generic: 'We could not submit your listing right now. Please try again later.'
+      }
     }
   },
   ar: {
@@ -479,7 +651,8 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       home: 'الرئيسية',
       properties: 'العقارات',
       about: 'من نحن',
-      contact: 'تواصل معنا'
+      contact: 'تواصل معنا',
+      forBrokers: 'للوسطاء'
     },
     home: {
       hero: {
@@ -543,6 +716,21 @@ export const siteCopy: Record<Locale, SiteCopy> = {
         title: 'تحدث مع فريق GOLD',
         subtitle: 'أخبرنا بما تبحث عنه وسنعود إليك بتوصية خاصة ومصممة لك.',
         cta: 'تواصل معنا'
+      },
+      rentalDesk: {
+        eyebrow: 'مكتب الإيجارات',
+        title: 'طريقة أسرع لمطابقة الإيجارات',
+        subtitle: 'يربط مكتبنا للوسطاء والملاك متطلبات الوسطاء بعروض الملاك مباشرة، ليتحرك الطرفان بسرعة أكبر.',
+        brokerCard: {
+          title: 'للوسطاء',
+          body: 'أرسل متطلبات عميلك الإيجارية وسنقوم بمطابقتها مع العروض النشطة والتواصل معك.',
+          cta: 'إرسال طلب إيجار'
+        },
+        ownerCard: {
+          title: 'لملاك العقارات',
+          body: 'أضف عقارك للإيجار وسيراجعه فريقنا، ثم يطابقه مع وسطاء يبحثون عن نفس المواصفات بالضبط.',
+          cta: 'أضف عقارك للإيجار'
+        }
       }
     },
     propertiesPage: {
@@ -724,6 +912,79 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     footer: {
       tagline: 'الفرصة الذهبية لمجال ريادي.',
       legal: '© 2026 GOLD Investment Opportunities. جميع الحقوق محفوظة.'
+    },
+    rentalRequestPage: {
+      eyebrow: 'مكتب الإيجارات / للوسطاء',
+      title: 'إرسال طلب إيجار',
+      intro: 'أخبرنا بما يحتاجه عميلك وسنقوم بمطابقته مع العروض الإيجارية النشطة والتواصل معك بالخيارات المتاحة.',
+      brokerSectionTitle: 'بياناتك',
+      requestSectionTitle: 'ماذا يحتاج عميلك',
+      name: 'الاسم الكامل',
+      company: 'الشركة (اختياري)',
+      phone: 'رقم الهاتف',
+      whatsapp: 'واتساب (اختياري)',
+      email: 'البريد الإلكتروني (اختياري)',
+      propertyTypeLabel: 'نوع العقار',
+      locationLabel: 'الموقع',
+      budgetMinLabel: 'أقل ميزانية (جنيه)',
+      budgetMaxLabel: 'أعلى ميزانية (جنيه)',
+      bedroomsLabel: 'غرف النوم (كحد أدنى)',
+      furnishedLabel: 'مفروش',
+      furnishedAny: 'لا يهم',
+      furnishedYes: 'مفروش',
+      furnishedNo: 'غير مفروش',
+      moveInDateLabel: 'تاريخ الانتقال',
+      rentalPeriodLabel: 'مدة الإيجار',
+      rentalPeriodAny: 'أي مدة',
+      notesLabel: 'ملاحظات (اختياري)',
+      submit: 'إرسال طلب الإيجار',
+      submitting: 'جار الإرسال...',
+      successTitle: 'تم استلام الطلب',
+      successBody: 'تم إرسال طلب الإيجار الخاص بك. سيقوم فريق GOLD بمطابقته مع العروض النشطة والتواصل معك.',
+      referenceLabel: 'رقم مرجع طلبك',
+      submitAnother: 'إرسال طلب آخر',
+      errors: {
+        name: 'من فضلك أدخل الاسم الكامل.',
+        phone: 'من فضلك أدخل رقم هاتف صحيح.',
+        propertyType: 'من فضلك اختر نوع العقار.',
+        location: 'من فضلك اختر الموقع.',
+        generic: 'تعذر إرسال طلبك الآن. حاول مرة أخرى لاحقاً.'
+      }
+    },
+    listPropertyPage: {
+      eyebrow: 'مكتب الإيجارات / للملاك',
+      title: 'أضف عقارك للإيجار',
+      intro: 'أضف عقارك إلى مكتب الإيجارات لدينا وسيراجعه فريقنا، ثم يطابقه مع وسطاء يبحثون عن نفس المواصفات بالضبط.',
+      ownerSectionTitle: 'بياناتك',
+      listingSectionTitle: 'تفاصيل العقار',
+      name: 'الاسم الكامل',
+      phone: 'رقم الهاتف',
+      whatsapp: 'واتساب (اختياري)',
+      email: 'البريد الإلكتروني (اختياري)',
+      propertyTypeLabel: 'نوع العقار',
+      locationLabel: 'الموقع',
+      priceLabel: 'الإيجار الشهري (جنيه)',
+      bedroomsLabel: 'غرف النوم',
+      furnishedLabel: 'مفروش',
+      furnishedYes: 'مفروش',
+      furnishedNo: 'غير مفروش',
+      availableFromLabel: 'متاح اعتباراً من',
+      photosLabel: 'الصور',
+      photosHint: 'ارفع صورة واحدة على الأقل للعقار.',
+      submit: 'إرسال العرض',
+      submitting: 'جار الإرسال...',
+      successTitle: 'تم إرسال العرض',
+      successBody: 'تم إرسال عقارك للمراجعة. سيقوم فريقنا بمراجعته والبدء في مطابقته مع طلبات الوسطاء.',
+      submitAnother: 'إضافة عقار آخر',
+      errors: {
+        name: 'من فضلك أدخل الاسم الكامل.',
+        phone: 'من فضلك أدخل رقم هاتف صحيح.',
+        propertyType: 'من فضلك اختر نوع العقار.',
+        location: 'من فضلك اختر الموقع.',
+        price: 'من فضلك أدخل إيجاراً شهرياً صحيحاً.',
+        photos: 'من فضلك ارفع صورة واحدة على الأقل.',
+        generic: 'تعذر إرسال عرضك الآن. حاول مرة أخرى لاحقاً.'
+      }
     }
   }
 };

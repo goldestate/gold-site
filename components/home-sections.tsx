@@ -285,6 +285,54 @@ export function HomePartners({ copy, isRtl }: { copy: SiteCopy['home']['partners
   );
 }
 
+export function RentalDeskPromo({
+  copy,
+  locale,
+  isRtl
+}: {
+  copy: SiteCopy['home']['rentalDesk'];
+  locale: 'en' | 'ar';
+  isRtl: boolean;
+}) {
+  const cards = [
+    { ...copy.brokerCard, icon: 'key' as const, href: '/rental-request' },
+    { ...copy.ownerCard, icon: 'estate' as const, href: '/list-property' }
+  ];
+
+  return (
+    <SurfaceShell variant="dark" className="px-4 py-20 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        <SectionTitle eyebrow={copy.eyebrow} title={copy.title} intro={copy.subtitle} isRtl={isRtl} tone="dark" />
+        <div className="mt-12 grid gap-6 border-t border-white/10 pt-10 sm:grid-cols-2">
+          {cards.map((card, index) => (
+            <motion.div
+              key={card.title}
+              variants={fadeUp}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: '-120px' }}
+              transition={{ duration: 0.7, delay: index * 0.06 }}
+              className="rounded-[1.75rem] border border-white/10 bg-white/5 p-7 backdrop-blur-sm"
+            >
+              <LineIcon icon={card.icon} gold />
+              <h3 className="mt-6 text-xl font-medium uppercase tracking-[0.14em] text-white">{card.title}</h3>
+              <p className="mt-4 text-sm leading-7 text-white/68">{card.body}</p>
+              <Link
+                href={card.href}
+                locale={locale}
+                className="mt-6 inline-flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.2em] text-[#D9B355]"
+              >
+                {card.cta}
+                <ArrowIcon rtl={isRtl} />
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </SurfaceShell>
+  );
+}
+
 export function ContactCta({
   copy,
   locale,
