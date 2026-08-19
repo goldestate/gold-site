@@ -20,6 +20,7 @@ export function SiteHeader({ copy, locale, isRtl }: SiteHeaderProps) {
     { label: copy.nav.home, href: '/' },
     { label: copy.nav.properties, href: '/properties' },
     { label: copy.nav.about, href: '/about' },
+    { label: copy.nav.forBrokers, href: '/rental-request' },
     { label: copy.nav.contact, href: '/contact' }
   ];
   const orderedNavItems = isRtl ? [...navItems].reverse() : navItems;

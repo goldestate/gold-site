@@ -13,3 +13,4 @@ export const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
 });
 
 export const PROPERTY_PHOTOS_BUCKET = 'property-photos';
+export const RENTAL_PHOTOS_BUCKET = 'rental-photos';

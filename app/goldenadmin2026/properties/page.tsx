@@ -21,8 +21,11 @@ export default async function AdminPropertiesPage({
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <div className="font-serif text-xs uppercase tracking-[0.4em] text-[rgba(217,179,85,0.9)]">
-            GOLD Admin
+          <div className="flex items-center gap-4 font-serif text-xs uppercase tracking-[0.4em] text-[rgba(217,179,85,0.9)]">
+            <span>Properties</span>
+            <Link href="/goldenadmin2026/rental-desk" className="text-white/40 transition hover:text-[#D9B355]">
+              Rental Desk
+            </Link>
           </div>
           <h1 className="mt-2 text-2xl font-medium uppercase tracking-[0.1em] text-white">
             Properties

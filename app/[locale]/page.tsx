@@ -3,7 +3,7 @@ import { getSiteCopy } from '@/lib/site-content';
 import { readPublishedProperties } from '@/lib/properties-store';
 import { type Locale } from '@/i18n/routing';
 import { PageShell } from '@/components/page-shell';
-import { HeroSearch, TrustStrip, FeaturedProperties, HomePartners, ContactCta } from '@/components/home-sections';
+import { HeroSearch, TrustStrip, FeaturedProperties, HomePartners, RentalDeskPromo, ContactCta } from '@/components/home-sections';
 
 export async function generateMetadata({
   params
@@ -58,6 +58,7 @@ export default async function HomePage({ params }: { params: { locale: Locale } 
         <FeaturedProperties copy={copy.home.featured} properties={featured} locale={locale} isRtl={isRtl} />
       ) : null}
       <TrustStrip copy={copy.home.trust} isRtl={isRtl} />
+      <RentalDeskPromo copy={copy.home.rentalDesk} locale={locale} isRtl={isRtl} />
       <ContactCta copy={copy.home.contactCta} locale={locale} isRtl={isRtl} />
     </PageShell>
   );
