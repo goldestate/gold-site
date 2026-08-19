@@ -26,7 +26,7 @@ export function PropertyCard({
   delay?: number;
 }) {
   const propertyShowsArea = showsArea(property.propertyType) && property.area > 0;
-  const priceSuffix = priceSuffixLabel(property.propertyType, property.unitType);
+  const priceSuffix = priceSuffixLabel(property.propertyType);
 
   return (
     <motion.article
@@ -35,9 +35,9 @@ export function PropertyCard({
       whileInView="show"
       viewport={{ once: true, margin: '-120px' }}
       transition={{ duration: 0.7, delay }}
-      className="group overflow-hidden rounded-2xl border border-[rgba(35,31,32,0.1)] bg-white shadow-[0_8px_24px_rgba(35,31,32,0.08)] transition hover:-translate-y-1 hover:border-[rgba(184,134,11,0.35)] hover:shadow-[0_16px_36px_rgba(35,31,32,0.14)] sm:rounded-[1.5rem]"
+      className="group overflow-hidden rounded-[0.85rem] border border-[rgba(35,31,32,0.1)] bg-white transition hover:border-[rgba(184,134,11,0.4)] hover:shadow-[0_10px_24px_rgba(35,31,32,0.1)] sm:rounded-[1rem]"
     >
-      <div className="relative aspect-[4/3] overflow-hidden">
+      <div className="relative aspect-[3/2] overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={property.images[0]}
@@ -47,49 +47,52 @@ export function PropertyCard({
             property.tone === 'mono' ? 'grayscale contrast-110' : ''
           }`}
         />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(35,31,32,0.02),rgba(35,31,32,0.32))]" />
-        <div className="absolute left-2 top-2 rounded-full border border-white/20 bg-black/30 px-2 py-0.5 text-[8px] font-semibold uppercase tracking-[0.14em] text-white/90 backdrop-blur-sm sm:left-3 sm:top-3 sm:px-3 sm:py-1 sm:text-[10px] sm:tracking-[0.2em]">
+        <div className="absolute left-2 top-2 rounded-full bg-[#231F20]/85 px-2 py-0.5 text-[8px] font-semibold uppercase tracking-[0.14em] text-white sm:left-3 sm:top-3 sm:px-2.5 sm:py-1 sm:text-[10px] sm:tracking-[0.18em]">
           {propertyTypeLabel(property.propertyType, locale)}
         </div>
       </div>
-      <div className="space-y-2 p-2.5 sm:space-y-3 sm:p-4">
-        <div className={`flex items-start justify-between gap-1.5 ${isRtl ? 'flex-row-reverse' : ''}`}>
-          <h3 className="min-w-0 flex-1 truncate text-xs font-semibold tracking-[0.01em] text-[#231F20] sm:text-base">
-            {property.name}
-          </h3>
-          <span className={`flex flex-none flex-col ${isRtl ? 'items-start' : 'items-end'}`}>
-            <span className="text-xs font-bold text-[#B8860B] sm:text-sm">{formatPrice(property.price, locale)}</span>
-            {priceSuffix ? (
-              <span className="text-[8px] font-medium text-[#58595B] sm:text-[10px]">{priceSuffix}</span>
-            ) : null}
-          </span>
-        </div>
 
-        <p className="truncate text-[10px] uppercase tracking-[0.14em] text-[#58595B] sm:text-xs sm:tracking-[0.22em]">
+      <div className="p-2.5 sm:p-3.5">
+        <span className={`flex items-baseline gap-1.5 ${isRtl ? 'flex-row-reverse' : ''}`}>
+          <span className="text-sm font-bold tracking-[0.01em] text-[#B8860B] sm:text-lg">
+            {formatPrice(property.price, locale)}
+          </span>
+          {priceSuffix ? (
+            <span dir="ltr" className="text-[9px] font-medium text-[#58595B] sm:text-[11px]">
+              {priceSuffix}
+            </span>
+          ) : null}
+        </span>
+
+        <h3 className="mt-1 truncate text-xs font-semibold tracking-[0.01em] text-[#231F20] sm:mt-1.5 sm:text-sm">
+          {property.name}
+        </h3>
+
+        <p className="mt-0.5 truncate text-[9px] uppercase tracking-[0.1em] text-[#58595B] sm:text-[10px] sm:tracking-[0.16em]">
           {unitTypeLabel(property.unitType, locale)} · {locationLabel(property.location, locale)}
         </p>
 
         {property.bedrooms > 0 || property.bathrooms > 0 || propertyShowsArea ? (
           <div
-            className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 border-t border-[rgba(35,31,32,0.08)] pt-2 text-[10px] text-[#231F20] sm:gap-x-4 sm:pt-3 sm:text-sm ${
+            className={`mt-1.5 flex items-center gap-x-2.5 gap-y-1 border-t border-[rgba(35,31,32,0.08)] pt-1.5 text-[10px] text-[#231F20] sm:mt-2 sm:gap-x-3.5 sm:pt-2 sm:text-xs ${
               isRtl ? 'flex-row-reverse' : ''
             }`}
           >
             {property.bedrooms > 0 ? (
-              <span className="inline-flex items-center gap-1 sm:gap-1.5">
-                <StatIcon icon="bed" className="h-3 w-3 text-[#B8860B] sm:h-4 sm:w-4" />
+              <span className="inline-flex items-center gap-1">
+                <StatIcon icon="bed" className="h-3 w-3 text-[#B8860B] sm:h-3.5 sm:w-3.5" />
                 {property.bedrooms}
               </span>
             ) : null}
             {property.bathrooms > 0 ? (
-              <span className="inline-flex items-center gap-1 sm:gap-1.5">
-                <StatIcon icon="bath" className="h-3 w-3 text-[#B8860B] sm:h-4 sm:w-4" />
+              <span className="inline-flex items-center gap-1">
+                <StatIcon icon="bath" className="h-3 w-3 text-[#B8860B] sm:h-3.5 sm:w-3.5" />
                 {property.bathrooms}
               </span>
             ) : null}
             {propertyShowsArea ? (
-              <span className="inline-flex items-center gap-1 sm:gap-1.5">
-                <StatIcon icon="area" className="h-3 w-3 text-[#B8860B] sm:h-4 sm:w-4" />
+              <span className="inline-flex items-center gap-1">
+                <StatIcon icon="area" className="h-3 w-3 text-[#B8860B] sm:h-3.5 sm:w-3.5" />
                 {formatArea(property.area, locale)}
               </span>
             ) : null}
@@ -99,7 +102,7 @@ export function PropertyCard({
         <Link
           href={`/properties/${property.id}`}
           locale={locale}
-          className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-[rgba(35,31,32,0.12)] py-1.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-[#231F20] transition hover:border-[#B8860B] hover:text-[#B8860B] sm:gap-2 sm:py-2 sm:text-[11px] sm:tracking-[0.2em]"
+          className="mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-[rgba(35,31,32,0.16)] py-1.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-[#231F20] transition group-hover:border-[#B8860B] group-hover:text-[#B8860B] sm:mt-2.5 sm:py-2 sm:text-[10px] sm:tracking-[0.16em]"
         >
           {viewDetailsLabel}
           <ArrowIcon rtl={isRtl} />
