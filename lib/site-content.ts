@@ -303,7 +303,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       properties: 'Properties',
       about: 'About',
       contact: 'Contact',
-      forBrokers: 'For Brokers'
+      forBrokers: 'Gold Partners'
     },
     home: {
       hero: {
@@ -374,7 +374,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
         subtitle:
           'Our B2B desk connects broker requirements with owner listings directly, so both sides move faster.',
         brokerCard: {
-          title: 'For Brokers',
+          title: 'Gold Partners',
           body: 'Submit a client’s rental requirement and we will match it against active listings and reach back out.',
           cta: 'Submit a Rental Request'
         },
@@ -567,7 +567,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       legal: '© 2026 GOLD Investment Opportunities. All rights reserved.'
     },
     rentalRequestPage: {
-      eyebrow: 'Rental Desk / For Brokers',
+      eyebrow: 'Rental Desk / Gold Partners',
       title: 'Submit a Rental Request',
       intro:
         'Tell us what your client needs and we will match it against active rental listings and reach back out with options.',
@@ -652,7 +652,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       properties: 'العقارات',
       about: 'من نحن',
       contact: 'تواصل معنا',
-      forBrokers: 'للوسطاء'
+      forBrokers: 'شركاء GOLD'
     },
     home: {
       hero: {
@@ -722,7 +722,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
         title: 'طريقة أسرع لمطابقة الإيجارات',
         subtitle: 'يربط مكتبنا للوسطاء والملاك متطلبات الوسطاء بعروض الملاك مباشرة، ليتحرك الطرفان بسرعة أكبر.',
         brokerCard: {
-          title: 'للوسطاء',
+          title: 'شركاء GOLD',
           body: 'أرسل متطلبات عميلك الإيجارية وسنقوم بمطابقتها مع العروض النشطة والتواصل معك.',
           cta: 'إرسال طلب إيجار'
         },
@@ -914,7 +914,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       legal: '© 2026 GOLD Investment Opportunities. جميع الحقوق محفوظة.'
     },
     rentalRequestPage: {
-      eyebrow: 'مكتب الإيجارات / للوسطاء',
+      eyebrow: 'مكتب الإيجارات / شركاء GOLD',
       title: 'إرسال طلب إيجار',
       intro: 'أخبرنا بما يحتاجه عميلك وسنقوم بمطابقته مع العروض الإيجارية النشطة والتواصل معك بالخيارات المتاحة.',
       brokerSectionTitle: 'بياناتك',

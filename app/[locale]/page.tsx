@@ -65,3 +65,4 @@ export default async function HomePage({ params }: { params: { locale: Locale } 
 }
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;

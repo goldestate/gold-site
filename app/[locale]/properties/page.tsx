@@ -38,3 +38,4 @@ export default async function PropertiesPage({ params }: { params: { locale: Loc
 }
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;

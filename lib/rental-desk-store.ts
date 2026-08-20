@@ -227,6 +227,8 @@ export type RentalListing = {
   availableFrom: string | null;
   photos: string[];
   status: string;
+  /** Set when this listing is a mirror of one of GOLD's own units in `properties`, not a third-party submission. */
+  sourcePropertyId: string | null;
   createdAt: string;
 };
 
@@ -241,6 +243,7 @@ type RentalListingRow = {
   available_from: string | null;
   photos: unknown;
   status: string;
+  source_property_id: string | null;
   created_at: string;
 };
 
@@ -256,6 +259,7 @@ function rowToRentalListing(row: RentalListingRow): RentalListing {
     availableFrom: row.available_from,
     photos: Array.isArray(row.photos) ? row.photos.filter((item): item is string => typeof item === 'string') : [],
     status: row.status,
+    sourcePropertyId: row.source_property_id,
     createdAt: row.created_at
   };
 }
