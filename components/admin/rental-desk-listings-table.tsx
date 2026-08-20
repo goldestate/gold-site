@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import type { RentalListingWithOwner } from '@/lib/rental-desk-store';
@@ -79,7 +80,17 @@ export function RentalDeskListingsTable({ listings }: { listings: RentalListingW
             {listings.map((listing) => (
               <tr key={listing.id} className={pendingId === listing.id ? 'opacity-50' : ''}>
                 <td className="px-5 py-4">
-                  <div className="font-medium text-white">{listing.owner.name}</div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-white">{listing.owner.name}</span>
+                    {listing.sourcePropertyId ? (
+                      <Link
+                        href={`/goldenadmin2026/properties/${listing.sourcePropertyId}/edit`}
+                        className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-white/60 transition hover:bg-white/15 hover:text-white"
+                      >
+                        In-house
+                      </Link>
+                    ) : null}
+                  </div>
                   <a href={`tel:${listing.owner.phone}`} className="text-xs text-white/50 hover:text-[#D9B355]">
                     {listing.owner.phone}
                   </a>

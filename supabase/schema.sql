@@ -309,7 +309,7 @@ declare
   v_listing public.rental_listings;
 begin
   select * into v_listing from public.rental_listings where id = p_listing_id;
-  if not found then
+  if not found or v_listing.status <> 'active' then
     return;
   end if;
 
@@ -366,3 +366,205 @@ drop trigger if exists rental_listings_match_trigger on public.rental_listings;
 create trigger rental_listings_match_trigger
   after update of status on public.rental_listings
   for each row execute function public.trg_rental_listing_match();
+
+-- ============================================================
+-- Rental Desk: fold GOLD's own rental inventory into the matching pool
+-- ============================================================
+-- Every `properties` row with property_type = 'rental' -- published or
+-- not, since public-site visibility and rental-desk matching eligibility
+-- are separate concerns -- is mirrored into rental_listings under a
+-- synthetic "GOLD" owner, so the existing matching engine and admin UI
+-- need zero special-casing to also consider in-house inventory.
+
+-- ON DELETE SET NULL is a defensive backup only; the BEFORE DELETE trigger
+-- below does this proactively so the DELETE never needs to fall back on it.
+alter table public.rental_listings
+  add column if not exists source_property_id uuid references public.properties (id) on delete set null;
+
+create unique index if not exists rental_listings_source_property_id_key
+  on public.rental_listings (source_property_id)
+  where source_property_id is not null;
+
+-- properties.unit_type is a finer-grained taxonomy than rental_listings'
+-- property_type; this collapses it onto the closest equivalent.
+create or replace function public.map_unit_type_to_rental_property_type(p_unit_type text)
+returns text
+language sql
+immutable
+as $$
+  select case p_unit_type
+    when 'apartment' then 'apartment'
+    when 'penthouse' then 'apartment'
+    when 'studio' then 'apartment'
+    when 'villa' then 'villa'
+    when 'townhouse' then 'villa'
+    when 'twinhouse' then 'villa'
+    when 'chalet' then 'chalet'
+    when 'cabin' then 'chalet'
+    when 'office' then 'office'
+    when 'clinic' then 'office'
+    else 'other'
+  end;
+$$;
+
+create or replace function public.get_or_create_gold_owner_id()
+returns uuid
+language plpgsql
+as $$
+declare
+  v_owner_id uuid;
+begin
+  -- Insert-first with a conflict fallback (rather than select-then-insert)
+  -- so two properties saved back-to-back can't both miss the row and race
+  -- to insert it, which owners.phone's unique index would otherwise reject.
+  insert into public.owners (name, phone)
+  values ('GOLD Investment Opportunities (In-house)', '+20 106 637 7883')
+  on conflict (phone) do nothing
+  returning id into v_owner_id;
+
+  if v_owner_id is null then
+    select id into v_owner_id from public.owners where phone = '+20 106 637 7883';
+  end if;
+
+  return v_owner_id;
+end;
+$$;
+
+-- Keeps one rental_listings row per rental-type property in sync with its
+-- source. Ordinary edits (price, bedrooms, location, unit type, photos)
+-- refresh the mirror without touching its status, so an admin's manual
+-- "rented" / "inactive" choice on the mirror survives unrelated edits to
+-- the source property. Only a genuine property_type transition (into or
+-- out of 'rental') changes the mirror's status here -- transitioning out
+-- sets it 'inactive' rather than deleting the row, so match history isn't
+-- destroyed by a re-categorization.
+--
+-- This only runs AFTER insert/update, not delete: on delete, the mirror
+-- still needs to exist (and its source_property_id still needs to point
+-- at the row about to disappear) for a BEFORE trigger to react to it --
+-- seeing this run AFTER the row is gone would be too late. See the
+-- separate BEFORE DELETE trigger below.
+--
+-- properties.price for rental-type units is quoted per day (see
+-- lib/property-taxonomy.ts priceSuffixLabel); rental_listings.price is
+-- monthly, so this multiplies by 30 as an approximate, explicitly-flagged
+-- conversion -- good enough for matching, not meant to be exact.
+create or replace function public.sync_rental_listing_from_property()
+returns trigger
+language plpgsql
+as $$
+declare
+  v_mirror_id uuid;
+  v_was_rental boolean;
+  v_now_rental boolean;
+begin
+  v_now_rental := (new.property_type = 'rental');
+  v_was_rental := (tg_op = 'UPDATE' and old.property_type = 'rental');
+
+  if not v_now_rental then
+    if v_was_rental then
+      update public.rental_listings set status = 'inactive' where source_property_id = new.id;
+    end if;
+    return new;
+  end if;
+
+  select id into v_mirror_id from public.rental_listings where source_property_id = new.id;
+
+  if v_mirror_id is null then
+    insert into public.rental_listings (
+      owner_id, property_type, location, price, bedrooms, furnished, available_from, photos, status, source_property_id
+    ) values (
+      public.get_or_create_gold_owner_id(),
+      public.map_unit_type_to_rental_property_type(new.unit_type),
+      new.location,
+      new.price * 30,
+      new.bedrooms,
+      null,
+      null,
+      new.images,
+      'active',
+      new.id
+    )
+    returning id into v_mirror_id;
+  else
+    update public.rental_listings
+    set
+      property_type = public.map_unit_type_to_rental_property_type(new.unit_type),
+      location = new.location,
+      price = new.price * 30,
+      bedrooms = new.bedrooms,
+      photos = new.images,
+      status = case when not v_was_rental then 'active' else status end
+    where id = v_mirror_id;
+  end if;
+
+  perform public.generate_matches_for_listing(v_mirror_id);
+  return new;
+end;
+$$;
+
+drop trigger if exists properties_sync_rental_listing_trigger on public.properties;
+create trigger properties_sync_rental_listing_trigger
+  after insert or update on public.properties
+  for each row execute function public.sync_rental_listing_from_property();
+
+-- BEFORE, not AFTER: this has to run -- and finish clearing
+-- source_property_id -- before Postgres's own FK enforcement checks
+-- whether the row being deleted is still referenced, and before the row
+-- is actually gone. An AFTER trigger here would race that check (and,
+-- depending on trigger firing order, could lose it silently).
+create or replace function public.deactivate_rental_listing_before_property_delete()
+returns trigger
+language plpgsql
+as $$
+begin
+  update public.rental_listings
+  set status = 'inactive', source_property_id = null
+  where source_property_id = old.id;
+  return old;
+end;
+$$;
+
+drop trigger if exists properties_deactivate_rental_listing_trigger on public.properties;
+create trigger properties_deactivate_rental_listing_trigger
+  before delete on public.properties
+  for each row execute function public.deactivate_rental_listing_before_property_delete();
+
+-- Backfill: mirror any rental-type properties that already existed
+-- before this trigger was created.
+insert into public.rental_listings (
+  owner_id, property_type, location, price, bedrooms, furnished, available_from, photos, status, source_property_id
+)
+select
+  public.get_or_create_gold_owner_id(),
+  public.map_unit_type_to_rental_property_type(p.unit_type),
+  p.location,
+  p.price * 30,
+  p.bedrooms,
+  null,
+  null,
+  p.images,
+  'active',
+  p.id
+from public.properties p
+where p.property_type = 'rental'
+on conflict (source_property_id) where source_property_id is not null do update set
+  property_type = excluded.property_type,
+  location = excluded.location,
+  price = excluded.price,
+  bedrooms = excluded.bedrooms,
+  photos = excluded.photos;
+
+-- The backfill above is a bulk insert, so it doesn't go through the
+-- properties trigger and never calls generate_matches_for_listing.
+-- Run it explicitly for every mirror so this backfill also catches any
+-- requests that were already open before it ran.
+do $$
+declare
+  r record;
+begin
+  for r in select id from public.rental_listings where source_property_id is not null loop
+    perform public.generate_matches_for_listing(r.id);
+  end loop;
+end;
+$$;
