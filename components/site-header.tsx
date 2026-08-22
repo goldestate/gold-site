@@ -18,9 +18,10 @@ export function SiteHeader({ copy, locale, isRtl }: SiteHeaderProps) {
 
   const navItems = [
     { label: copy.nav.home, href: '/' },
-    { label: copy.nav.properties, href: '/properties' },
     { label: copy.nav.about, href: '/about' },
+    { label: copy.nav.properties, href: '/properties' },
     { label: copy.nav.forBrokers, href: '/rental-request' },
+    { label: copy.nav.goldLife, href: '/gold-life' },
     { label: copy.nav.contact, href: '/contact' }
   ];
   const orderedNavItems = isRtl ? [...navItems].reverse() : navItems;
