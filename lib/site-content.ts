@@ -13,6 +13,7 @@ export type SiteCopy = {
     about: string;
     contact: string;
     forBrokers: string;
+    goldLife: string;
   };
   home: {
     hero: {
@@ -303,7 +304,8 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       properties: 'Properties',
       about: 'About',
       contact: 'Contact',
-      forBrokers: 'Gold Partners'
+      forBrokers: 'Gold Partners',
+      goldLife: 'Gold Life'
     },
     home: {
       hero: {
@@ -652,7 +654,8 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       properties: 'العقارات',
       about: 'من نحن',
       contact: 'تواصل معنا',
-      forBrokers: 'شركاء GOLD'
+      forBrokers: 'شركاء GOLD',
+      goldLife: 'Gold Life'
     },
     home: {
       hero: {
