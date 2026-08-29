@@ -394,6 +394,7 @@ immutable
 as $$
   select case p_unit_type
     when 'apartment' then 'apartment'
+    when 'duplex' then 'apartment'
     when 'penthouse' then 'apartment'
     when 'studio' then 'apartment'
     when 'villa' then 'villa'
@@ -403,6 +404,7 @@ as $$
     when 'cabin' then 'chalet'
     when 'office' then 'office'
     when 'clinic' then 'office'
+    when 'commercial' then 'retail'
     else 'other'
   end;
 $$;
