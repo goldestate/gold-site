@@ -1,15 +1,17 @@
 export type PropertyTypeValue = 'primary' | 'rental' | 'resale' | 'commercial' | 'administrative';
 export type UnitTypeValue =
+  | 'studio'
+  | 'cabin'
   | 'chalet'
   | 'apartment'
+  | 'duplex'
+  | 'penthouse'
   | 'townhouse'
   | 'twinhouse'
   | 'villa'
   | 'clinic'
   | 'office'
-  | 'penthouse'
-  | 'studio'
-  | 'cabin';
+  | 'commercial';
 export type LocationValue = 'north-coast' | 'sheikh-zayed' | 'new-cairo' | 'ain-sokhna' | 'gouna';
 
 type TaxonomyOption<T extends string> = {
@@ -26,17 +28,21 @@ export const PROPERTY_TYPES: TaxonomyOption<PropertyTypeValue>[] = [
   { value: 'administrative', en: 'Administrative', ar: 'إداري' }
 ];
 
+// Ordered smallest-to-largest residential, then commercial-use units; the
+// filter chips, the admin form, and the contact form all render this order.
 export const UNIT_TYPES: TaxonomyOption<UnitTypeValue>[] = [
+  { value: 'studio', en: 'Studio', ar: 'استوديو' },
+  { value: 'cabin', en: 'Cabin', ar: 'كابينة' },
   { value: 'chalet', en: 'Chalet', ar: 'شاليه' },
   { value: 'apartment', en: 'Apartment', ar: 'شقة' },
+  { value: 'duplex', en: 'Duplex', ar: 'دوبلكس' },
+  { value: 'penthouse', en: 'Penthouse', ar: 'بنتهاوس' },
   { value: 'townhouse', en: 'Townhouse', ar: 'تاون هاوس' },
   { value: 'twinhouse', en: 'Twinhouse', ar: 'توين هاوس' },
   { value: 'villa', en: 'Villa', ar: 'فيلا' },
   { value: 'clinic', en: 'Clinic', ar: 'عيادة' },
   { value: 'office', en: 'Office', ar: 'مكتب' },
-  { value: 'penthouse', en: 'Penthouse', ar: 'بنتهاوس' },
-  { value: 'studio', en: 'Studio', ar: 'استوديو' },
-  { value: 'cabin', en: 'Cabin', ar: 'كابينة' }
+  { value: 'commercial', en: 'Commercial', ar: 'تجاري' }
 ];
 
 export const LOCATIONS: TaxonomyOption<LocationValue>[] = [

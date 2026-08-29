@@ -250,6 +250,18 @@ export function UnitTypeIcon({ type, className = '' }: { type: string; className
     );
   }
 
+  if (type === 'duplex') {
+    return (
+      <svg className={base} viewBox="0 0 24 24" aria-hidden="true">
+        <rect {...shared} x="4" y="4" width="16" height="16" rx="1" />
+        <path {...shared} d="M4 12h16" />
+        <path {...shared} d="M8 20v-3h3v-3h3" />
+        <path {...shared} d="M8 9h3" />
+        <path {...shared} d="M14 9h2" />
+      </svg>
+    );
+  }
+
   if (type === 'commercial') {
     return (
       <svg className={base} viewBox="0 0 24 24" aria-hidden="true">
