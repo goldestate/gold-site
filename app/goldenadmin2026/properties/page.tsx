@@ -26,6 +26,9 @@ export default async function AdminPropertiesPage({
             <Link href="/goldenadmin2026/rental-desk" className="text-white/40 transition hover:text-[#D9B355]">
               Rental Desk
             </Link>
+            <Link href="/goldenadmin2026/directory" className="text-white/40 transition hover:text-[#D9B355]">
+              Directory
+            </Link>
           </div>
           <h1 className="mt-2 text-2xl font-medium uppercase tracking-[0.1em] text-white">
             Properties
