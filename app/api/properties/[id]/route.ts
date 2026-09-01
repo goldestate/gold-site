@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/require-admin';
 import { deleteProperty, updateProperty, type PropertyInput } from '@/lib/properties-store';
-import { isLocation, isPropertyType, isUnitType } from '@/lib/property-taxonomy';
+import { isLocation, isPricePeriod, isPropertyType, isUnitType } from '@/lib/property-taxonomy';
 
 function pickPatch(body: unknown): Partial<PropertyInput> | null {
   if (!body || typeof body !== 'object') return null;
@@ -27,6 +27,10 @@ function pickPatch(body: unknown): Partial<PropertyInput> | null {
   if (value.price !== undefined) {
     if (typeof value.price !== 'number' || !Number.isFinite(value.price) || value.price < 0) return null;
     patch.price = value.price;
+  }
+  if (value.pricePeriod !== undefined) {
+    if (!isPricePeriod(value.pricePeriod)) return null;
+    patch.pricePeriod = value.pricePeriod;
   }
   if (value.bedrooms !== undefined) {
     if (typeof value.bedrooms !== 'number' || !Number.isFinite(value.bedrooms) || value.bedrooms < 0) return null;

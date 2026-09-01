@@ -1,9 +1,11 @@
 import { supabase } from './supabase';
 import {
+  isPricePeriod,
   isPropertyType,
   isUnitType,
   normalizeLegacyLocation,
   type LocationValue,
+  type PricePeriodValue,
   type PropertyTypeValue,
   type UnitTypeValue
 } from './property-taxonomy';
@@ -15,6 +17,7 @@ export type Property = {
   propertyType: PropertyTypeValue;
   unitType: UnitTypeValue;
   price: number;
+  pricePeriod: PricePeriodValue;
   bedrooms: number;
   bathrooms: number;
   area: number;
@@ -31,6 +34,7 @@ export type PropertyInput = {
   propertyType: PropertyTypeValue;
   unitType: UnitTypeValue;
   price: number;
+  pricePeriod: PricePeriodValue;
   bedrooms: number;
   bathrooms: number;
   area: number;
@@ -47,6 +51,7 @@ type PropertyRow = {
   property_type: string;
   unit_type: string;
   price: number;
+  price_period: string;
   bedrooms: number;
   bathrooms: number;
   area: number;
@@ -65,6 +70,9 @@ function rowToProperty(row: PropertyRow): Property {
     propertyType: isPropertyType(row.property_type) ? row.property_type : 'resale',
     unitType: isUnitType(row.unit_type) ? row.unit_type : 'apartment',
     price: row.price,
+    // Legacy rows predate the column; 'total' renders no suffix, so an unknown
+    // value fails silent rather than asserting a wrong one.
+    pricePeriod: isPricePeriod(row.price_period) ? row.price_period : 'total',
     bedrooms: row.bedrooms,
     bathrooms: row.bathrooms,
     area: row.area,
@@ -83,6 +91,7 @@ function inputToRow(input: PropertyInput) {
     property_type: input.propertyType,
     unit_type: input.unitType,
     price: input.price,
+    price_period: input.pricePeriod,
     bedrooms: input.bedrooms,
     bathrooms: input.bathrooms,
     area: input.area,
@@ -100,6 +109,7 @@ function patchToRow(patch: Partial<PropertyInput>) {
   if (patch.propertyType !== undefined) row.property_type = patch.propertyType;
   if (patch.unitType !== undefined) row.unit_type = patch.unitType;
   if (patch.price !== undefined) row.price = patch.price;
+  if (patch.pricePeriod !== undefined) row.price_period = patch.pricePeriod;
   if (patch.bedrooms !== undefined) row.bedrooms = patch.bedrooms;
   if (patch.bathrooms !== undefined) row.bathrooms = patch.bathrooms;
   if (patch.area !== undefined) row.area = patch.area;

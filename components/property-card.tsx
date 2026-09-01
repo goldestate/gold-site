@@ -26,7 +26,7 @@ export function PropertyCard({
   delay?: number;
 }) {
   const propertyShowsArea = showsArea(property.propertyType) && property.area > 0;
-  const priceSuffix = priceSuffixLabel(property.propertyType);
+  const priceSuffix = priceSuffixLabel(property.pricePeriod, locale);
 
   return (
     <motion.article
