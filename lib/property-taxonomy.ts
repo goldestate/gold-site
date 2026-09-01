@@ -13,6 +13,8 @@ export type UnitTypeValue =
   | 'office'
   | 'commercial';
 export type LocationValue = 'north-coast' | 'sheikh-zayed' | 'new-cairo' | 'ain-sokhna' | 'gouna';
+/** How a listing's `price` should be read. Stored per row -- never derived from property type. */
+export type PricePeriodValue = 'daily' | 'monthly' | 'quarterly' | 'yearly' | 'total';
 
 type TaxonomyOption<T extends string> = {
   value: T;
@@ -53,9 +55,20 @@ export const LOCATIONS: TaxonomyOption<LocationValue>[] = [
   { value: 'gouna', en: 'Gouna', ar: 'الجونة' }
 ];
 
+// Ordered shortest-to-longest tenure, then the sale case. Rendered by the admin
+// form's period select; `total` is the sale price and shows no suffix.
+export const PRICE_PERIODS: TaxonomyOption<PricePeriodValue>[] = [
+  { value: 'daily', en: 'Per day', ar: 'يومي' },
+  { value: 'monthly', en: 'Per month', ar: 'شهري' },
+  { value: 'quarterly', en: 'Quarterly instalments', ar: 'ربع سنوي' },
+  { value: 'yearly', en: 'Per year', ar: 'سنوي' },
+  { value: 'total', en: 'Total price (sale)', ar: 'السعر الإجمالي' }
+];
+
 export const PROPERTY_TYPE_VALUES = PROPERTY_TYPES.map((item) => item.value);
 export const UNIT_TYPE_VALUES = UNIT_TYPES.map((item) => item.value);
 export const LOCATION_VALUES = LOCATIONS.map((item) => item.value);
+export const PRICE_PERIOD_VALUES = PRICE_PERIODS.map((item) => item.value);
 
 export const BEDROOM_OPTIONS = [1, 2, 3, 4, 5, 6, 7] as const;
 export const BATHROOM_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
@@ -72,6 +85,10 @@ export function isLocation(value: unknown): value is LocationValue {
   return typeof value === 'string' && (LOCATION_VALUES as string[]).includes(value);
 }
 
+export function isPricePeriod(value: unknown): value is PricePeriodValue {
+  return typeof value === 'string' && (PRICE_PERIOD_VALUES as string[]).includes(value);
+}
+
 export function propertyTypeLabel(value: PropertyTypeValue, locale: 'en' | 'ar'): string {
   return PROPERTY_TYPES.find((item) => item.value === value)?.[locale] ?? value;
 }
@@ -80,13 +97,25 @@ export function unitTypeLabel(value: UnitTypeValue, locale: 'en' | 'ar'): string
   return UNIT_TYPES.find((item) => item.value === value)?.[locale] ?? value;
 }
 
-/** Rentals are quoted per day; primary, commercial, and administrative properties are quoted on a quarterly-then-annual schedule. */
-export function priceSuffixLabel(propertyType: PropertyTypeValue): string {
-  if (propertyType === 'rental') return '/Day';
-  if (propertyType === 'primary' || propertyType === 'commercial' || propertyType === 'administrative') {
-    return '/Q-Annual';
-  }
-  return '';
+export function pricePeriodLabel(value: PricePeriodValue, locale: 'en' | 'ar'): string {
+  return PRICE_PERIODS.find((item) => item.value === value)?.[locale] ?? value;
+}
+
+const PRICE_PERIOD_SUFFIXES: Record<PricePeriodValue, { en: string; ar: string }> = {
+  daily: { en: '/Day', ar: '/اليوم' },
+  monthly: { en: '/Month', ar: '/الشهر' },
+  quarterly: { en: '/Q-Annual', ar: '/ربع سنوي' },
+  yearly: { en: '/Year', ar: '/السنة' },
+  total: { en: '', ar: '' }
+};
+
+/**
+ * The suffix shown after a price. Read from the row's stored `pricePeriod` -- it is
+ * deliberately NOT derived from propertyType: a monthly rental once rendered as "/Day",
+ * understating it ~30x. Never reintroduce a propertyType-based branch here.
+ */
+export function priceSuffixLabel(pricePeriod: PricePeriodValue, locale: 'en' | 'ar'): string {
+  return PRICE_PERIOD_SUFFIXES[pricePeriod]?.[locale] ?? '';
 }
 
 export function showsArea(propertyType: PropertyTypeValue): boolean {

@@ -8,6 +8,12 @@ create table if not exists public.properties (
   property_type text not null,
   unit_type text not null,
   price numeric not null default 0,
+  -- What `price` covers. Stored, never derived from property_type: rentals were
+  -- previously assumed per-day, so a monthly listing rendered ~30x understated.
+  -- Defaults to 'total' (renders no suffix) so a missing value fails silent
+  -- rather than asserting a wrong period.
+  price_period text not null default 'total'
+    check (price_period in ('daily', 'monthly', 'quarterly', 'yearly', 'total')),
   bedrooms integer not null default 0,
   bathrooms integer not null default 0,
   area numeric not null default 0,

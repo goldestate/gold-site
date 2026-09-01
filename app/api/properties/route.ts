@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/require-admin';
 import { createProperty, readProperties, readPublishedProperties, type PropertyInput } from '@/lib/properties-store';
-import { isLocation, isPropertyType, isUnitType } from '@/lib/property-taxonomy';
+import { isLocation, isPricePeriod, isPropertyType, isUnitType } from '@/lib/property-taxonomy';
 
 function isValidInput(body: unknown): body is PropertyInput {
   if (!body || typeof body !== 'object') return false;
@@ -15,6 +15,7 @@ function isValidInput(body: unknown): body is PropertyInput {
     typeof value.price === 'number' &&
     Number.isFinite(value.price) &&
     value.price >= 0 &&
+    isPricePeriod(value.pricePeriod) &&
     typeof value.bedrooms === 'number' &&
     Number.isFinite(value.bedrooms) &&
     value.bedrooms >= 0 &&
@@ -62,6 +63,7 @@ export async function POST(request: NextRequest) {
       propertyType: body.propertyType,
       unitType: body.unitType,
       price: body.price,
+      pricePeriod: body.pricePeriod,
       bedrooms: body.bedrooms,
       bathrooms: body.bathrooms,
       area: body.area,

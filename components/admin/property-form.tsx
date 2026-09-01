@@ -5,10 +5,12 @@ import { useState, type FormEvent } from 'react';
 import type { Property } from '@/lib/properties-store';
 import {
   LOCATIONS,
+  PRICE_PERIODS,
   PROPERTY_TYPES,
   UNIT_TYPES,
   showsArea,
   type LocationValue,
+  type PricePeriodValue,
   type PropertyTypeValue,
   type UnitTypeValue
 } from '@/lib/property-taxonomy';
@@ -39,6 +41,9 @@ export function PropertyForm({ property }: PropertyFormProps) {
   );
   const [unitType, setUnitType] = useState<UnitTypeValue>(property?.unitType ?? UNIT_TYPES[0].value);
   const [price, setPrice] = useState(property ? String(property.price) : '');
+  // Intentionally starts empty on a new listing so the period is an explicit choice.
+  // Defaulting it is how a monthly rental silently ends up rendering as "/Day".
+  const [pricePeriod, setPricePeriod] = useState<PricePeriodValue | ''>(property?.pricePeriod ?? '');
   const [bedrooms, setBedrooms] = useState(property ? String(property.bedrooms) : '');
   const [bathrooms, setBathrooms] = useState(property ? String(property.bathrooms) : '');
   const [area, setArea] = useState(property ? String(property.area) : '');
@@ -155,6 +160,10 @@ export function PropertyForm({ property }: PropertyFormProps) {
       setError('Enter a valid price.');
       return;
     }
+    if (!pricePeriod) {
+      setError('Choose what the price covers (per day, per month, total, ...).');
+      return;
+    }
     const parsedBedrooms = Number(bedrooms);
     if (!bedrooms || Number.isNaN(parsedBedrooms) || parsedBedrooms < 0) {
       setError('Enter a valid number of bedrooms.');
@@ -197,6 +206,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
       propertyType,
       unitType,
       price: parsedPrice,
+      pricePeriod,
       bedrooms: parsedBedrooms,
       bathrooms: parsedBathrooms,
       area: parsedArea,
@@ -307,6 +317,25 @@ export function PropertyForm({ property }: PropertyFormProps) {
             placeholder="18000000"
             className="w-full rounded-[1rem] border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)]"
           />
+        </label>
+        <label className="block">
+          <span className="mb-2 block text-sm font-medium uppercase tracking-[0.16em] text-white/72">
+            Price covers
+          </span>
+          <select
+            value={pricePeriod}
+            onChange={(event) => setPricePeriod(event.target.value as PricePeriodValue)}
+            className={selectClass}
+          >
+            <option value="" disabled className="bg-[#231F20]">
+              Select what the price covers...
+            </option>
+            {PRICE_PERIODS.map((item) => (
+              <option key={item.value} value={item.value} className="bg-[#231F20]">
+                {item.en}
+              </option>
+            ))}
+          </select>
         </label>
         <label className="block">
           <span className="mb-2 block text-sm font-medium uppercase tracking-[0.16em] text-white/72">
