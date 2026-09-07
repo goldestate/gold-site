@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 const BASE_URL = 'https://gold-eg.com';
 const LOCALES = ['en', 'ar'] as const;
-const STATIC_PATHS = ['', '/properties', '/about', '/contact'];
+const STATIC_PATHS = ['', '/properties', '/about', '/contact', '/privacy'];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const properties = await readPublishedProperties();

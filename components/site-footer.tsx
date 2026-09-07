@@ -58,7 +58,12 @@ export function SiteFooter({ copy, locale }: SiteFooterProps) {
             locale === 'ar' ? 'sm:flex-row-reverse text-right' : 'sm:flex-row'
           }`}
         >
-          <p>{copy.footer.legal}</p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <p>{copy.footer.legal}</p>
+            <Link href="/privacy" className="transition hover:text-[#D9B355]">
+              {locale === 'ar' ? 'الخصوصية' : 'Privacy'}
+            </Link>
+          </div>
           <div className="flex items-center gap-3">
             <Link
               href="/"
