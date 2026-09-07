@@ -11,6 +11,7 @@ import {
   type PlaceTierValue
 } from '@/lib/directory-taxonomy';
 import { PasteImport } from './paste-import';
+import { inviteMessage, whatsappComposeUrl } from '@/lib/app-links';
 
 const fieldClass =
   'w-full rounded-[0.8rem] border border-white/12 bg-white/5 px-3 py-2.5 text-base text-white outline-none placeholder:text-white/30 focus:border-[#D9B355]';
@@ -31,6 +32,47 @@ export function CompoundEditor({
   const [adding, setAdding] = useState<PlaceCategoryValue | null>(null);
   const [newName, setNewName] = useState('');
   const [newPhone, setNewPhone] = useState('');
+  const [copied, setCopied] = useState<'idle' | 'done' | 'failed'>('idle');
+  const [matchNames, setMatchNames] = useState(
+    (compound.matchNames.length > 0 ? compound.matchNames : [compound.nameEn]).join(', ')
+  );
+  const [matchSaved, setMatchSaved] = useState(false);
+
+  const saveMatchNames = async () => {
+    setBusy(true);
+    const res = await fetch('/api/directory/compounds', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: compound.id,
+        matchNames: matchNames.split(',').map((item) => item.trim())
+      })
+    });
+    setBusy(false);
+    if (res.ok) {
+      setMatchSaved(true);
+      setTimeout(() => setMatchSaved(false), 2500);
+      refresh();
+    }
+  };
+
+  // The message staff actually send. Recomputed rather than stored so rotating
+  // the code can never leave a stale link sitting in the box.
+  const invite = code ? inviteMessage(code.code, compound.nameEn) : null;
+
+  const copyInvite = async () => {
+    if (!invite) return;
+    try {
+      await navigator.clipboard.writeText(invite);
+      setCopied('done');
+    } catch {
+      // Clipboard access needs a secure context and can be refused outright.
+      // The message is visible in the box below either way, so this degrades
+      // to "select it yourself" rather than to nothing.
+      setCopied('failed');
+    }
+    setTimeout(() => setCopied('idle'), 2500);
+  };
 
   const filled = new Set(places.filter((place) => place.active).map((place) => place.category));
   const missing = PLACE_CATEGORIES.filter((item) => !filled.has(item.value));
@@ -52,6 +94,7 @@ export function CompoundEditor({
       body: JSON.stringify({ compoundId: compound.id, action })
     });
     setBusy(false);
+    setCopied('idle');
     refresh();
   };
 
@@ -295,6 +338,35 @@ export function CompoundEditor({
         ))}
       </div>
 
+      {/* which listings belong to this compound */}
+      <div className="rounded-[1rem] border border-white/12 bg-white/5 p-4">
+        <div className="text-xs uppercase tracking-[0.18em] text-white/40">Matches listings named</div>
+        <input
+          value={matchNames}
+          onChange={(event) => {
+            setMatchNames(event.target.value);
+            setMatchSaved(false);
+          }}
+          className={`mt-2 ${fieldClass}`}
+        />
+        <div className="mt-2 flex items-center gap-3">
+          <button
+            type="button"
+            onClick={saveMatchNames}
+            disabled={busy || !matchNames.trim()}
+            className="rounded-full border border-white/20 px-5 py-2.5 text-xs uppercase tracking-[0.18em] text-white disabled:opacity-40"
+          >
+            {matchSaved ? 'Saved' : 'Save names'}
+          </button>
+        </div>
+        <p className="mt-2 text-[11px] leading-relaxed text-white/40">
+          Comma separated. This is the compound part of a listing name &mdash; everything before the first
+          dash. Add every spelling that should land here, so Marassi also lists{' '}
+          <strong className="text-white/60">Marassi Marina</strong>. Capitalisation and punctuation do not
+          matter.
+        </p>
+      </div>
+
       {/* code panel */}
       <div className="rounded-[1rem] border border-white/12 bg-white/5 p-4">
         <div className="text-xs uppercase tracking-[0.18em] text-white/40">Guest code</div>
@@ -322,6 +394,40 @@ export function CompoundEditor({
             </button>
           ) : null}
         </div>
+        {invite ? (
+          <div className="mt-4 border-t border-white/10 pt-4">
+            <div className="text-xs uppercase tracking-[0.18em] text-white/40">Invite to send</div>
+            <textarea
+              readOnly
+              value={invite}
+              rows={9}
+              onFocus={(event) => event.currentTarget.select()}
+              className="mt-2 w-full resize-none rounded-[0.8rem] border border-white/12 bg-black/30 px-3 py-2.5 text-xs leading-relaxed text-white/70 outline-none focus:border-[#D9B355]"
+            />
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={copyInvite}
+                className="rounded-full border border-white/20 px-5 py-2.5 text-xs uppercase tracking-[0.18em] text-white"
+              >
+                {copied === 'done' ? 'Copied' : copied === 'failed' ? 'Copy it from the box' : 'Copy invite'}
+              </button>
+              <a
+                href={whatsappComposeUrl(invite)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-full border border-white/20 px-5 py-2.5 text-xs uppercase tracking-[0.18em] text-white"
+              >
+                Send on WhatsApp
+              </a>
+            </div>
+            <p className="mt-2 text-[11px] leading-relaxed text-white/40">
+              The link opens the directory straight in the app. The code is included underneath for
+              anyone who would rather type it.
+            </p>
+          </div>
+        ) : null}
+
         <p className="mt-3 text-[11px] leading-relaxed text-white/40">
           <strong className="text-white/60">New code</strong> stops the old one being used again, but guests
           who already unlocked keep their access.{' '}

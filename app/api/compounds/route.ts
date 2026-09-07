@@ -12,7 +12,11 @@ export async function GET() {
         slug: item.slug,
         name_en: item.nameEn,
         name_ar: item.nameAr,
-        location: item.location
+        location: item.location,
+        // The app resolves a listing's compound name against these. Without
+        // them it can only match a listing whose name is already the compound's
+        // own, so "Marassi Marina" would find nothing.
+        match_names: item.matchNames
       }))
     });
   } catch (error) {
