@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { readCompounds, readAllPlaces, readActiveCode } from '@/lib/directory-store';
+import { readCompounds, readAllPlaces, readLiveCodes } from '@/lib/directory-store';
 import { PLACE_CATEGORIES } from '@/lib/directory-taxonomy';
 import { LogoutButton } from '@/components/admin/logout-button';
 import { NewCompoundForm } from '@/components/admin/new-compound-form';
@@ -17,9 +17,17 @@ export default async function DirectoryPage() {
   const suggestions = deriveCompoundSuggestions(properties, new Set(compounds.map((item) => item.slug)));
   const rows = await Promise.all(
     compounds.map(async (compound) => {
-      const [places, code] = await Promise.all([readAllPlaces(compound.id), readActiveCode(compound.id)]);
+      const [places, codes] = await Promise.all([readAllPlaces(compound.id), readLiveCodes(compound.id)]);
       const filled = new Set(places.filter((place) => place.active).map((place) => place.category));
-      return { compound, filled: filled.size, total: PLACE_CATEGORIES.length, code, places: places.length };
+      const unlocked = codes.reduce((sum, code) => sum + code.redemptionCount, 0);
+      return {
+        compound,
+        filled: filled.size,
+        total: PLACE_CATEGORIES.length,
+        liveCodes: codes.length,
+        unlocked,
+        places: places.length
+      };
     })
   );
 
@@ -52,7 +60,7 @@ export default async function DirectoryPage() {
           </p>
         ) : null}
 
-        {rows.map(({ compound, filled, total, code, places }) => {
+        {rows.map(({ compound, filled, total, liveCodes, unlocked, places }) => {
           const percent = Math.round((filled / total) * 100);
           return (
             <Link
@@ -68,9 +76,11 @@ export default async function DirectoryPage() {
                   </div>
                 </div>
                 <div className="flex-none text-right">
-                  <div className="font-mono text-sm text-[#D9B355]">{code?.code ?? 'No code'}</div>
+                  <div className="text-sm text-[#D9B355]">
+                    {liveCodes > 0 ? `${liveCodes} live ${liveCodes === 1 ? 'code' : 'codes'}` : 'No codes'}
+                  </div>
                   <div className="mt-0.5 text-[11px] text-white/40">
-                    {code ? `${code.redemptionCount} unlocked` : 'not set up'}
+                    {liveCodes > 0 ? `${unlocked} unlocked` : 'not set up'}
                   </div>
                 </div>
               </div>

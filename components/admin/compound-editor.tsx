@@ -11,7 +11,7 @@ import {
   type PlaceTierValue
 } from '@/lib/directory-taxonomy';
 import { PasteImport } from './paste-import';
-import { inviteMessage, whatsappComposeUrl } from '@/lib/app-links';
+import { CodePanel } from './code-panel';
 
 const fieldClass =
   'w-full rounded-[0.8rem] border border-white/12 bg-white/5 px-3 py-2.5 text-base text-white outline-none placeholder:text-white/30 focus:border-[#D9B355]';
@@ -19,12 +19,12 @@ const fieldClass =
 export function CompoundEditor({
   compound,
   places,
-  code,
+  codes,
   otherCompounds
 }: {
   compound: Compound;
   places: Place[];
-  code: CompoundCode | null;
+  codes: CompoundCode[];
   otherCompounds: { id: string; nameEn: string }[];
 }) {
   const router = useRouter();
@@ -32,7 +32,6 @@ export function CompoundEditor({
   const [adding, setAdding] = useState<PlaceCategoryValue | null>(null);
   const [newName, setNewName] = useState('');
   const [newPhone, setNewPhone] = useState('');
-  const [copied, setCopied] = useState<'idle' | 'done' | 'failed'>('idle');
   const [matchNames, setMatchNames] = useState(
     (compound.matchNames.length > 0 ? compound.matchNames : [compound.nameEn]).join(', ')
   );
@@ -56,47 +55,11 @@ export function CompoundEditor({
     }
   };
 
-  // The message staff actually send. Recomputed rather than stored so rotating
-  // the code can never leave a stale link sitting in the box.
-  const invite = code ? inviteMessage(code.code, compound.nameEn) : null;
-
-  const copyInvite = async () => {
-    if (!invite) return;
-    try {
-      await navigator.clipboard.writeText(invite);
-      setCopied('done');
-    } catch {
-      // Clipboard access needs a secure context and can be refused outright.
-      // The message is visible in the box below either way, so this degrades
-      // to "select it yourself" rather than to nothing.
-      setCopied('failed');
-    }
-    setTimeout(() => setCopied('idle'), 2500);
-  };
-
   const filled = new Set(places.filter((place) => place.active).map((place) => place.category));
   const missing = PLACE_CATEGORIES.filter((item) => !filled.has(item.value));
   const percent = Math.round((filled.size / PLACE_CATEGORIES.length) * 100);
 
   const refresh = () => router.refresh();
-
-  const codeAction = async (action: 'rotate' | 'revoke') => {
-    if (action === 'revoke') {
-      const ok = window.confirm(
-        'Revoke access for everyone?\n\nGuests who already unlocked this compound will LOSE the vetted list immediately, including anyone mid-stay. A new code is issued.\n\nTo simply change the code without cutting anyone off, use Rotate instead.'
-      );
-      if (!ok) return;
-    }
-    setBusy(true);
-    await fetch('/api/directory/codes', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ compoundId: compound.id, action })
-    });
-    setBusy(false);
-    setCopied('idle');
-    refresh();
-  };
 
   const addPlace = async (category: PlaceCategoryValue) => {
     if (!newName.trim()) return;
@@ -367,74 +330,8 @@ export function CompoundEditor({
         </p>
       </div>
 
-      {/* code panel */}
-      <div className="rounded-[1rem] border border-white/12 bg-white/5 p-4">
-        <div className="text-xs uppercase tracking-[0.18em] text-white/40">Guest code</div>
-        <div className="mt-2 font-mono text-2xl tracking-[0.1em] text-[#D9B355]">{code?.code ?? 'none yet'}</div>
-        <div className="mt-1 text-xs text-white/45">
-          {code ? `${code.redemptionCount} ${code.redemptionCount === 1 ? 'guest has' : 'guests have'} unlocked` : 'Create a code to share with guests.'}
-        </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => codeAction('rotate')}
-            disabled={busy}
-            className="btn-gold rounded-full px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] disabled:opacity-50"
-          >
-            {code ? 'New code' : 'Create code'}
-          </button>
-          {code ? (
-            <button
-              type="button"
-              onClick={() => codeAction('revoke')}
-              disabled={busy}
-              className="rounded-full border border-red-400/40 px-5 py-2.5 text-xs uppercase tracking-[0.18em] text-red-300 disabled:opacity-50"
-            >
-              Cut off everyone
-            </button>
-          ) : null}
-        </div>
-        {invite ? (
-          <div className="mt-4 border-t border-white/10 pt-4">
-            <div className="text-xs uppercase tracking-[0.18em] text-white/40">Invite to send</div>
-            <textarea
-              readOnly
-              value={invite}
-              rows={9}
-              onFocus={(event) => event.currentTarget.select()}
-              className="mt-2 w-full resize-none rounded-[0.8rem] border border-white/12 bg-black/30 px-3 py-2.5 text-xs leading-relaxed text-white/70 outline-none focus:border-[#D9B355]"
-            />
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={copyInvite}
-                className="rounded-full border border-white/20 px-5 py-2.5 text-xs uppercase tracking-[0.18em] text-white"
-              >
-                {copied === 'done' ? 'Copied' : copied === 'failed' ? 'Copy it from the box' : 'Copy invite'}
-              </button>
-              <a
-                href={whatsappComposeUrl(invite)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-full border border-white/20 px-5 py-2.5 text-xs uppercase tracking-[0.18em] text-white"
-              >
-                Send on WhatsApp
-              </a>
-            </div>
-            <p className="mt-2 text-[11px] leading-relaxed text-white/40">
-              The link opens the directory straight in the app. The code is included underneath for
-              anyone who would rather type it.
-            </p>
-          </div>
-        ) : null}
+      <CodePanel compoundId={compound.id} compoundName={compound.nameEn} codes={codes} />
 
-        <p className="mt-3 text-[11px] leading-relaxed text-white/40">
-          <strong className="text-white/60">New code</strong> stops the old one being used again, but guests
-          who already unlocked keep their access.{' '}
-          <strong className="text-white/60">Cut off everyone</strong> removes access from every guest
-          immediately, including anyone currently staying.
-        </p>
-      </div>
     </div>
   );
 }
