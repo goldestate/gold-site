@@ -3,11 +3,18 @@ import { readCompounds, readAllPlaces, readActiveCode } from '@/lib/directory-st
 import { PLACE_CATEGORIES } from '@/lib/directory-taxonomy';
 import { LogoutButton } from '@/components/admin/logout-button';
 import { NewCompoundForm } from '@/components/admin/new-compound-form';
+import { CompoundSuggestions } from '@/components/admin/compound-suggestions';
+import { readProperties } from '@/lib/properties-store';
+import { deriveCompoundSuggestions } from '@/lib/compound-suggestions';
 
 export const dynamic = 'force-dynamic';
 
 export default async function DirectoryPage() {
   const compounds = await readCompounds(true);
+  // Derived here rather than fetched: this page is already a server component,
+  // and the listings it reads are the same ones the properties admin shows.
+  const properties = await readProperties();
+  const suggestions = deriveCompoundSuggestions(properties, new Set(compounds.map((item) => item.slug)));
   const rows = await Promise.all(
     compounds.map(async (compound) => {
       const [places, code] = await Promise.all([readAllPlaces(compound.id), readActiveCode(compound.id)]);
@@ -86,6 +93,8 @@ export default async function DirectoryPage() {
           );
         })}
       </div>
+
+      <CompoundSuggestions suggestions={suggestions} />
 
       <NewCompoundForm />
     </div>
