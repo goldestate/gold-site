@@ -3,7 +3,7 @@ import { requireAdmin } from '@/lib/require-admin';
 import {
   createCompound,
   readAllPlaces,
-  readActiveCode,
+  readLiveCodes,
   readCompounds,
   updateCompoundMatchNames
 } from '@/lib/directory-store';
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     const compounds = await readCompounds(true);
     const rows = await Promise.all(
       compounds.map(async (compound) => {
-        const [places, code] = await Promise.all([readAllPlaces(compound.id), readActiveCode(compound.id)]);
+        const [places, codes] = await Promise.all([readAllPlaces(compound.id), readLiveCodes(compound.id)]);
         const filled = new Set(places.filter((place) => place.active).map((place) => place.category));
         return {
           ...compound,
@@ -29,8 +29,8 @@ export async function GET(request: NextRequest) {
           filledCategories: filled.size,
           totalCategories: PLACE_CATEGORIES.length,
           missingCategories: PLACE_CATEGORIES.filter((item) => !filled.has(item.value)).map((item) => item.value),
-          code: code?.code ?? null,
-          redemptionCount: code?.redemptionCount ?? 0
+          liveCodes: codes.length,
+          redemptionCount: codes.reduce((sum, item) => sum + item.redemptionCount, 0)
         };
       })
     );
