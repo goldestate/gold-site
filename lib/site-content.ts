@@ -270,6 +270,27 @@ export type SiteCopy = {
       generic: string;
     };
   };
+  /**
+   * The page behind an unlock link. It is a handoff to the app, not a form: it
+   * never checks whether the code is real, because a browser-visible answer
+   * would tell anyone guessing which prefixes exist and undo the deliberately
+   * indistinguishable 404 that /api/unlock returns.
+   */
+  unlockPage: {
+    eyebrow: string;
+    title: string;
+    intro: string;
+    codeLabel: string;
+    openInApp: string;
+    openInAppHint: string;
+    getTheApp: string;
+    getTheAppHint: string;
+    askUs: string;
+    askUsHint: string;
+    manualTitle: string;
+    manualBody: string;
+    whatsappMessage: string;
+  };
 };
 
 const priceBucketsEn: PriceBucket[] = [
@@ -641,6 +662,23 @@ export const siteCopy: Record<Locale, SiteCopy> = {
         photos: 'Please upload at least one photo.',
         generic: 'We could not submit your listing right now. Please try again later.'
       }
+    },
+    unlockPage: {
+      eyebrow: 'Neighbourhood directory',
+      title: 'Your compound, unlocked.',
+      intro:
+        'This code opens GOLD’s vetted list for your compound — the plumber, the electrician, the AC technician and the rest of the people we actually use, with their numbers.',
+      codeLabel: 'Your code',
+      openInApp: 'Open in the GOLD app',
+      openInAppHint: 'Already installed? This takes you straight there.',
+      getTheApp: 'Get the GOLD app',
+      getTheAppHint: 'Free, and the code stays valid.',
+      askUs: 'Ask GOLD on WhatsApp',
+      askUsHint: 'The app is launching shortly. Message us and we will send the list in the meantime.',
+      manualTitle: 'Or enter it by hand',
+      manualBody:
+        'Open the GOLD app, go to Nearby, tap Enter your code, and type the code above.',
+      whatsappMessage: 'Hello, I have a GOLD code: {code}'
     }
   },
   ar: {
@@ -988,6 +1026,24 @@ export const siteCopy: Record<Locale, SiteCopy> = {
         photos: 'من فضلك ارفع صورة واحدة على الأقل.',
         generic: 'تعذر إرسال عرضك الآن. حاول مرة أخرى لاحقاً.'
       }
+    },
+    unlockPage: {
+      eyebrow: 'دليل الحي',
+      title: 'كمبوندك مفتوح لك.',
+      intro:
+        'هذا الكود يفتح لك قائمة جولد المعتمدة في كمبوندك — السباك والكهربائي وفني التكييف وباقي من نتعامل معهم فعلاً، بأرقامهم.',
+      codeLabel: 'الكود الخاص بك',
+      openInApp: 'افتح في تطبيق جولد',
+      openInAppHint: 'لديك التطبيق بالفعل؟ سيفتح مباشرة.',
+      getTheApp: 'حمّل تطبيق جولد',
+      getTheAppHint: 'مجانًا، والكود يظل صالحًا.',
+      askUs: 'تواصل مع جولد على واتساب',
+      askUsHint:
+        'التطبيق على وشك الإطلاق. راسلنا وسنرسل لك القائمة حتى ذلك الحين.',
+      manualTitle: 'أو أدخل الكود يدويًا',
+      manualBody:
+        'افتح تطبيق جولد، اذهب إلى قريب مني، اضغط أدخل الكود، ثم اكتب الكود الموضح أعلاه.',
+      whatsappMessage: 'مرحباً، معي كود جولد: {code}'
     }
   }
 };

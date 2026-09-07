@@ -161,6 +161,22 @@ export async function createCompound(input: {
   return rowToCompound(data as CompoundRow);
 }
 
+/**
+ * The listing names that resolve to this compound. Editable because the answer
+ * is not derivable from the data: "Marassi Marina" is part of Marassi, and no
+ * amount of string comparison establishes that -- only GOLD knows.
+ */
+export async function updateCompoundMatchNames(id: string, matchNames: string[]): Promise<Compound> {
+  const { data, error } = await supabase
+    .from('compounds')
+    .update({ match_names: matchNames })
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return rowToCompound(data as CompoundRow);
+}
+
 // ============================================================
 // Places
 // ============================================================

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { redeemCode, readVettedPlaces } from '@/lib/directory-store';
 import { normalizeCode } from '@/lib/directory-taxonomy';
-import { checkRateLimit, getClientKey } from '@/lib/rate-limit';
+import { getClientKey } from '@/lib/rate-limit';
+import { consumeRateLimit } from '@/lib/rate-limit-durable';
 import { serializePlace } from '@/lib/serialize-place';
 
 export const dynamic = 'force-dynamic';
@@ -18,6 +19,9 @@ const WINDOW_MS = 10 * 60 * 1000;
  *     so `redeemCode` collapses both cases to null and we never branch on why.
  *  2. Limited per IP *and* per device id. IP alone is trivially bypassed by
  *     rotating networks; device id alone is attacker-chosen. Either tripping is a 429.
+ *     The counters live in Postgres, not in process memory: an in-process count
+ *     hands out a fresh budget on every deploy and restart, which for the one
+ *     endpoint guarding the code space is the same as not counting at all.
  */
 export async function POST(request: Request) {
   let body: unknown;
@@ -38,8 +42,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid device_id.' }, { status: 400 });
   }
 
-  const ipLimit = checkRateLimit(`unlock:ip:${getClientKey(request)}`, { max: MAX_ATTEMPTS, windowMs: WINDOW_MS });
-  const deviceLimit = checkRateLimit(`unlock:device:${deviceId}`, { max: MAX_ATTEMPTS, windowMs: WINDOW_MS });
+  const [ipLimit, deviceLimit] = await Promise.all([
+    consumeRateLimit(`unlock:ip:${getClientKey(request)}`, { max: MAX_ATTEMPTS, windowMs: WINDOW_MS }),
+    consumeRateLimit(`unlock:device:${deviceId}`, { max: MAX_ATTEMPTS, windowMs: WINDOW_MS })
+  ]);
   if (!ipLimit.allowed || !deviceLimit.allowed) {
     const retryAfter = Math.max(ipLimit.retryAfterSeconds, deviceLimit.retryAfterSeconds);
     return NextResponse.json(

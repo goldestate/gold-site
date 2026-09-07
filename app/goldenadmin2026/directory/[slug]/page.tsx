@@ -24,9 +24,6 @@ export default async function CompoundDirectoryPage({ params }: { params: { slug
         &larr; All compounds
       </Link>
       <h1 className="mt-3 text-2xl font-medium uppercase tracking-[0.1em] text-white">{compound.nameEn}</h1>
-      <p className="mt-1 text-sm text-white/45">
-        Matches listings named: {compound.matchNames.join(', ') || compound.nameEn}
-      </p>
 
       <div className="mt-6">
         <CompoundEditor

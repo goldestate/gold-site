@@ -5,10 +5,15 @@ const DEFAULT_WINDOW_MS = 15 * 60 * 1000;
 const DEFAULT_MAX_ATTEMPTS = 5;
 
 /**
- * In-memory sliding-window limiter. Good enough for a single long-running
- * Node process (this app's Railway deployment); it resets on restart and
- * doesn't share state across instances, which is an acceptable trade-off
- * for throttling login guesses without adding an external dependency.
+ * In-memory fixed-window limiter. Good enough for throttling admin login
+ * guesses: those come from one operator on one deployment, and losing the
+ * count on restart costs nothing.
+ *
+ * It is NOT good enough for /api/unlock, where the counter is the only thing
+ * standing between the code space and enumeration -- a redeploy would hand an
+ * attacker a fresh budget. That path uses `consumeRateLimit` in
+ * rate-limit-durable.ts, which counts in Postgres. This function stays as its
+ * fallback.
  */
 export function checkRateLimit(
   key: string,
