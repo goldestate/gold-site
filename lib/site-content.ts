@@ -667,7 +667,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       eyebrow: 'Neighbourhood directory',
       title: 'Your compound, unlocked.',
       intro:
-        'This code opens GOLD’s vetted list for your compound — the plumber, the electrician, the AC technician and the rest of the people we actually use, with their numbers.',
+        'This code opens your compound’s guide — the shops nearby, plus the plumber, the electrician, the AC technician and the rest of the people we actually use, with their numbers.',
       codeLabel: 'Your code',
       openInApp: 'Open in the GOLD app',
       openInAppHint: 'Already installed? This takes you straight there.',
