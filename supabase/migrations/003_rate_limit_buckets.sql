@@ -76,3 +76,5 @@ alter table public.rate_limit_buckets enable row level security;
 
 revoke all on function public.consume_rate_limit(text, integer, integer) from public;
 revoke all on function public.consume_rate_limit(text, integer, integer) from anon;
+
+  
