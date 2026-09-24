@@ -9,6 +9,17 @@ export const dynamic = 'force-dynamic';
 const MAX_CHECKS = 60;
 const WINDOW_MS = 10 * 60 * 1000;
 
+// Same shape check as /api/unlock: the app only ever sends UUID().uuidString.
+const DEVICE_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// The answer is one device's private places. No cache between here and the phone
+// may keep it: a stale copy would outlive the code that granted it.
+const NO_STORE = { 'Cache-Control': 'no-store' };
+
+function reply(body: unknown, status = 200, headers: Record<string, string> = {}) {
+  return NextResponse.json(body, { status, headers: { ...NO_STORE, ...headers } });
+}
+
 /**
  * What this device still has access to. Called by the app on launch.
  *
@@ -24,34 +35,45 @@ const WINDOW_MS = 10 * 60 * 1000;
  * guess at a secret.
  */
 export async function POST(request: Request) {
+  // JSON only, as on /api/unlock: a text/plain POST needs no CORS preflight, so
+  // any web page could spend guests' shared IP budget from its visitors' browsers.
+  const contentType = request.headers.get('content-type') ?? '';
+  if (!/^application\/json\b/i.test(contentType.trim())) {
+    return reply({ error: 'Content-Type must be application/json.' }, 415);
+  }
+
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 });
+    return reply({ error: 'Invalid request body.' }, 400);
   }
 
   const value = (body ?? {}) as Record<string, unknown>;
   const deviceId = typeof value.device_id === 'string' ? value.device_id.trim() : '';
-  if (!deviceId || deviceId.length > 100) {
-    return NextResponse.json({ error: 'device_id is required.' }, { status: 400 });
+  if (!deviceId || !DEVICE_ID.test(deviceId)) {
+    return reply({ error: 'device_id is required.' }, 400);
   }
 
-  const [ipLimit, deviceLimit] = await Promise.all([
-    consumeRateLimit(`entitlements:ip:${getClientKey(request)}`, { max: MAX_CHECKS, windowMs: WINDOW_MS }),
-    consumeRateLimit(`entitlements:device:${deviceId}`, { max: MAX_CHECKS, windowMs: WINDOW_MS })
-  ]);
-  if (!ipLimit.allowed || !deviceLimit.allowed) {
-    const retryAfter = Math.max(ipLimit.retryAfterSeconds, deviceLimit.retryAfterSeconds);
-    return NextResponse.json(
-      { error: 'Too many requests. Please try again later.' },
-      { status: 429, headers: { 'Retry-After': String(retryAfter) } }
-    );
+  // IP first, and a refused request stops there, so a caller inventing a device
+  // id per request is turned away without writing a bucket for each one.
+  const ipLimit = await consumeRateLimit(`entitlements:ip:${getClientKey(request)}`, {
+    max: MAX_CHECKS,
+    windowMs: WINDOW_MS
+  });
+  const deviceLimit = ipLimit.allowed
+    ? await consumeRateLimit(`entitlements:device:${deviceId}`, { max: MAX_CHECKS, windowMs: WINDOW_MS })
+    : null;
+  if (!ipLimit.allowed || !deviceLimit?.allowed) {
+    const retryAfter = Math.max(ipLimit.retryAfterSeconds, deviceLimit?.retryAfterSeconds ?? 0);
+    return reply({ error: 'Too many requests. Please try again later.' }, 429, {
+      'Retry-After': String(Math.max(1, retryAfter))
+    });
   }
 
   try {
     const entitlements = await readDeviceEntitlements(deviceId);
-    return NextResponse.json({
+    return reply({
       compounds: entitlements.map((item) => ({
         compound_slug: item.slug,
         places: item.places.map(serializePlace)
@@ -59,6 +81,6 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error('Entitlement check failed', error);
-    return NextResponse.json({ error: 'Could not check access.' }, { status: 500 });
+    return reply({ error: 'Could not check access.' }, 500);
   }
 }

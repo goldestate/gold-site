@@ -24,11 +24,15 @@ const association = {
         appIDs: [APP_ID],
         components: [
           // The canonical link staff send.
-          { '/': '/unlock/*', comment: 'Guest unlock codes' },
-          // The locale-prefixed form. /unlock/X redirects to /en/unlock/X in the
-          // browser, so this shape ends up in circulation whenever someone
-          // copies the URL out of their address bar rather than the message.
-          { '/': '/*/unlock/*', comment: 'Guest unlock codes, locale-prefixed' }
+          { '/': '/unlock/*', comment: 'Guest unlock codes' }
+          // The locale-prefixed form (/en/unlock/X, /ar/unlock/X) is deliberately
+          // NOT claimed. /unlock/X redirects there in the browser, so it does
+          // circulate, but the shipped app's DeepLink parser only understands
+          // /unlock/X: claiming /*/unlock/* opened the app and then did nothing,
+          // and the web page -- whose "Open in app" button works -- never loaded.
+          // Put `{ '/': '/*/unlock/*' }` back once an app version that parses
+          // /en|ar/unlock/X is the one guests have. Apple's CDN caches this file
+          // for hours to a day, so either change reaches phones slowly.
         ]
       }
     ]

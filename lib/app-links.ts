@@ -35,19 +35,22 @@ export function unlockUrl(code: string): string {
  * pasted on its own is a code the guest has to retype.
  *
  * Bilingual in one message because staff do not know which language a given
- * guest reads, and asking them to choose is one more decision per send.
+ * guest reads, and asking them to choose is one more decision per send. Each
+ * half names the compound in its own language; the Arabic falls back to the
+ * English name when a compound has none.
  */
-export function inviteMessage(code: string, compoundName: string): string {
+export function inviteMessage(code: string, nameEn: string, nameAr?: string): string {
   const link = unlockUrl(code);
+  const arabicName = nameAr?.trim() || nameEn;
   return [
-    `Your GOLD neighbourhood directory for ${compoundName}.`,
+    `Your GOLD compound guide for ${nameEn}.`,
     '',
     `Open this link: ${link}`,
     `Or enter this code in the GOLD app: ${code}`,
     '',
     '—',
     '',
-    `دليل جولد للحي في ${compoundName}.`,
+    `دليل الكمبوند من جولد في ${arabicName}.`,
     '',
     `افتح الرابط: ${link}`,
     `أو أدخل هذا الكود في تطبيق جولد: ${code}`

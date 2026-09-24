@@ -1,35 +1,42 @@
 import Link from 'next/link';
-import { readCompounds, readAllPlaces, readLiveCodes } from '@/lib/directory-store';
-import { PLACE_CATEGORIES } from '@/lib/directory-taxonomy';
+import { readDirectorySummary, readListingNames } from '@/lib/directory-store';
+import { COVERAGE_CATEGORIES, isCoverageCategory } from '@/lib/directory-taxonomy';
 import { LogoutButton } from '@/components/admin/logout-button';
 import { NewCompoundForm } from '@/components/admin/new-compound-form';
 import { CompoundSuggestions } from '@/components/admin/compound-suggestions';
-import { readProperties } from '@/lib/properties-store';
-import { deriveCompoundSuggestions } from '@/lib/compound-suggestions';
+import { deriveCompoundSuggestions, type CompoundSuggestion } from '@/lib/compound-suggestions';
 
 export const dynamic = 'force-dynamic';
 
 export default async function DirectoryPage() {
-  const compounds = await readCompounds(true);
+  // Side by side: the listings read only feeds the suggestions, and it is
+  // optional -- if it fails, staff still get their compound list, just without
+  // "From your listings" underneath it.
+  const [rows, listings] = await Promise.all([
+    readDirectorySummary(),
+    readListingNames().catch((error) => {
+      console.error('Failed to read listings for compound suggestions', error);
+      return null;
+    })
+  ]);
+
   // Derived here rather than fetched: this page is already a server component,
   // and the listings it reads are the same ones the properties admin shows.
-  const properties = await readProperties();
-  const suggestions = deriveCompoundSuggestions(properties, new Set(compounds.map((item) => item.slug)));
-  const rows = await Promise.all(
-    compounds.map(async (compound) => {
-      const [places, codes] = await Promise.all([readAllPlaces(compound.id), readLiveCodes(compound.id)]);
-      const filled = new Set(places.filter((place) => place.active).map((place) => place.category));
-      const unlocked = codes.reduce((sum, code) => sum + code.redemptionCount, 0);
-      return {
-        compound,
-        filled: filled.size,
-        total: PLACE_CATEGORIES.length,
-        liveCodes: codes.length,
-        unlocked,
-        places: places.length
-      };
-    })
-  );
+  let suggestions: CompoundSuggestion[] = [];
+  if (listings) {
+    try {
+      suggestions = deriveCompoundSuggestions(
+        listings,
+        rows.map((row) => row.compound)
+      );
+    } catch (error) {
+      console.error('Failed to derive compound suggestions', error);
+    }
+  }
+
+  // Emergency and Other are not counted: the app ships the national emergency
+  // numbers already, and "Other" is a catch-all, so neither is a gap.
+  const total = COVERAGE_CATEGORIES.length;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
@@ -60,19 +67,23 @@ export default async function DirectoryPage() {
           </p>
         ) : null}
 
-        {rows.map(({ compound, filled, total, liveCodes, unlocked, places }) => {
-          const percent = Math.round((filled / total) * 100);
+        {rows.map(({ compound, filledCategories, liveCodes, unlocked, placeCount }) => {
+          const filled = filledCategories.filter(isCoverageCategory).length;
+          const percent = total === 0 ? 0 : Math.round((filled / total) * 100);
           return (
             <Link
               key={compound.id}
               href={`/goldenadmin2026/directory/${compound.slug}`}
-              className="block rounded-[1rem] border border-white/12 bg-white/5 p-4 transition active:scale-[0.99] hover:border-[rgba(217,179,85,0.45)]"
+              className={`block rounded-[1rem] border border-white/12 bg-white/5 p-4 transition active:scale-[0.99] hover:border-[rgba(217,179,85,0.45)] ${
+                compound.active ? '' : 'opacity-60'
+              }`}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="truncate text-base font-medium text-white">{compound.nameEn}</div>
                   <div className="mt-0.5 text-xs uppercase tracking-[0.16em] text-white/40">
-                    {places} {places === 1 ? 'entry' : 'entries'}
+                    {placeCount} {placeCount === 1 ? 'entry' : 'entries'}
+                    {compound.active ? null : <span className="ml-2 text-[#D9A441]">Hidden</span>}
                   </div>
                 </div>
                 <div className="flex-none text-right">

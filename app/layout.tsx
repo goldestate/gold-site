@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { Jost, Libre_Baskerville, Tajawal } from 'next/font/google';
 import { getLocale } from 'next-intl/server';
+import { SHARE_IMAGE, SITE_URL, siteCopy } from '@/lib/site-content';
 import './globals.css';
 
 const jost = Jost({
@@ -26,21 +27,35 @@ const tajawal = Tajawal({
   display: 'swap'
 });
 
+/**
+ * Site-wide defaults. Pages under /[locale] get localized versions of these from
+ * app/[locale]/layout.tsx. The images below do not reach every page: while
+ * app/opengraph-image.tsx exists, Next's file convention overrides them at this
+ * level, so a page that does not name its own images (the admin) gets that
+ * file's /opengraph-image URL, which the locale middleware redirects to a 404.
+ * Harmless there, since admin links are never shared.
+ *
+ * metadataBase is what relative image and page URLs in link previews resolve
+ * against. It pointed at a placeholder .example domain, so every preview image
+ * on the site -- including the one WhatsApp shows under a guest's unlock link --
+ * was a URL that does not exist.
+ */
 export const metadata: Metadata = {
-  metadataBase: new URL('https://gold-investment-opportunities.example'),
-  title: {
-    default: 'GOLD Investment Opportunities',
-    template: '%s | GOLD Investment Opportunities'
-  },
-  description:
-    'Premium real estate and investment holding brand with bilingual routing, luxury presentation, and future-ready sub-brands.',
+  metadataBase: new URL(SITE_URL),
+  // No title template: every page already writes its full title, brand
+  // included ("About — GOLD Investment Opportunities"), and a suffix here
+  // printed the brand twice.
+  title: siteCopy.en.seo.title,
+  description: siteCopy.en.seo.description,
   openGraph: {
     type: 'website',
-    siteName: 'GOLD Investment Opportunities',
-    images: ['/opengraph-image']
+    siteName: siteCopy.en.seo.title,
+    images: [{ ...SHARE_IMAGE, alt: 'GOLD' }]
   },
   twitter: {
-    card: 'summary_large_image'
+    // A square image, so the small card; the large one would crop it.
+    card: 'summary',
+    images: [SHARE_IMAGE.url]
   }
 };
 
