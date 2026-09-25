@@ -11,10 +11,14 @@ import {
 import { isLocation } from '@/lib/property-taxonomy';
 import { slugifyCompound } from '@/lib/directory-taxonomy';
 import { isValidPin } from '@/lib/map-pin';
+import { fillMissingPins, lookUpCompoundPin, refreshAutoPin } from '@/lib/compound-pins';
 
 export const dynamic = 'force-dynamic';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const MIGRATION_NEEDED =
+  'The database is not ready for map locations yet. Run supabase/migrations/006_compound_pins.sql in the Supabase SQL editor, then try again.';
 
 /**
  * There is no GET here: both directory pages read the store directly, and the
@@ -82,6 +86,9 @@ export async function POST(request: NextRequest) {
       // Default the mapping to the compound's own name so listings match immediately.
       matchNames: matchNames.length > 0 ? matchNames : [nameEn]
     });
+    // Put it on the map in the background; it is pinned by the time anyone
+    // opens it, and nobody is asked where it is.
+    fillMissingPins([compound]);
     return NextResponse.json({ compound }, { status: 201 });
   } catch (error) {
     if (postgresErrorCode(error) === '23505') {
@@ -100,8 +107,9 @@ export async function POST(request: NextRequest) {
 /**
  * Edits a compound: any of nameEn, nameAr, location, active, matchNames, pin
  * and radiusKm. The editor's match-names box still sends just {id, matchNames},
- * the pin card sends {id, pin, radiusKm}, and the settings panel sends the rest.
- * The slug never changes (see updateCompound).
+ * the pin card sends {id, radiusKm} or a hand-placed {id, pin}, and the settings
+ * panel sends the rest. {id, findOnMap: true} looks it up on OpenStreetMap again
+ * now. The slug never changes (see updateCompound).
  */
 export async function PATCH(request: NextRequest) {
   if (!(await requireAdmin(request))) {
@@ -112,6 +120,25 @@ export async function PATCH(request: NextRequest) {
 
   const id = typeof value.id === 'string' ? value.id : '';
   if (!UUID.test(id)) return NextResponse.json({ error: 'id is required.' }, { status: 400 });
+
+  // Staff asking for the automatic lookup again, for a pin that looks wrong.
+  // Answered when it's done, unlike the background filling, so the card can say
+  // what happened.
+  if (value.findOnMap === true) {
+    try {
+      const compound = await updateCompound(id, {});
+      if (!compound) return NextResponse.json({ error: 'This compound no longer exists.' }, { status: 404 });
+      const result = await lookUpCompoundPin(compound, true);
+      if (result === 'no-columns') return NextResponse.json({ error: MIGRATION_NEEDED }, { status: 409 });
+      if (result === 'failed') {
+        return NextResponse.json({ error: 'The map lookup did not answer. Try again in a minute.' }, { status: 502 });
+      }
+      return NextResponse.json({ found: result === 'found' });
+    } catch (error) {
+      console.error('Failed to look a compound up on the map', error);
+      return NextResponse.json({ error: 'Could not look it up. Try again.' }, { status: 500 });
+    }
+  }
 
   const patch: Partial<Pick<Compound, 'nameEn' | 'nameAr' | 'location' | 'active' | 'matchNames' | 'pin' | 'radiusKm'>> =
     {};
@@ -175,16 +202,15 @@ export async function PATCH(request: NextRequest) {
   try {
     const compound = await updateCompound(id, patch);
     if (!compound) return NextResponse.json({ error: 'This compound no longer exists.' }, { status: 404 });
+    // A new name or region can find it where the old one couldn't, or find it
+    // somewhere better. Only for pins the site placed; a hand-placed one stays.
+    if (patch.nameEn !== undefined || patch.nameAr !== undefined || patch.location !== undefined) {
+      refreshAutoPin(compound);
+    }
     return NextResponse.json({ compound });
   } catch (error) {
     if (isMissingPinColumns(error)) {
-      return NextResponse.json(
-        {
-          error:
-            'The database is not ready for pins yet. Run supabase/migrations/006_compound_pins.sql in the Supabase SQL editor, then save again.'
-        },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: MIGRATION_NEEDED }, { status: 409 });
     }
     console.error('Failed to update compound', error);
     return NextResponse.json({ error: 'Could not save these changes. Try again.' }, { status: 500 });

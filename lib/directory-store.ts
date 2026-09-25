@@ -21,7 +21,11 @@ export type Compound = {
   pin: Pin | null;
   /** How far from the pin still counts as this compound, in km. */
   radiusKm: number;
+  /** 'auto' when the site found it on OpenStreetMap, 'staff' when someone fixed it by hand. */
+  pinSource: PinSource | null;
 };
+
+export type PinSource = 'auto' | 'staff';
 
 export type Place = {
   id: string;
@@ -56,6 +60,7 @@ type CompoundRow = {
   lat?: unknown;
   lng?: unknown;
   radius_km?: unknown;
+  pin_source?: unknown;
 };
 
 type PlaceRow = {
@@ -88,7 +93,8 @@ function rowToCompound(row: CompoundRow): Compound {
       : [],
     active: row.active,
     pin: readPin(row.lat, row.lng),
-    radiusKm: readRadius(row.radius_km)
+    radiusKm: readRadius(row.radius_km),
+    pinSource: row.pin_source === 'auto' || row.pin_source === 'staff' ? row.pin_source : null
   };
 }
 
@@ -120,7 +126,7 @@ export function isMissingPinColumns(error: unknown): boolean {
   const code = postgresErrorCode(error);
   if (code !== 'PGRST204' && code !== '42703') return false;
   const message = String((error as { message?: unknown } | null)?.message ?? '');
-  return /\b(lat|lng|radius_km)\b/.test(message);
+  return /\b(lat|lng|radius_km|pin_source)\b/.test(message);
 }
 
 function rowToPlace(row: PlaceRow): Place {
@@ -282,7 +288,9 @@ export async function createCompound(input: {
  */
 export async function updateCompound(
   id: string,
-  patch: Partial<Pick<Compound, 'nameEn' | 'nameAr' | 'location' | 'active' | 'matchNames' | 'pin' | 'radiusKm'>>
+  patch: Partial<
+    Pick<Compound, 'nameEn' | 'nameAr' | 'location' | 'active' | 'matchNames' | 'pin' | 'radiusKm' | 'pinSource'>
+  >
 ): Promise<Compound | null> {
   const row: Record<string, unknown> = {};
   if (patch.nameEn !== undefined) row.name_en = patch.nameEn;
@@ -294,6 +302,8 @@ export async function updateCompound(
   if (patch.pin !== undefined) {
     row.lat = patch.pin?.lat ?? null;
     row.lng = patch.pin?.lng ?? null;
+    // Removing the pin removes who placed it; placing one says who did.
+    row.pin_source = patch.pin ? patch.pinSource ?? 'staff' : null;
   }
   if (patch.radiusKm !== undefined) row.radius_km = patch.radiusKm;
 
@@ -306,6 +316,23 @@ export async function updateCompound(
   const { data, error } = await supabase.from('compounds').update(row).eq('id', id).select().maybeSingle();
   if (error) throw error;
   return data ? rowToCompound(data as CompoundRow) : null;
+}
+
+/**
+ * Stores a pin the site found by itself, unless staff have placed one since:
+ * the lookup runs in the background, and a pin fixed by hand while it was on
+ * its way must not be overwritten by the automatic one it was correcting.
+ * Returns false when nothing was changed.
+ */
+export async function setAutoPin(id: string, pin: Pin): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('compounds')
+    .update({ lat: pin.lat, lng: pin.lng, pin_source: 'auto' })
+    .eq('id', id)
+    .or('pin_source.is.null,pin_source.eq.auto')
+    .select('id');
+  if (error) throw error;
+  return (data ?? []).length > 0;
 }
 
 /**

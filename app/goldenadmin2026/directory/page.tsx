@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { readDirectorySummary, readListingNames } from '@/lib/directory-store';
 import { COVERAGE_CATEGORIES, isCoverageCategory } from '@/lib/directory-taxonomy';
 import { LogoutButton } from '@/components/admin/logout-button';
+import { fillMissingPins } from '@/lib/compound-pins';
 import { NewCompoundForm } from '@/components/admin/new-compound-form';
 import { CompoundSuggestions } from '@/components/admin/compound-suggestions';
 import { deriveCompoundSuggestions, type CompoundSuggestion } from '@/lib/compound-suggestions';
@@ -33,6 +34,10 @@ export default async function DirectoryPage() {
       console.error('Failed to derive compound suggestions', error);
     }
   }
+
+  // Compounds with no map location are looked up on OpenStreetMap in the
+  // background; their pins are there on the next load. Nothing here waits.
+  fillMissingPins(rows.map((row) => row.compound));
 
   // Emergency and Other are not counted: the app ships the national emergency
   // numbers already, and "Other" is a catch-all, so neither is a gap.
@@ -84,8 +89,9 @@ export default async function DirectoryPage() {
                   <div className="mt-0.5 text-xs uppercase tracking-[0.16em] text-white/40">
                     {placeCount} {placeCount === 1 ? 'entry' : 'entries'}
                     {compound.active ? null : <span className="ml-2 text-[#D9A441]">Hidden</span>}
-                    {/* Without a pin, guests can only reach it with a code. */}
-                    {compound.pin ? null : <span className="ml-2 text-[#D9A441]">No map pin</span>}
+                    {/* Found automatically; this shows until OpenStreetMap has it. The
+                        app still tries Apple Maps for these, so it is a note, not a fault. */}
+                    {compound.pin ? null : <span className="ml-2 text-white/35">Not on OpenStreetMap</span>}
                   </div>
                 </div>
                 <div className="flex-none text-right">
