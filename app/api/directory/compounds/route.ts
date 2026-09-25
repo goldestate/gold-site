@@ -3,12 +3,14 @@ import { requireAdmin } from '@/lib/require-admin';
 import {
   createCompound,
   deleteCompound,
+  isMissingPinColumns,
   postgresErrorCode,
   updateCompound,
   type Compound
 } from '@/lib/directory-store';
 import { isLocation } from '@/lib/property-taxonomy';
 import { slugifyCompound } from '@/lib/directory-taxonomy';
+import { isValidPin } from '@/lib/map-pin';
 
 export const dynamic = 'force-dynamic';
 
@@ -96,9 +98,10 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * Edits a compound: any of nameEn, nameAr, location, active and matchNames.
- * The editor's match-names box still sends just {id, matchNames}, and the
- * settings panel sends the rest. The slug never changes (see updateCompound).
+ * Edits a compound: any of nameEn, nameAr, location, active, matchNames, pin
+ * and radiusKm. The editor's match-names box still sends just {id, matchNames},
+ * the pin card sends {id, pin, radiusKm}, and the settings panel sends the rest.
+ * The slug never changes (see updateCompound).
  */
 export async function PATCH(request: NextRequest) {
   if (!(await requireAdmin(request))) {
@@ -110,7 +113,8 @@ export async function PATCH(request: NextRequest) {
   const id = typeof value.id === 'string' ? value.id : '';
   if (!UUID.test(id)) return NextResponse.json({ error: 'id is required.' }, { status: 400 });
 
-  const patch: Partial<Pick<Compound, 'nameEn' | 'nameAr' | 'location' | 'active' | 'matchNames'>> = {};
+  const patch: Partial<Pick<Compound, 'nameEn' | 'nameAr' | 'location' | 'active' | 'matchNames' | 'pin' | 'radiusKm'>> =
+    {};
 
   if (value.nameEn !== undefined) {
     const nameEn = typeof value.nameEn === 'string' ? value.nameEn.trim() : '';
@@ -143,6 +147,27 @@ export async function PATCH(request: NextRequest) {
     patch.matchNames = matchNames;
   }
 
+  // null removes the pin; the compound then can't be found by location.
+  if (value.pin !== undefined) {
+    if (value.pin === null) {
+      patch.pin = null;
+    } else {
+      const raw = value.pin as { lat?: unknown; lng?: unknown };
+      const pin = { lat: Number(raw?.lat), lng: Number(raw?.lng) };
+      if (typeof raw !== 'object' || typeof raw.lat !== 'number' || typeof raw.lng !== 'number' || !isValidPin(pin)) {
+        return NextResponse.json({ error: 'That pin is not a valid location.' }, { status: 400 });
+      }
+      patch.pin = pin;
+    }
+  }
+  if (value.radiusKm !== undefined) {
+    const radius = value.radiusKm;
+    if (typeof radius !== 'number' || !Number.isFinite(radius) || radius <= 0 || radius > 50) {
+      return NextResponse.json({ error: 'Pick a distance between 0 and 50 km.' }, { status: 400 });
+    }
+    patch.radiusKm = radius;
+  }
+
   if (Object.keys(patch).length === 0) {
     return NextResponse.json({ error: 'Nothing to change.' }, { status: 400 });
   }
@@ -152,6 +177,15 @@ export async function PATCH(request: NextRequest) {
     if (!compound) return NextResponse.json({ error: 'This compound no longer exists.' }, { status: 404 });
     return NextResponse.json({ compound });
   } catch (error) {
+    if (isMissingPinColumns(error)) {
+      return NextResponse.json(
+        {
+          error:
+            'The database is not ready for pins yet. Run supabase/migrations/006_compound_pins.sql in the Supabase SQL editor, then save again.'
+        },
+        { status: 409 }
+      );
+    }
     console.error('Failed to update compound', error);
     return NextResponse.json({ error: 'Could not save these changes. Try again.' }, { status: 500 });
   }
