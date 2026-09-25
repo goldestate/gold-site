@@ -84,6 +84,8 @@ export default async function DirectoryPage() {
                   <div className="mt-0.5 text-xs uppercase tracking-[0.16em] text-white/40">
                     {placeCount} {placeCount === 1 ? 'entry' : 'entries'}
                     {compound.active ? null : <span className="ml-2 text-[#D9A441]">Hidden</span>}
+                    {/* Without a pin, guests can only reach it with a code. */}
+                    {compound.pin ? null : <span className="ml-2 text-[#D9A441]">No map pin</span>}
                   </div>
                 </div>
                 <div className="flex-none text-right">

@@ -7,6 +7,7 @@ import {
   type PlaceTierValue
 } from './directory-taxonomy';
 import { normalizeLegacyLocation, type LocationValue } from './property-taxonomy';
+import { DEFAULT_RADIUS_KM, isValidPin, type Pin } from './map-pin';
 
 export type Compound = {
   id: string;
@@ -16,6 +17,10 @@ export type Compound = {
   location: LocationValue;
   matchNames: string[];
   active: boolean;
+  /** Where it is, or null until staff set it. Without one, no phone can find it by location. */
+  pin: Pin | null;
+  /** How far from the pin still counts as this compound, in km. */
+  radiusKm: number;
 };
 
 export type Place = {
@@ -46,6 +51,11 @@ type CompoundRow = {
   location: string;
   match_names: unknown;
   active: boolean;
+  // Absent until migration 006 is run: rows are read with select('*'), so a
+  // database without the columns reads as "no pin" rather than an error.
+  lat?: unknown;
+  lng?: unknown;
+  radius_km?: unknown;
 };
 
 type PlaceRow = {
@@ -76,8 +86,41 @@ function rowToCompound(row: CompoundRow): Compound {
     matchNames: Array.isArray(row.match_names)
       ? row.match_names.filter((item): item is string => typeof item === 'string')
       : [],
-    active: row.active
+    active: row.active,
+    pin: readPin(row.lat, row.lng),
+    radiusKm: readRadius(row.radius_km)
   };
+}
+
+/** double precision arrives as a number; tolerate a numeric string too. */
+function readNumber(value: unknown): number | null {
+  if (value === null || value === undefined || value === '') return null;
+  const number = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function readPin(lat: unknown, lng: unknown): Pin | null {
+  const pin = { lat: readNumber(lat), lng: readNumber(lng) };
+  if (pin.lat === null || pin.lng === null) return null;
+  const complete = { lat: pin.lat, lng: pin.lng };
+  return isValidPin(complete) ? complete : null;
+}
+
+function readRadius(value: unknown): number {
+  const radius = readNumber(value);
+  return radius !== null && radius > 0 ? radius : DEFAULT_RADIUS_KM;
+}
+
+/**
+ * Whether an error is the database not having the pin columns yet -- migration
+ * 006 not run. PostgREST answers an update naming an unknown column with
+ * PGRST204 ("could not find the 'lat' column"); Postgres itself with 42703.
+ */
+export function isMissingPinColumns(error: unknown): boolean {
+  const code = postgresErrorCode(error);
+  if (code !== 'PGRST204' && code !== '42703') return false;
+  const message = String((error as { message?: unknown } | null)?.message ?? '');
+  return /\b(lat|lng|radius_km)\b/.test(message);
 }
 
 function rowToPlace(row: PlaceRow): Place {
@@ -232,10 +275,14 @@ export async function createCompound(input: {
  * `active: false` hides the compound from the app (/api/compounds, the public
  * places route and entitlements all filter on it) and stops its codes
  * unlocking (redeemCode). Nothing is deleted, so it can be shown again.
+ *
+ * `pin` and `radiusKm` put the compound on the map, which is how the app finds
+ * it from a guest's location. They need migration 006: without it the update
+ * fails, and isMissingPinColumns tells that apart from any other failure.
  */
 export async function updateCompound(
   id: string,
-  patch: Partial<Pick<Compound, 'nameEn' | 'nameAr' | 'location' | 'active' | 'matchNames'>>
+  patch: Partial<Pick<Compound, 'nameEn' | 'nameAr' | 'location' | 'active' | 'matchNames' | 'pin' | 'radiusKm'>>
 ): Promise<Compound | null> {
   const row: Record<string, unknown> = {};
   if (patch.nameEn !== undefined) row.name_en = patch.nameEn;
@@ -243,6 +290,12 @@ export async function updateCompound(
   if (patch.location !== undefined) row.location = patch.location;
   if (patch.active !== undefined) row.active = patch.active;
   if (patch.matchNames !== undefined) row.match_names = patch.matchNames;
+  // Both coordinates together, always: the table refuses half a pin.
+  if (patch.pin !== undefined) {
+    row.lat = patch.pin?.lat ?? null;
+    row.lng = patch.pin?.lng ?? null;
+  }
+  if (patch.radiusKm !== undefined) row.radius_km = patch.radiusKm;
 
   if (Object.keys(row).length === 0) {
     const { data, error } = await supabase.from('compounds').select('*').eq('id', id).maybeSingle();

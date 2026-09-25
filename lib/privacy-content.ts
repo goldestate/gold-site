@@ -35,7 +35,7 @@ const ADDRESS =
 const en: PrivacyCopy = {
   eyebrow: 'Privacy',
   title: 'What we collect, and what we do not.',
-  updated: 'Last updated 24 September 2026',
+  updated: 'Last updated 25 September 2026',
   intro:
     'This policy covers the GOLD website at gold-eg.com and the GOLD iPhone app. It is written to be read, not to be survived — if something here is unclear, ask us and we will explain it.',
   sections: [
@@ -59,7 +59,7 @@ const en: PrivacyCopy = {
     {
       heading: 'What the app does not collect',
       bullets: [
-        'Your location. The app never asks for it and cannot access it.',
+        'Your location. If you allow it, the app uses your iPhone’s location to work out which GOLD compound you are at, so it can show that compound’s guide without a code. That happens entirely on your phone: the app compares your location with the list of compounds it already has, and your location is never sent to us, so we never see or store it. It asks only when you tap Continue in the Guide tab, and you can turn it off at any time in Settings › GOLD › Location.',
         'Your contacts, camera or microphone. A photo only reaches us if you pick it yourself to add to a property listing.',
         'Any advertising identifier, and no tracking across other apps or websites.',
         'Analytics. There is no analytics or crash-reporting service in the app.',
@@ -136,7 +136,7 @@ const en: PrivacyCopy = {
 const ar: PrivacyCopy = {
   eyebrow: 'الخصوصية',
   title: 'ما نجمعه، وما لا نجمعه.',
-  updated: 'آخر تحديث 24 سبتمبر 2026',
+  updated: 'آخر تحديث 25 سبتمبر 2026',
   intro:
     'تغطي هذه السياسة موقع جولد على gold-eg.com وتطبيق جولد على الآيفون. كُتبت لتُقرأ بوضوح — إذا كان أي شيء هنا غير واضح، اسألنا وسنشرحه.',
   sections: [
@@ -160,7 +160,7 @@ const ar: PrivacyCopy = {
     {
       heading: 'ما لا يجمعه التطبيق',
       bullets: [
-        'موقعك. التطبيق لا يطلبه ولا يمكنه الوصول إليه.',
+        'موقعك. إذا سمحت بذلك، يستخدم التطبيق موقع الآيفون ليعرف في أي كمبوند من كمبوندات جولد أنت، فيعرض دليل ذلك الكمبوند بدون كود. يحدث ذلك بالكامل على هاتفك: يقارن التطبيق موقعك بقائمة الكمبوندات الموجودة لديه، ولا يُرسل موقعك إلينا أبداً، فلا نراه ولا نحفظه. لا يطلبه إلا عندما تضغط «متابعة» في تبويب «الدليل»، ويمكنك إيقافه في أي وقت من الإعدادات › GOLD › الموقع.',
         'جهات اتصالك أو الكاميرا أو الميكروفون. لا تصلنا أي صورة إلا إذا اخترتها بنفسك لإضافتها إلى عرض عقار.',
         'أي معرّف إعلاني، ولا تتبع عبر التطبيقات أو المواقع الأخرى.',
         'التحليلات. لا توجد أي خدمة تحليلات أو تقارير أعطال داخل التطبيق.',

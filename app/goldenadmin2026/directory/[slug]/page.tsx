@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { getCompoundBySlug, readCodes, readAllPlaces, readCompounds } from '@/lib/directory-store';
 import { CompoundEditor } from '@/components/admin/compound-editor';
 import { CompoundSettings } from '@/components/admin/compound-settings';
+import { CompoundPin } from '@/components/admin/compound-pin';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,6 +42,19 @@ export default async function CompoundDirectoryPage({ params }: { params: { slug
             // Hidden compounds stay copyable -- their places are still GOLD's
             // data -- but are marked, so nobody mistakes one for a live list.
             .map((item) => ({ id: item.id, nameEn: item.active ? item.nameEn : `${item.nameEn} (hidden)` }))}
+        />
+      </div>
+
+      <div className="mt-5">
+        <CompoundPin
+          compound={compound}
+          // Live compounds only: a hidden one is not in the app, so it can't
+          // take a guest from this one.
+          neighbours={all.flatMap((item) =>
+            item.id !== compound.id && item.active && item.pin
+              ? [{ nameEn: item.nameEn, pin: item.pin, radiusKm: item.radiusKm }]
+              : []
+          )}
         />
       </div>
 

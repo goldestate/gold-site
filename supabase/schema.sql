@@ -614,7 +614,15 @@ create table if not exists public.compounds (
   -- parse listing names independently and drift apart.
   match_names text[] not null default '{}',
   active boolean not null default true,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  -- The compound's pin (006_compound_pins.sql). The app matches the phone's
+  -- location against these on the phone; the location never reaches the server.
+  lat double precision,
+  lng double precision,
+  radius_km double precision not null default 3,
+  constraint compounds_pin_complete check ((lat is null) = (lng is null)),
+  constraint compounds_pin_range check (lat is null or (lat between -90 and 90 and lng between -180 and 180)),
+  constraint compounds_radius_range check (radius_km > 0 and radius_km <= 50)
 );
 create index if not exists compounds_slug_idx on public.compounds (slug);
 
