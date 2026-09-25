@@ -1,6 +1,7 @@
 {
   "common": {
     "english": "EN",
-    "arabic": "عربي"
+    "arabic": "عربي",
+    "language": "اللغة"
   }
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { getSiteCopy } from '@/lib/site-content';
+import { SHARE_IMAGE, getSiteCopy } from '@/lib/site-content';
 import { readPublishedProperties } from '@/lib/properties-store';
 import { type Locale } from '@/i18n/routing';
 import { PageShell } from '@/components/page-shell';
@@ -27,14 +27,8 @@ export async function generateMetadata({
       title: copy.seo.title,
       description: copy.seo.description,
       url: `/${locale}`,
-      images: [
-        {
-          url: '/opengraph-image',
-          width: 1200,
-          height: 630,
-          alt: copy.seo.title
-        }
-      ]
+      // Not '/opengraph-image': the locale middleware redirects that path to a 404.
+      images: [{ ...SHARE_IMAGE, alt: copy.seo.title }]
     }
   };
 }

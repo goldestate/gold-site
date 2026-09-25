@@ -275,23 +275,64 @@ export type SiteCopy = {
    * never checks whether the code is real, because a browser-visible answer
    * would tell anyone guessing which prefixes exist and undo the deliberately
    * indistinguishable 404 that /api/unlock returns.
+   *
+   * The feature is called what the app calls it -- "Compound guide" under the
+   * "Guide" tab (Strings.swift in the app) -- so a guest following this page
+   * looks for words that are actually on their screen.
    */
   unlockPage: {
+    /** Link-preview title and description. Never include the code: previews get forwarded. */
+    metaTitle: string;
+    metaDescription: string;
+    /** The same page in the other language, shown as a link on the page itself. */
+    otherLanguage: string;
     eyebrow: string;
     title: string;
     intro: string;
     codeLabel: string;
-    openInApp: string;
-    openInAppHint: string;
+    /** For a link whose code is missing or cut off. The URL text is never shown back. */
+    incompleteTitle: string;
+    incompleteIntro: string;
     getTheApp: string;
     getTheAppHint: string;
     askUs: string;
+    /** Before the app is on the App Store, WhatsApp is how a guest gets the list. */
     askUsHint: string;
+    /** After it is, WhatsApp stays for Android and for anyone who can't install. */
+    askUsHintWithApp: string;
+    haveAppLead: string;
+    openInApp: string;
+    openInAppHint: string;
     manualTitle: string;
     manualBody: string;
+    manualTitleNoCode: string;
+    manualBodyNoCode: string;
     whatsappMessage: string;
+    whatsappMessageNoCode: string;
   };
 };
+
+export const SITE_URL = 'https://gold-eg.com';
+
+/**
+ * The picture link previews use (WhatsApp, iMessage, X), resolved against
+ * SITE_URL by the root layout's metadataBase.
+ *
+ * A static file in public/ rather than app/opengraph-image.tsx, because its path
+ * has a file extension, which the locale middleware never touches; /opengraph-image
+ * has none, so the middleware redirects it to /en/opengraph-image, which is a 404
+ * -- every preview built from it was broken.
+ *
+ * It is the app icon's mark flattened onto the icon's own dark background: square
+ * and fully opaque, so it reads as a thumbnail on light and dark chat themes alike
+ * (app/icon.png has transparent rounded corners). It is its own file, not
+ * /icon.png, so that changing the favicon (or turning it into icon.tsx) can never
+ * quietly break every link preview.
+ */
+export const SHARE_IMAGE = { url: '/share-icon.png', width: 512, height: 512 } as const;
+
+/** og:locale for each site language. */
+export const OG_LOCALE: Record<Locale, string> = { en: 'en_GB', ar: 'ar_EG' };
 
 const priceBucketsEn: PriceBucket[] = [
   { label: 'Up to EGP 10M', max: 10_000_000 },
@@ -664,21 +705,34 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       }
     },
     unlockPage: {
-      eyebrow: 'Neighbourhood directory',
+      metaTitle: 'Your GOLD compound guide',
+      metaDescription:
+        'The code GOLD sent you opens your compound guide: the shops nearby, and the plumber, the electrician and the other people we actually use, with their numbers.',
+      otherLanguage: 'العربية',
+      eyebrow: 'Compound guide',
       title: 'Your compound, unlocked.',
       intro:
         'This code opens your compound’s guide — the shops nearby, plus the plumber, the electrician, the AC technician and the rest of the people we actually use, with their numbers.',
       codeLabel: 'Your code',
-      openInApp: 'Open in the GOLD app',
-      openInAppHint: 'Already installed? This takes you straight there.',
+      incompleteTitle: 'This link isn’t complete.',
+      incompleteIntro:
+        'The code that belongs at the end of it is missing or cut off. Ask GOLD for your code and we will send it to you on WhatsApp.',
       getTheApp: 'Get the GOLD app',
-      getTheAppHint: 'Free, and the code stays valid.',
+      getTheAppHint: 'Free on the App Store, for iPhone.',
       askUs: 'Ask GOLD on WhatsApp',
-      askUsHint: 'The app is launching shortly. Message us and we will send the list in the meantime.',
+      askUsHint: 'The app is launching shortly. Message us and we will send you the list in the meantime.',
+      askUsHintWithApp: 'On Android, or can’t install the app? Message us and we will send you the list.',
+      haveAppLead: 'Already have the app?',
+      openInApp: 'Open it',
+      openInAppHint: 'If it doesn’t open, the app isn’t on this phone yet.',
       manualTitle: 'Or enter it by hand',
-      manualBody:
-        'Open the GOLD app, go to Nearby, tap Enter your code, and type the code above.',
-      whatsappMessage: 'Hello, I have a GOLD code: {code}'
+      manualBody: 'Open the GOLD app, tap Guide, then Enter code, and type the code above.',
+      manualTitleNoCode: 'When you have your code',
+      manualBodyNoCode:
+        'Open the GOLD app, tap Guide, then Enter code, and type it in. It looks like GOLD-XX-XXXX.',
+      whatsappMessage: 'Hello, I have a GOLD code for my compound guide: {code}',
+      whatsappMessageNoCode:
+        'Hello, the GOLD link I was sent doesn’t have a code in it. Could you send me my code for the compound guide?'
     }
   },
   ar: {
@@ -1028,22 +1082,34 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       }
     },
     unlockPage: {
-      eyebrow: 'دليل الحي',
+      metaTitle: 'دليل الكمبوند من جولد',
+      metaDescription:
+        'الكود الذي أرسلته لك جولد يفتح دليل الكمبوند: المحلات القريبة، والسباك والكهربائي وباقي من نتعامل معهم فعلاً، بأرقامهم.',
+      otherLanguage: 'English',
+      eyebrow: 'دليل الكمبوند',
       title: 'كمبوندك مفتوح لك.',
       intro:
-        'هذا الكود يفتح لك قائمة جولد المعتمدة في كمبوندك — السباك والكهربائي وفني التكييف وباقي من نتعامل معهم فعلاً، بأرقامهم.',
+        'هذا الكود يفتح لك دليل الكمبوند — المحلات القريبة، ومعها السباك والكهربائي وفني التكييف وباقي من نتعامل معهم فعلاً، بأرقامهم.',
       codeLabel: 'الكود الخاص بك',
-      openInApp: 'افتح في تطبيق جولد',
-      openInAppHint: 'لديك التطبيق بالفعل؟ سيفتح مباشرة.',
+      incompleteTitle: 'هذا الرابط غير مكتمل.',
+      incompleteIntro:
+        'الكود الذي يجب أن يكون في نهاية الرابط ناقص أو غير موجود. اطلب الكود من جولد وسنرسله لك على واتساب.',
       getTheApp: 'حمّل تطبيق جولد',
-      getTheAppHint: 'مجانًا، والكود يظل صالحًا.',
+      getTheAppHint: 'مجانًا على App Store، للآيفون.',
       askUs: 'تواصل مع جولد على واتساب',
-      askUsHint:
-        'التطبيق على وشك الإطلاق. راسلنا وسنرسل لك القائمة حتى ذلك الحين.',
+      askUsHint: 'التطبيق على وشك الإطلاق. راسلنا وسنرسل لك القائمة حتى ذلك الحين.',
+      askUsHintWithApp: 'على أندرويد، أو لا يمكنك تثبيت التطبيق؟ راسلنا وسنرسل لك القائمة.',
+      haveAppLead: 'لديك التطبيق بالفعل؟',
+      openInApp: 'افتحه',
+      openInAppHint: 'إذا لم يفتح، فالتطبيق غير مثبت على هذا الهاتف بعد.',
       manualTitle: 'أو أدخل الكود يدويًا',
-      manualBody:
-        'افتح تطبيق جولد، اذهب إلى قريب مني، اضغط أدخل الكود، ثم اكتب الكود الموضح أعلاه.',
-      whatsappMessage: 'مرحباً، معي كود جولد: {code}'
+      manualBody: 'افتح تطبيق جولد، واضغط «الدليل»، ثم «أدخل الكود»، واكتب الكود الموضح أعلاه.',
+      manualTitleNoCode: 'عندما يصلك الكود',
+      manualBodyNoCode:
+        'افتح تطبيق جولد، واضغط «الدليل»، ثم «أدخل الكود»، واكتبه. شكله GOLD-XX-XXXX.',
+      whatsappMessage: 'مرحباً، معي كود جولد لدليل الكمبوند: {code}',
+      whatsappMessageNoCode:
+        'مرحباً، رابط جولد الذي وصلني لا يحتوي على كود. هل يمكنكم إرسال الكود الخاص بي لدليل الكمبوند؟'
     }
   }
 };

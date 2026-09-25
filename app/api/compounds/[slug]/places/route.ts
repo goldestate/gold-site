@@ -4,6 +4,11 @@ import { serializePlace } from '@/lib/serialize-place';
 
 export const dynamic = 'force-dynamic';
 
+// No cache may keep this list. A place staff move from public to "needs code"
+// must stop being served here on the next request, not whenever a stored copy
+// expires -- a cached copy would go on handing out a number that is now private.
+const NO_STORE = { 'Cache-Control': 'no-store' };
+
 /**
  * PUBLIC TIER ONLY.
  *
@@ -16,15 +21,18 @@ export async function GET(_request: Request, { params }: { params: { slug: strin
   try {
     const compound = await getCompoundBySlug(params.slug);
     if (!compound || !compound.active) {
-      return NextResponse.json({ error: 'Not found.' }, { status: 404 });
+      return NextResponse.json({ error: 'Not found.' }, { status: 404, headers: NO_STORE });
     }
     const places = await readPublicPlaces(compound.id);
-    return NextResponse.json({
-      compound: { slug: compound.slug, name_en: compound.nameEn, name_ar: compound.nameAr },
-      places: places.map(serializePlace)
-    });
+    return NextResponse.json(
+      {
+        compound: { slug: compound.slug, name_en: compound.nameEn, name_ar: compound.nameAr },
+        places: places.map(serializePlace)
+      },
+      { headers: NO_STORE }
+    );
   } catch (error) {
     console.error('Failed to read places', error);
-    return NextResponse.json({ error: 'Could not load places.' }, { status: 500 });
+    return NextResponse.json({ error: 'Could not load places.' }, { status: 500, headers: NO_STORE });
   }
 }

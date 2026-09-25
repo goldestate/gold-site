@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/navigation';
+import { Link, usePathname } from '@/i18n/navigation';
 import { BrandLogo } from './brand-logo';
 import type { SiteCopy } from '@/lib/site-content';
 
@@ -27,6 +27,10 @@ export function SiteHeader({ copy, locale, isRtl }: SiteHeaderProps) {
   const orderedNavItems = isRtl ? [...navItems].reverse() : navItems;
 
   const switchLocale = locale === 'en' ? 'ar' : 'en';
+  // The current page without its locale ("/unlock/GOLD-AB-CDEF"), so switching
+  // language changes the language and nothing else. These links used to go to
+  // "/", which on an unlock page threw away the guest's code with the page.
+  const currentPath = usePathname();
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[rgba(35,31,32,0.96)] shadow-[0_14px_40px_rgba(0,0,0,0.3)] backdrop-blur-xl">
@@ -53,10 +57,15 @@ export function SiteHeader({ copy, locale, isRtl }: SiteHeaderProps) {
             ))}
           </nav>
 
-          <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 p-1">
+          <div
+            role="group"
+            aria-label={t('language')}
+            className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 p-1"
+          >
             <Link
-              href="/"
+              href={currentPath}
               locale="en"
+              lang="en"
               className={`rounded-full px-3 py-1 text-xs font-semibold tracking-[0.24em] transition ${
                 locale === 'en' ? 'btn-gold' : 'text-white/70 hover:text-white'
               }`}
@@ -64,8 +73,9 @@ export function SiteHeader({ copy, locale, isRtl }: SiteHeaderProps) {
               {t('english')}
             </Link>
             <Link
-              href="/"
+              href={currentPath}
               locale="ar"
+              lang="ar"
               className={`rounded-full px-3 py-1 text-xs font-semibold tracking-[0.24em] transition ${
                 locale === 'ar' ? 'btn-gold' : 'text-white/70 hover:text-white'
               }`}
@@ -112,9 +122,10 @@ export function SiteHeader({ copy, locale, isRtl }: SiteHeaderProps) {
             ))}
             <div className="mt-3 flex gap-2">
               <Link
-                href="/"
+                href={currentPath}
                 locale={switchLocale}
-                className="rounded-full border border-[rgba(217,179,85,0.3)] px-4 py-2 text-xs font-semibold tracking-[0.22em] text-[#D9B355]"
+                lang={switchLocale}
+                className="inline-flex min-h-[44px] items-center rounded-full border border-[rgba(217,179,85,0.3)] px-5 text-xs font-semibold tracking-[0.22em] text-[#D9B355]"
               >
                 {switchLocale === 'en' ? t('english') : t('arabic')}
               </Link>

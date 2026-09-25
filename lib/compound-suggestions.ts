@@ -1,4 +1,3 @@
-import type { Property } from './properties-store';
 import { slugifyCompound } from './directory-taxonomy';
 import type { LocationValue } from './property-taxonomy';
 
@@ -15,7 +14,8 @@ import type { LocationValue } from './property-taxonomy';
  * names that differ are never merged. "Mountain View 1" and "Mountain View" are
  * different compounds in different regions and stay that way; if GOLD ever
  * wants two names to share one directory, that is an explicit edit to the
- * compound's match names, not something inferred here.
+ * compound's match names, not something inferred here -- and once made, it is
+ * respected: a name in any compound's match names is never suggested again.
  */
 
 /**
@@ -43,14 +43,43 @@ export type CompoundSuggestion = {
   /** Locations that disagree within one name -- worth a human look, not an error. */
   otherLocations: LocationValue[];
   listingCount: number;
-  /** True when a compound with this slug is already in the directory. */
+  /** True when a compound in the directory already covers this name. */
   exists: boolean;
 };
 
+/** A listing, reduced to what suggestions read. A full Property fits too. */
+export type ListingName = { name: string; location: LocationValue };
+
+/** A directory compound, reduced to the names it answers to. */
+export type KnownCompound = { slug: string; nameEn: string; matchNames: string[] };
+
+/**
+ * Every slug the directory already answers to: each compound's slug, its
+ * English name and every one of its match names, compared slugified so
+ * "Marassi Marina", "marassi marina" and "Marassi-Marina" are one name.
+ *
+ * Match names are what make this work. Staff map "Marassi Marina" onto Marassi
+ * by adding it to Marassi's match names; a suggestion is also added with every
+ * listing spelling as match names, including the original when staff renamed
+ * it before adding. Checking only slugs, as this used to, offered all of those
+ * again as new compounds on every visit -- and 'Add all' created them.
+ */
+export function coveredSlugs(compounds: KnownCompound[]): Set<string> {
+  const covered = new Set<string>();
+  for (const compound of compounds) {
+    for (const name of [compound.slug, compound.nameEn, ...compound.matchNames]) {
+      const slug = slugifyCompound(name);
+      if (slug) covered.add(slug);
+    }
+  }
+  return covered;
+}
+
 export function deriveCompoundSuggestions(
-  properties: Property[],
-  existingSlugs: Set<string>
+  properties: ListingName[],
+  compounds: KnownCompound[]
 ): CompoundSuggestion[] {
+  const covered = coveredSlugs(compounds);
   const groups = new Map<
     string,
     { spellings: Map<string, number>; locations: Map<LocationValue, number>; count: number }
@@ -86,7 +115,7 @@ export function deriveCompoundSuggestions(
         location: locations[0],
         otherLocations: locations.slice(1),
         listingCount: group.count,
-        exists: existingSlugs.has(slug)
+        exists: covered.has(slug)
       };
     })
     // Most listings first: that is the order the directory is worth filling in.

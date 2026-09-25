@@ -2,6 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { adminFetch } from '@/lib/admin-fetch';
+import { slugifyCompound } from '@/lib/directory-taxonomy';
 import { LOCATIONS, type LocationValue } from '@/lib/property-taxonomy';
 
 const fieldClass =
@@ -21,16 +23,24 @@ export function NewCompoundForm() {
       setError('Enter the compound name.');
       return;
     }
+    // The web address is built from Latin letters and digits, so a name typed
+    // in Arabic here has none. The server refuses it too; saying so before the
+    // round trip saves a wait on a weak signal.
+    if (!slugifyCompound(nameEn)) {
+      setError('Give the compound an English name. The Arabic name goes in the second box.');
+      return;
+    }
     setBusy(true);
     setError('');
-    const res = await fetch('/api/directory/compounds', {
+    const result = await adminFetch('/api/directory/compounds', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nameEn: nameEn.trim(), nameAr: nameAr.trim(), location })
+      body: { nameEn: nameEn.trim(), nameAr: nameAr.trim(), location }
     });
     setBusy(false);
-    if (!res.ok) {
-      setError('Could not add this compound.');
+    if (!result.ok) {
+      // The server's own reason: already in the directory, no English name, or
+      // the login expired (in which case nothing is refreshed, so the typing stays).
+      setError(result.error);
       return;
     }
     setNameEn('');
@@ -56,13 +66,15 @@ export function NewCompoundForm() {
       <input
         value={nameEn}
         onChange={(event) => setNameEn(event.target.value)}
-        placeholder="Compound name (e.g. Hacienda Bay)"
+        placeholder="Compound name in English (e.g. Hacienda Bay)"
+        aria-label="English name"
         className={fieldClass}
       />
       <input
         value={nameAr}
         onChange={(event) => setNameAr(event.target.value)}
         placeholder="الاسم بالعربية (optional)"
+        aria-label="Arabic name"
         dir="rtl"
         className={fieldClass}
       />
@@ -89,7 +101,10 @@ export function NewCompoundForm() {
         </button>
         <button
           type="button"
-          onClick={() => setOpen(false)}
+          onClick={() => {
+            setOpen(false);
+            setError('');
+          }}
           className="rounded-full border border-white/15 px-5 py-3 text-xs uppercase tracking-[0.18em] text-white/60"
         >
           Cancel
