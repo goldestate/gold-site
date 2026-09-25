@@ -13,11 +13,14 @@ export const IOS_BUNDLE_ID = 'com.goldeg.app';
 export const APP_ID = `${APPLE_TEAM_ID}.${IOS_BUNDLE_ID}`;
 
 /**
- * Null until the app is on the App Store. The unlock page reads this: with a URL
- * it shows a download button, without one it falls back to WhatsApp, so the page
- * is never a dead end. Flipping this on is the only change needed at launch.
+ * The app's App Store page, or null when it isn't there. The unlock page shows a
+ * download button with it and falls back to WhatsApp without it, so the page is
+ * never a dead end; the footer links it on every page.
+ *
+ * Country-neutral on purpose: apps.apple.com/app/... opens each visitor's own
+ * store, where /eg/ or /us/ would send an Egyptian iPhone to the US storefront.
  */
-export const APP_STORE_URL: string | null = null;
+export const APP_STORE_URL: string | null = 'https://apps.apple.com/app/gold-eg/id6809770355';
 
 /** The custom scheme. Works today, without the app-site-association file. */
 export function appSchemeUnlockUrl(code: string): string {
