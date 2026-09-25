@@ -4,6 +4,7 @@ import { getCompoundBySlug, readCodes, readAllPlaces, readCompounds } from '@/li
 import { CompoundEditor } from '@/components/admin/compound-editor';
 import { CompoundSettings } from '@/components/admin/compound-settings';
 import { CompoundPin } from '@/components/admin/compound-pin';
+import { fillMissingPins } from '@/lib/compound-pins';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +17,8 @@ export default async function CompoundDirectoryPage({ params }: { params: { slug
     readCodes(compound.id),
     readCompounds(true)
   ]);
+  // Opened straight from a link, the list page may never have run the lookup.
+  fillMissingPins(all);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">

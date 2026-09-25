@@ -3,7 +3,36 @@
  * two. Imported by the admin (client) and the API (server), so it imports nothing.
  */
 
+import type { LocationValue } from './property-taxonomy';
+
 export type Pin = { lat: number; lng: number };
+
+/** [west, south, east, north], in degrees. */
+export type Box = [number, number, number, number];
+
+/**
+ * Where each region is, generously. A compound looked up by name must land
+ * inside its own region's box: "Mountain View" alone finds the one in New Cairo,
+ * and the box is what keeps the North Coast compound from being pinned there.
+ *
+ * The app keeps the same boxes (Location.box, CompoundPinFinder.swift) for the
+ * compounds it looks up on Apple Maps. Change both together.
+ */
+export const REGION_BOXES: Record<LocationValue, Box> = {
+  // Agami to past Marsa Matrouh.
+  'north-coast': [26.8, 30.6, 30.0, 31.6],
+  'sheikh-zayed': [30.85, 29.9, 31.1, 30.15],
+  'new-cairo': [31.3, 29.9, 31.8, 30.15],
+  // Ain Sokhna and the Galala plateau above it.
+  'ain-sokhna': [32.1, 29.1, 32.9, 29.95],
+  // El Gouna and Hurghada.
+  gouna: [33.4, 26.9, 34.0, 27.6]
+};
+
+export function isInBox(pin: Pin, box: Box): boolean {
+  const [west, south, east, north] = box;
+  return pin.lng >= west && pin.lng <= east && pin.lat >= south && pin.lat <= north;
+}
 
 /** The radius staff get unless they change it, in km. Matches the column default in 006. */
 export const DEFAULT_RADIUS_KM = 3;

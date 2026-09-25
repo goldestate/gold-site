@@ -59,7 +59,7 @@ const en: PrivacyCopy = {
     {
       heading: 'What the app does not collect',
       bullets: [
-        'Your location. If you allow it, the app uses your iPhone’s location to work out which GOLD compound you are at, so it can show that compound’s guide without a code. That happens entirely on your phone: the app compares your location with the list of compounds it already has, and your location is never sent to us, so we never see or store it. It asks only when you tap Continue in the Guide tab, and you can turn it off at any time in Settings › GOLD › Location.',
+        'Your location. If you allow it, the app uses your iPhone’s location to work out which GOLD compound you are at, so it can show that compound’s guide without a code. That happens entirely on your phone: the app compares your location with the list of compounds it already has, and your location is never sent to us, so we never see or store it. For a compound we have not placed on the map ourselves, the app may search Apple Maps for the compound’s name; that search contains the compound’s name, not your location. It asks only when you tap Continue in the Guide tab, and you can turn it off at any time in Settings › GOLD › Location. Compound locations come from OpenStreetMap (© OpenStreetMap contributors) and Apple Maps.',
         'Your contacts, camera or microphone. A photo only reaches us if you pick it yourself to add to a property listing.',
         'Any advertising identifier, and no tracking across other apps or websites.',
         'Analytics. There is no analytics or crash-reporting service in the app.',
@@ -160,7 +160,7 @@ const ar: PrivacyCopy = {
     {
       heading: 'ما لا يجمعه التطبيق',
       bullets: [
-        'موقعك. إذا سمحت بذلك، يستخدم التطبيق موقع الآيفون ليعرف في أي كمبوند من كمبوندات جولد أنت، فيعرض دليل ذلك الكمبوند بدون كود. يحدث ذلك بالكامل على هاتفك: يقارن التطبيق موقعك بقائمة الكمبوندات الموجودة لديه، ولا يُرسل موقعك إلينا أبداً، فلا نراه ولا نحفظه. لا يطلبه إلا عندما تضغط «متابعة» في تبويب «الدليل»، ويمكنك إيقافه في أي وقت من الإعدادات › GOLD › الموقع.',
+        'موقعك. إذا سمحت بذلك، يستخدم التطبيق موقع الآيفون ليعرف في أي كمبوند من كمبوندات جولد أنت، فيعرض دليل ذلك الكمبوند بدون كود. يحدث ذلك بالكامل على هاتفك: يقارن التطبيق موقعك بقائمة الكمبوندات الموجودة لديه، ولا يُرسل موقعك إلينا أبداً، فلا نراه ولا نحفظه. وإذا لم نكن قد حددنا مكان كمبوند على الخريطة بأنفسنا، قد يبحث التطبيق عن اسمه في خرائط Apple، ويحتوي هذا البحث على اسم الكمبوند وليس على موقعك. لا يطلبه إلا عندما تضغط «متابعة» في تبويب «الدليل»، ويمكنك إيقافه في أي وقت من الإعدادات › GOLD › الموقع. مواقع الكمبوندات مصدرها OpenStreetMap (© مساهمو OpenStreetMap) وخرائط Apple.',
         'جهات اتصالك أو الكاميرا أو الميكروفون. لا تصلنا أي صورة إلا إذا اخترتها بنفسك لإضافتها إلى عرض عقار.',
         'أي معرّف إعلاني، ولا تتبع عبر التطبيقات أو المواقع الأخرى.',
         'التحليلات. لا توجد أي خدمة تحليلات أو تقارير أعطال داخل التطبيق.',

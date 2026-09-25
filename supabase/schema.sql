@@ -620,6 +620,9 @@ create table if not exists public.compounds (
   lat double precision,
   lng double precision,
   radius_km double precision not null default 3,
+  -- 'auto' when the site found it on OpenStreetMap, 'staff' when fixed by hand.
+  pin_source text,
+  constraint compounds_pin_source_values check (pin_source is null or pin_source in ('auto', 'staff')),
   constraint compounds_pin_complete check ((lat is null) = (lng is null)),
   constraint compounds_pin_range check (lat is null or (lat between -90 and 90 and lng between -180 and 180)),
   constraint compounds_radius_range check (radius_km > 0 and radius_km <= 50)
