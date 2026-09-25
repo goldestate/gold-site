@@ -196,6 +196,8 @@ export type SiteCopy = {
   footer: {
     tagline: string;
     legal: string;
+    /** The App Store link under the tagline, on every page. */
+    getTheApp: string;
   };
   rentalRequestPage: {
     eyebrow: string;
@@ -296,7 +298,7 @@ export type SiteCopy = {
     getTheApp: string;
     getTheAppHint: string;
     askUs: string;
-    /** Before the app is on the App Store, WhatsApp is how a guest gets the list. */
+    /** Shown when there is no App Store link: WhatsApp is how a guest gets the list. */
     askUsHint: string;
     /** After it is, WhatsApp stays for Android and for anyone who can't install. */
     askUsHintWithApp: string;
@@ -628,7 +630,8 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     },
     footer: {
       tagline: 'Golden Opportunity Of Leading Domain.',
-      legal: '© 2026 GOLD Investment Opportunities. All rights reserved.'
+      legal: '© 2026 GOLD Investment Opportunities. All rights reserved.',
+      getTheApp: 'Get the GOLD app on the App Store'
     },
     rentalRequestPage: {
       eyebrow: 'Rental Desk / Gold Partners',
@@ -1006,7 +1009,8 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     },
     footer: {
       tagline: 'الفرصة الذهبية لمجال ريادي.',
-      legal: '© 2026 GOLD Investment Opportunities. جميع الحقوق محفوظة.'
+      legal: '© 2026 GOLD Investment Opportunities. جميع الحقوق محفوظة.',
+      getTheApp: 'حمّل تطبيق جولد من App Store'
     },
     rentalRequestPage: {
       eyebrow: 'مكتب الإيجارات / شركاء GOLD',

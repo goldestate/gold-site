@@ -2,6 +2,7 @@ import { Link } from '@/i18n/navigation';
 import { BrandLogo } from './brand-logo';
 import { GMark } from './gmark';
 import type { SiteCopy } from '@/lib/site-content';
+import { APP_STORE_URL } from '@/lib/app-links';
 
 type SiteFooterProps = {
   copy: SiteCopy;
@@ -34,6 +35,18 @@ export function SiteFooter({ copy, locale }: SiteFooterProps) {
           <div className="max-w-md">
             <BrandLogo />
             <p className="mt-6 max-w-sm text-sm leading-7 text-white/68">{copy.footer.tagline}</p>
+            {/* Plain text rather than Apple's badge artwork, which comes with its
+                own usage rules; the words say where the link goes. */}
+            {APP_STORE_URL ? (
+              <a
+                href={APP_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-5 inline-flex min-h-[44px] items-center rounded-full border border-[rgba(217,179,85,0.45)] px-5 text-xs font-semibold uppercase tracking-[0.18em] text-[#D9B355] transition hover:border-[#D9B355]"
+              >
+                {copy.footer.getTheApp}
+              </a>
+            ) : null}
           </div>
 
           <nav
