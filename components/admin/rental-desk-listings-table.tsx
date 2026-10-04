@@ -7,6 +7,7 @@ import type { RentalListingWithOwner } from '@/lib/rental-desk-store';
 import { formatPrice } from '@/lib/format-price';
 import { locationLabel } from '@/lib/property-taxonomy';
 import { RENTAL_LISTING_STATUSES, rentalPropertyTypeLabel, type RentalListingStatusValue } from '@/lib/rental-taxonomy';
+import { NdaBadge, type NdaSummary } from './nda-badge';
 
 function formatDate(iso: string): string {
   const date = new Date(iso);
@@ -21,7 +22,14 @@ const statusBadgeClass: Record<RentalListingStatusValue, string> = {
   inactive: 'bg-red-400/10 text-red-300'
 };
 
-export function RentalDeskListingsTable({ listings }: { listings: RentalListingWithOwner[] }) {
+export function RentalDeskListingsTable({
+  listings,
+  ndas
+}: {
+  listings: RentalListingWithOwner[];
+  /** Agreements by listing id. */
+  ndas: Record<string, NdaSummary>;
+}) {
   const router = useRouter();
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -65,7 +73,7 @@ export function RentalDeskListingsTable({ listings }: { listings: RentalListingW
       ) : null}
 
       <div className="overflow-x-auto rounded-[1.5rem] border border-white/10">
-        <table className="w-full min-w-[860px] text-left text-sm">
+        <table className="w-full min-w-[1000px] text-left text-sm">
           <thead className="bg-white/5 text-xs uppercase tracking-[0.16em] text-white/50">
             <tr>
               <th className="px-5 py-4">Owner</th>
@@ -74,6 +82,7 @@ export function RentalDeskListingsTable({ listings }: { listings: RentalListingW
               <th className="px-5 py-4">Beds / Furnished</th>
               <th className="px-5 py-4">Added</th>
               <th className="px-5 py-4">Status</th>
+              <th className="px-5 py-4">Agreement</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/8">
@@ -118,6 +127,9 @@ export function RentalDeskListingsTable({ listings }: { listings: RentalListingW
                       </option>
                     ))}
                   </select>
+                </td>
+                <td className="px-5 py-4">
+                  <NdaBadge nda={ndas[listing.id]} />
                 </td>
               </tr>
             ))}

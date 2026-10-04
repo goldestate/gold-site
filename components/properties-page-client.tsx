@@ -15,6 +15,7 @@ import {
 import { SectionTitle, UnitTypeIcon, FunnelIcon } from './section-ui';
 import { RangeSlider } from './range-slider';
 import { PropertyCard } from './property-card';
+import { GoldSelect } from './gold-select';
 
 const PRICE_STEP = 500_000;
 const AREA_STEP = 5;
@@ -152,7 +153,7 @@ export function PropertiesPageClient({
   };
 
   const selectClass =
-    'w-full rounded-full border border-[rgba(35,31,32,0.15)] bg-white px-5 py-3 text-sm text-[#231F20] outline-none transition focus:border-[#B8860B] focus:ring-2 focus:ring-[rgba(184,134,11,0.18)]';
+    'w-full rounded-full border border-[rgba(35,31,32,0.15)] bg-white px-5 py-3 text-sm text-[#231F20] outline-none transition focus-visible:border-[#B8860B] focus-visible:ring-2 focus-visible:ring-[rgba(184,134,11,0.18)]';
 
   const resultsLabel = copy.filters.resultsCount.replace('{count}', String(filtered.length));
 
@@ -202,19 +203,19 @@ export function PropertiesPageClient({
           <div className="mt-5 space-y-5 sm:mt-8 sm:space-y-8">
           <div>
             <FilterLabel>{copy.filters.locationLabel}</FilterLabel>
-            <select
+            <GoldSelect
+              label={copy.filters.locationLabel}
               value={location}
-              onChange={(event) => setLocation(event.target.value)}
-              dir={isRtl ? 'rtl' : 'ltr'}
-              className={`${selectClass} mt-2.5 sm:mt-3`}
-            >
-              <option value="any">{copy.filters.anyLocation}</option>
-              {LOCATIONS.map((item) => (
-                <option key={item.value} value={item.value}>
-                  {item[locale]}
-                </option>
-              ))}
-            </select>
+              onChange={setLocation}
+              tone="light"
+              isRtl={isRtl}
+              className="mt-2.5 sm:mt-3"
+              triggerClassName={selectClass}
+              options={[
+                { value: 'any', label: copy.filters.anyLocation },
+                ...LOCATIONS.map((item) => ({ value: item.value, label: item[locale] }))
+              ]}
+            />
           </div>
 
           <div>

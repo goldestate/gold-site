@@ -7,6 +7,7 @@ import type { SiteCopy } from '@/lib/site-content';
 import { UNIT_TYPES } from '@/lib/property-taxonomy';
 import { GMark } from './gmark';
 import { SectionTitle, SurfaceShell, ArrowIcon } from './section-ui';
+import { GoldSelect } from './gold-select';
 
 const MAP_QUERY = encodeURIComponent(
   'The Office, Tolip El Narge, El Tagmoa El Khames, 90th Street, New Cairo, Egypt'
@@ -115,29 +116,25 @@ function InquiryForm({ labels, locale, isRtl }: { labels: SiteCopy['contact']; l
         placeholder="name@example.com"
         isRtl={isRtl}
       />
-      <label className="block">
+      <div className="block">
         <span className="mb-2 block text-sm font-medium uppercase tracking-[0.18em] text-white/72">
           {labels.interest}
         </span>
-        <select
+        <GoldSelect
+          label={labels.interest}
           value={form.interest}
-          onChange={(event) => update('interest', event.target.value)}
-          className={`w-full rounded-[1rem] border bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)] ${
+          onChange={(value) => update('interest', value)}
+          isRtl={isRtl}
+          placeholder={labels.placeholderInterest}
+          triggerClassName={`w-full rounded-[1rem] border bg-white/5 px-4 py-3 text-sm text-white outline-none transition focus-visible:border-[#D9B355] focus-visible:ring-2 focus-visible:ring-[rgba(217,179,85,0.22)] ${
             errors.interest ? 'border-red-400/70' : 'border-white/12'
           }`}
-          dir={isRtl ? 'rtl' : 'ltr'}
-        >
-          <option value="" className="bg-[#231F20] text-white/60">
-            {labels.placeholderInterest}
-          </option>
-          {UNIT_TYPES.map((option) => (
-            <option key={option.value} value={option[locale]} className="bg-[#231F20] text-white">
-              {option[locale]}
-            </option>
-          ))}
-        </select>
+          // The enquiry has always sent the label in the visitor's language, so
+          // the value stays the label.
+          options={UNIT_TYPES.map((option) => ({ value: option[locale], label: option[locale] }))}
+        />
         {errors.interest ? <p className="mt-2 text-xs text-red-300">{errors.interest}</p> : null}
-      </label>
+      </div>
       <label className="block">
         <span className="mb-2 block text-sm font-medium uppercase tracking-[0.18em] text-white/72">
           {labels.message}

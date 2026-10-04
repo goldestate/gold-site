@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { readDirectorySummary, readListingNames } from '@/lib/directory-store';
 import { COVERAGE_CATEGORIES, isCoverageCategory } from '@/lib/directory-taxonomy';
 import { LogoutButton } from '@/components/admin/logout-button';
+import { AdminNav } from '@/components/admin/admin-nav';
 import { fillMissingPins } from '@/lib/compound-pins';
 import { NewCompoundForm } from '@/components/admin/new-compound-form';
 import { CompoundSuggestions } from '@/components/admin/compound-suggestions';
@@ -47,15 +48,7 @@ export default async function DirectoryPage() {
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <div className="flex flex-wrap items-center gap-4 font-serif text-xs uppercase tracking-[0.4em] text-[rgba(217,179,85,0.9)]">
-            <Link href="/goldenadmin2026/properties" className="text-white/40 transition hover:text-[#D9B355]">
-              Properties
-            </Link>
-            <Link href="/goldenadmin2026/rental-desk" className="text-white/40 transition hover:text-[#D9B355]">
-              Rental Desk
-            </Link>
-            <span>Directory</span>
-          </div>
+          <AdminNav current="directory" />
           <h1 className="mt-2 text-2xl font-medium uppercase tracking-[0.1em] text-white">Neighbourhood</h1>
         </div>
         <LogoutButton />

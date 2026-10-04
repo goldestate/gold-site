@@ -6,6 +6,7 @@ import type { MatchWithListing, RentalRequestWithBroker } from '@/lib/rental-des
 import { formatPrice } from '@/lib/format-price';
 import { locationLabel } from '@/lib/property-taxonomy';
 import { RENTAL_REQUEST_STATUS_LABELS, rentalPropertyTypeLabel, type RentalRequestStatusValue } from '@/lib/rental-taxonomy';
+import { NdaBadge, type NdaSummary } from './nda-badge';
 
 const MAX_VISIBLE_MATCHES = 5;
 
@@ -77,10 +78,13 @@ function MatchRow({ match, onSent }: { match: MatchWithListing; onSent: (matchId
 
 export function RentalDeskRequestsPanel({
   requests,
-  matchesByRequest
+  matchesByRequest,
+  ndas
 }: {
   requests: RentalRequestWithBroker[];
   matchesByRequest: Record<string, MatchWithListing[]>;
+  /** Agreements by request id. */
+  ndas: Record<string, NdaSummary>;
 }) {
   const router = useRouter();
   const [error, setError] = useState('');
@@ -135,13 +139,16 @@ export function RentalDeskRequestsPanel({
                   {request.broker.phone}
                 </a>
               </div>
-              <span
-                className={`rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] ${
-                  requestStatusBadgeClass[request.status as RentalRequestStatusValue] ?? 'bg-white/10 text-white/60'
-                }`}
-              >
-                {RENTAL_REQUEST_STATUS_LABELS[request.status as RentalRequestStatusValue] ?? request.status}
-              </span>
+              <div className="flex flex-col items-end gap-2">
+                <span
+                  className={`rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] ${
+                    requestStatusBadgeClass[request.status as RentalRequestStatusValue] ?? 'bg-white/10 text-white/60'
+                  }`}
+                >
+                  {RENTAL_REQUEST_STATUS_LABELS[request.status as RentalRequestStatusValue] ?? request.status}
+                </span>
+                <NdaBadge nda={ndas[request.id]} />
+              </div>
             </div>
 
             <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-sm text-white/70">
