@@ -1,13 +1,14 @@
 import type { Metadata } from 'next';
-import { getSiteCopy } from '@/lib/site-content';
+import { SITE_URL, getSiteCopy } from '@/lib/site-content';
 import { getProperty, type Property } from '@/lib/properties-store';
 import type { SiteCopy } from '@/lib/site-content';
 import { formatPrice } from '@/lib/format-price';
+import { goldWhatsAppUrl } from '@/lib/app-links';
 import { locationLabel, priceSuffixLabel, propertyTypeLabel, showsArea, unitTypeLabel } from '@/lib/property-taxonomy';
 import { type Locale } from '@/i18n/routing';
 import { PageShell } from '@/components/page-shell';
 import { Link } from '@/i18n/navigation';
-import { ArrowIcon, PhoneIcon, StatIcon, SurfaceShell } from '@/components/section-ui';
+import { ArrowIcon, PhoneIcon, StatIcon, SurfaceShell, WhatsAppIcon } from '@/components/section-ui';
 import { GMark } from '@/components/gmark';
 import { PropertyGallery } from '@/components/property-gallery';
 
@@ -27,12 +28,24 @@ function descriptionItems(description: string): string[] | null {
   return items.length > 1 ? items : null;
 }
 
+/** Fills "{key}" slots in a copy string. Split and join, so a "$" in a listing name is just a "$". */
+function fill(template: string, values: Record<string, string>): string {
+  return Object.entries(values).reduce((text, [key, value]) => text.split(`{${key}}`).join(value), template);
+}
+
+/**
+ * WhatsApp leads, because it is where people here actually ask about a unit;
+ * the enquiry form and the phone stay for whoever prefers them. Capitals and
+ * letter-spacing are for the Latin labels only: spacing Arabic letters apart
+ * breaks the joins between them.
+ */
 function PriceCard({
   copy,
   property,
   locale,
   isRtl,
   priceSuffix,
+  whatsappHref,
   enquireHref,
   callHref
 }: {
@@ -41,9 +54,13 @@ function PriceCard({
   locale: 'en' | 'ar';
   isRtl: boolean;
   priceSuffix: string;
+  whatsappHref: string;
   enquireHref: string;
   callHref: string;
 }) {
+  const label = isRtl ? 'text-base' : 'text-sm uppercase tracking-[0.18em]';
+  const outline = `inline-flex items-center justify-center gap-2.5 rounded-full border border-white/25 px-6 py-3.5 font-medium text-white transition hover:border-[#D9B355] hover:text-[#D9B355] ${label}`;
+
   return (
     <div className="relative overflow-hidden rounded-[1.5rem] bg-[#231F20] p-6 text-white shadow-[0_20px_50px_rgba(35,31,32,0.22)] sm:p-7">
       <GMark tone="gold" size={300} className={`-bottom-16 opacity-[0.07] ${isRtl ? '-left-16 scale-x-[-1]' : '-right-16'}`} />
@@ -63,22 +80,86 @@ function PriceCard({
           </div>
         ) : null}
         <div className="mt-7 flex flex-col gap-3">
-          <Link
-            href={enquireHref}
-            locale={locale}
-            className="btn-gold inline-flex items-center justify-center gap-3 rounded-full px-6 py-3.5 text-sm font-medium uppercase tracking-[0.18em]"
+          <a
+            href={whatsappHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`btn-gold inline-flex items-center justify-center gap-2.5 rounded-full px-6 py-3.5 font-medium ${label}`}
           >
+            <WhatsAppIcon className="h-[1.1rem] w-[1.1rem]" />
+            {copy.propertyDetail.whatsappCta}
+          </a>
+          <Link href={enquireHref} locale={locale} className={outline}>
             {copy.propertyDetail.enquireCta}
             <ArrowIcon rtl={isRtl} />
           </Link>
-          <a
-            href={callHref}
-            className="inline-flex items-center justify-center gap-2.5 rounded-full border border-white/25 px-6 py-3.5 text-sm font-medium uppercase tracking-[0.18em] text-white transition hover:border-[#D9B355] hover:text-[#D9B355]"
-          >
+          <a href={callHref} className={outline}>
             <PhoneIcon />
             {copy.propertyDetail.callCta}
           </a>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * On phones the price box scrolls away with the page, so the two quickest ways
+ * to ask about the unit stay pinned to the bottom of the screen.
+ */
+function PhoneContactBar({
+  copy,
+  property,
+  locale,
+  priceSuffix,
+  whatsappHref,
+  callHref
+}: {
+  copy: SiteCopy;
+  property: Property;
+  locale: 'en' | 'ar';
+  priceSuffix: string;
+  whatsappHref: string;
+  callHref: string;
+}) {
+  const isRtl = locale === 'ar';
+
+  return (
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[rgba(23,19,20,0.96)] px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 shadow-[0_-14px_40px_rgba(0,0,0,0.3)] backdrop-blur-xl lg:hidden">
+      <div className="mx-auto flex max-w-xl items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="gold-gradient-text truncate text-lg font-medium tracking-[0.02em]">
+            {formatPrice(property.price, locale)}
+          </div>
+          {priceSuffix ? (
+            <div
+              dir="ltr"
+              className={`text-[11px] font-semibold uppercase tracking-[0.18em] text-white/50 ${isRtl ? 'text-right' : ''}`}
+            >
+              {priceSuffix}
+            </div>
+          ) : null}
+        </div>
+        <a
+          href={callHref}
+          aria-label={copy.propertyDetail.callCta}
+          className="inline-flex h-12 w-12 flex-none items-center justify-center rounded-full border border-white/25 text-white transition hover:border-[#D9B355] hover:text-[#D9B355]"
+        >
+          <PhoneIcon className="h-5 w-5" />
+        </a>
+        {/* On the narrowest phones the word goes and the glyph stays, so the price never gets cut off. */}
+        <a
+          href={whatsappHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={copy.propertyDetail.whatsappCta}
+          className={`btn-gold inline-flex h-12 flex-none items-center justify-center gap-2 rounded-full px-4 font-semibold max-[359px]:w-12 max-[359px]:px-0 ${
+            isRtl ? 'text-base' : 'text-sm uppercase tracking-[0.08em]'
+          }`}
+        >
+          <WhatsAppIcon className="h-5 w-5" />
+          <span className="max-[359px]:hidden">{copy.contact.whatsappLabel}</span>
+        </a>
       </div>
     </div>
   );
@@ -131,6 +212,14 @@ export default async function PropertyDetailPage({
   const propertyShowsArea = showsArea(property.propertyType) && property.area > 0;
   const priceSuffix = priceSuffixLabel(property.pricePeriod, locale);
   const descriptionBullets = descriptionItems(property.description);
+  const whatsappHref = goldWhatsAppUrl(
+    fill(copy.propertyDetail.whatsappMessage, {
+      property: property.name,
+      location: locationLabel(property.location, locale),
+      price: `${formatPrice(property.price, locale)}${priceSuffix}`,
+      url: `${SITE_URL}/${locale}/properties/${property.id}`
+    })
+  );
 
   const specs = [
     { label: copy.propertyDetail.typeLabel, value: propertyTypeLabel(property.propertyType, locale) },
@@ -146,7 +235,20 @@ export default async function PropertyDetailPage({
   ];
 
   return (
-    <PageShell locale={locale} copy={copy}>
+    <PageShell
+      locale={locale}
+      copy={copy}
+      bottomBar={
+        <PhoneContactBar
+          copy={copy}
+          property={property}
+          locale={locale}
+          priceSuffix={priceSuffix}
+          whatsappHref={whatsappHref}
+          callHref={callHref}
+        />
+      }
+    >
       <SurfaceShell variant="light" className="px-4 pb-24 pt-32 sm:px-6 sm:pt-36 lg:px-8">
         <div className="relative mx-auto max-w-6xl">
           <Link
@@ -219,6 +321,7 @@ export default async function PropertyDetailPage({
                   locale={locale}
                   isRtl={isRtl}
                   priceSuffix={priceSuffix}
+                  whatsappHref={whatsappHref}
                   enquireHref={enquireHref}
                   callHref={callHref}
                 />
@@ -269,6 +372,7 @@ export default async function PropertyDetailPage({
                 locale={locale}
                 isRtl={isRtl}
                 priceSuffix={priceSuffix}
+                whatsappHref={whatsappHref}
                 enquireHref={enquireHref}
                 callHref={callHref}
               />

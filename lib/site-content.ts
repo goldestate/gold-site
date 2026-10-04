@@ -106,6 +106,13 @@ export type SiteCopy = {
     bathroomsLabel: string;
     areaLabel: string;
     descriptionLabel: string;
+    whatsappCta: string;
+    /**
+     * Typed into WhatsApp for the visitor. "{property}", "{location}", "{price}"
+     * and "{url}" are filled in by the page; the link is what tells the team
+     * exactly which unit is meant.
+     */
+    whatsappMessage: string;
     enquireCta: string;
     callCta: string;
     notFoundTitle: string;
@@ -180,6 +187,9 @@ export type SiteCopy = {
     address: string;
     hotlineLabel: string;
     hotline: string;
+    whatsappLabel: string;
+    /** Typed into WhatsApp when someone starts a chat from the contact page. */
+    whatsappMessage: string;
     emailLabel: string;
     emailValue: string;
     mapCta: string;
@@ -534,6 +544,8 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       bathroomsLabel: 'Bathrooms',
       areaLabel: 'Area',
       descriptionLabel: 'About this property',
+      whatsappCta: 'WhatsApp us',
+      whatsappMessage: 'Hello GOLD, I’m interested in {property} ({location}, {price}). {url}',
       enquireCta: 'Enquire About This Property',
       callCta: 'Call Now',
       notFoundTitle: 'Property not found',
@@ -661,6 +673,8 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       address: 'The Office, Tolip El Narge, El Tagmoa El Khames, 90th Street, New Cairo, Egypt',
       hotlineLabel: 'Phone',
       hotline: '+20 106 637 7883',
+      whatsappLabel: 'WhatsApp',
+      whatsappMessage: 'Hello GOLD, I have a question.',
       emailLabel: 'Email',
       emailValue: 'gold.domain01@gmail.com',
       mapCta: 'Open map',
@@ -955,6 +969,8 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       bathroomsLabel: 'الحمامات',
       areaLabel: 'المساحة',
       descriptionLabel: 'عن هذا العقار',
+      whatsappCta: 'راسلنا على واتساب',
+      whatsappMessage: 'مرحباً جولد، أنا مهتم بـ {property} ({location}، {price}). {url}',
       enquireCta: 'استفسر عن هذا العقار',
       callCta: 'اتصل الآن',
       notFoundTitle: 'العقار غير موجود',
@@ -1081,6 +1097,8 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       address: 'المكتب، توليب النرجس، التجمع الخامس، شارع 90، القاهرة الجديدة، مصر',
       hotlineLabel: 'الهاتف',
       hotline: '+20 106 637 7883',
+      whatsappLabel: 'واتساب',
+      whatsappMessage: 'مرحباً جولد، لدي استفسار.',
       emailLabel: 'البريد',
       emailValue: 'gold.domain01@gmail.com',
       mapCta: 'عرض الخريطة',

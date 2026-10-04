@@ -4,6 +4,7 @@ import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import type { SiteCopy } from '@/lib/site-content';
+import { goldWhatsAppUrl } from '@/lib/app-links';
 import { UNIT_TYPES } from '@/lib/property-taxonomy';
 import { GMark } from './gmark';
 import { SectionTitle, SurfaceShell, ArrowIcon } from './section-ui';
@@ -200,16 +201,36 @@ function Field({
   );
 }
 
-function InfoCard({ label, value, href }: { label: string; value: string; href?: string }) {
+function InfoCard({
+  label,
+  value,
+  href,
+  external = false,
+  ltr = false
+}: {
+  label: string;
+  value: string;
+  href?: string;
+  /** Opens in a new tab: WhatsApp, rather than a tel: or mailto: link. */
+  external?: boolean;
+  /** Phone numbers read left to right even on Arabic pages, or "+20" ends up last. */
+  ltr?: boolean;
+}) {
+  const text = ltr ? <span dir="ltr">{value}</span> : value;
+
   return (
     <div className="rounded-[1.2rem] border border-white/10 bg-black/22 px-4 py-4">
       <div className="text-xs uppercase tracking-[0.26em] text-white/52">{label}</div>
       {href ? (
-        <a href={href} className="mt-3 block text-sm font-medium leading-6 text-white transition hover:text-[#D9B355]">
-          {value}
+        <a
+          href={href}
+          {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+          className="mt-3 block text-sm font-medium leading-6 text-white transition hover:text-[#D9B355]"
+        >
+          {text}
         </a>
       ) : (
-        <div className="mt-3 text-sm font-medium leading-6 text-white">{value}</div>
+        <div className="mt-3 text-sm font-medium leading-6 text-white">{text}</div>
       )}
     </div>
   );
@@ -252,11 +273,21 @@ export function ContactSection({
               <p className="mt-4 max-w-md text-sm leading-7 text-white/74">{copy.address}</p>
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
                 <InfoCard
+                  label={copy.whatsappLabel}
+                  value={copy.hotline}
+                  href={goldWhatsAppUrl(copy.whatsappMessage)}
+                  external
+                  ltr
+                />
+                <InfoCard
                   label={copy.hotlineLabel}
                   value={copy.hotline}
                   href={`tel:${copy.hotline.replace(/[^+\d]/g, '')}`}
+                  ltr
                 />
-                <InfoCard label={copy.emailLabel} value={copy.emailValue} href={`mailto:${copy.emailValue}`} />
+                <div className="sm:col-span-2">
+                  <InfoCard label={copy.emailLabel} value={copy.emailValue} href={`mailto:${copy.emailValue}`} />
+                </div>
               </div>
               <a
                 href={`https://www.google.com/maps?q=${MAP_QUERY}`}
