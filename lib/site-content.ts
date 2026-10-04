@@ -206,8 +206,21 @@ export type SiteCopy = {
   footer: {
     tagline: string;
     legal: string;
-    /** The App Store link under the tagline, on every page. */
-    getTheApp: string;
+    /**
+     * The app card under the tagline, on every page. "App Store" and "iPhone"
+     * stay in English in both languages: Apple's rules forbid translating or
+     * transliterating its trademarks.
+     */
+    app: {
+      title: string;
+      body: string;
+      /** Under the QR code, which only shows on wide screens. */
+      scanHint: string;
+      /** The card is a single link; this is what a screen reader announces for it. */
+      linkLabel: string;
+    };
+    /** The credit Apple requires wherever its badge appears, placed with the legal line. */
+    appleCredit: string;
   };
   rentalRequestPage: {
     eyebrow: string;
@@ -691,7 +704,14 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     footer: {
       tagline: 'Golden Opportunity Of Leading Domain.',
       legal: '© 2026 GOLD Investment Opportunities. All rights reserved.',
-      getTheApp: 'Get the GOLD app on the App Store'
+      app: {
+        title: 'GOLD for iPhone',
+        body: 'Browse every listing, save the ones you like and find trusted help in your compound. Free, no sign-up.',
+        scanHint: 'Scan with your iPhone',
+        linkLabel: 'GOLD for iPhone: Download on the App Store'
+      },
+      appleCredit:
+        'Apple and the Apple logo are trademarks of Apple Inc., registered in the U.S. and other countries. App Store is a service mark of Apple Inc.'
     },
     rentalRequestPage: {
       eyebrow: 'Rental Desk / Gold Partners',
@@ -1115,7 +1135,17 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     footer: {
       tagline: 'الفرصة الذهبية لمجال ريادي.',
       legal: '© 2026 GOLD Investment Opportunities. جميع الحقوق محفوظة.',
-      getTheApp: 'حمّل تطبيق جولد من App Store'
+      app: {
+        title: 'جولد لأجهزة iPhone',
+        body: 'تصفّح كل العقارات، واحفظ ما يعجبك، واعثر على فنيين موثوقين في الكمبوند. مجاني وبدون تسجيل.',
+        scanHint: 'امسح الرمز بكاميرا iPhone',
+        // The words on Apple's Arabic badge, so what is read out matches what is seen.
+        linkLabel: 'جولد لأجهزة iPhone: تنزيل من App Store'
+      },
+      // ‎ keeps each "Inc." full stop with the English name; without it the
+      // Arabic line around it pulls the stop to the wrong side.
+      appleCredit:
+        'Apple وشعار Apple علامتان تجاريتان لشركة Apple Inc.‎، مسجّلتان في الولايات المتحدة ودول أخرى. App Store علامة خدمة لشركة Apple Inc.‎'
     },
     rentalRequestPage: {
       eyebrow: 'مكتب الإيجارات / شركاء GOLD',
