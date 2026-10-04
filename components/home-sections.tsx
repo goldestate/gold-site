@@ -2,15 +2,13 @@
 
 import Image from 'next/image';
 import { useState, type FormEvent } from 'react';
-import { motion } from 'framer-motion';
 import { useRouter } from '@/i18n/navigation';
 import { Link } from '@/i18n/navigation';
 import type { SiteCopy } from '@/lib/site-content';
 import type { Property } from '@/lib/properties-store';
 import { LOCATIONS, PROPERTY_TYPES } from '@/lib/property-taxonomy';
 import { GoldSelect, type GoldSelectOption } from './gold-select';
-import { GMark } from './gmark';
-import { fadeUp, SectionTitle, SurfaceShell, LineIcon, ArrowIcon } from './section-ui';
+import { SectionTitle, SurfaceShell, LineIcon, ArrowIcon } from './section-ui';
 import { PropertyCard } from './property-card';
 import { PartnersMarquee } from './partners-marquee';
 
@@ -35,11 +33,16 @@ function SearchSelect({
       options={options}
       isRtl={isRtl}
       className="w-full sm:flex-1"
-      triggerClassName="w-full rounded-full border border-white/15 bg-white/8 px-5 py-3 text-sm text-white outline-none transition focus-visible:border-[#D9B355] focus-visible:ring-2 focus-visible:ring-[rgba(217,179,85,0.22)] sm:rounded-none sm:border-0 sm:bg-transparent sm:focus-visible:ring-0"
+      triggerClassName="h-12 w-full rounded-full border border-white/[0.12] bg-white/[0.06] px-5 text-sm text-white outline-none transition focus-visible:border-[#D9B355] focus-visible:ring-2 focus-visible:ring-[rgba(217,179,85,0.22)] sm:rounded-none sm:border-0 sm:bg-transparent sm:focus-visible:ring-0"
     />
   );
 }
 
+/**
+ * The opening screen: one of GOLD's own homes (Hacienda West, North Coast, at
+ * dusk) under a shade that darkens the side the words sit on. The shade turns
+ * with the page direction, so Arabic text gets the dark side too.
+ */
 export function HeroSearch({
   copy,
   locale,
@@ -64,109 +67,106 @@ export function HeroSearch({
     router.push(`/properties${query ? `?${query}` : ''}`);
   };
 
-  return (
-    <section className="relative min-h-[100svh] overflow-hidden bg-spotlight-black pt-32 text-white sm:pt-36">
-      <div className="absolute inset-0">
-        <Image
-          src="https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=2200&q=80"
-          alt="Luxury modern architecture background"
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-center opacity-30"
-        />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_16%,rgba(212,175,55,0.16),transparent_28%),linear-gradient(180deg,rgba(35,31,32,0.18),rgba(35,31,32,0.92))]" />
-      </div>
+  const stats = [
+    { label: copy.statLabel1, value: copy.statValue1 },
+    { label: copy.statLabel2, value: copy.statValue2 },
+    { label: copy.statLabel3, value: copy.statValue3 }
+  ];
 
-      <GMark
-        tone="gold"
-        size={760}
-        className={`-bottom-40 opacity-[0.05] ${isRtl ? '-left-40 scale-x-[-1]' : '-right-40'}`}
+  return (
+    <section className="relative isolate flex min-h-[88svh] items-end overflow-hidden bg-[#171314] pb-14 pt-32 text-white sm:pb-20 sm:pt-40">
+      <Image
+        src="/hero/hacienda-west-dusk.jpg"
+        alt={copy.heroImageAlt}
+        fill
+        priority
+        sizes="100vw"
+        className="-z-20 object-cover object-[60%_50%]"
+      />
+      <div
+        aria-hidden="true"
+        className={`absolute inset-0 -z-10 ${
+          isRtl
+            ? 'bg-[linear-gradient(270deg,rgba(23,19,20,0.94)_0%,rgba(23,19,20,0.74)_40%,rgba(23,19,20,0.3)_78%,rgba(23,19,20,0.18)_100%)]'
+            : 'bg-[linear-gradient(90deg,rgba(23,19,20,0.94)_0%,rgba(23,19,20,0.74)_40%,rgba(23,19,20,0.3)_78%,rgba(23,19,20,0.18)_100%)]'
+        }`}
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(23,19,20,0.6)_0%,rgba(23,19,20,0)_28%,rgba(23,19,20,0)_62%,#1e1a1b_100%)]"
       />
 
-      <div className="relative mx-auto flex max-w-4xl flex-col items-center px-4 pb-20 text-center sm:px-6 lg:px-8">
-        <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ duration: 0.8, ease: 'easeOut' }}>
+      <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="max-w-2xl">
           <div className="font-serif text-xs uppercase tracking-[0.48em] text-[rgba(217,179,85,0.9)]">{copy.eyebrow}</div>
-          <h1 className="mt-6 text-4xl font-medium uppercase tracking-[0.1em] sm:text-5xl lg:text-6xl">
+          <h1 className="mt-6 text-4xl font-medium uppercase leading-[1.15] tracking-[0.1em] sm:text-5xl lg:text-6xl">
             <span className="bg-[linear-gradient(90deg,#8B6508_0%,#D4AF37_28%,#F1D878_50%,#D4AF37_72%,#8B6508_100%)] bg-clip-text text-transparent">
               {copy.title}
             </span>
           </h1>
-          <p className="mx-auto mt-7 max-w-xl text-base leading-8 text-white/74 sm:text-lg">{copy.subtitle}</p>
-        </motion.div>
+          <p className="mt-7 max-w-xl text-base leading-8 text-white/80 sm:text-lg">{copy.subtitle}</p>
+        </div>
 
-        <motion.form
+        <form
           onSubmit={handleSubmit}
-          variants={fadeUp}
-          initial="hidden"
-          animate="show"
-          transition={{ duration: 0.8, ease: 'easeOut', delay: 0.1 }}
-          className={`mt-10 flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:gap-3 ${
-            isRtl ? 'sm:flex-row-reverse' : ''
-          }`}
+          className="mt-10 max-w-4xl rounded-[1.6rem] bg-[rgba(23,19,20,0.6)] p-2 ring-1 ring-white/[0.12] backdrop-blur-md sm:rounded-full"
         >
-          <div
-            className={`flex w-full flex-col gap-3 sm:flex-1 sm:items-stretch sm:gap-0 sm:divide-x sm:divide-white/12 sm:rounded-full sm:border sm:border-white/15 sm:bg-white/8 sm:backdrop-blur-sm ${
-              isRtl ? 'sm:flex-row-reverse sm:divide-x-reverse' : 'sm:flex-row'
-            }`}
-          >
-            <SearchSelect
-              ariaLabel={copy.search.propertyTypeLabel}
-              value={propertyType}
-              onChange={setPropertyType}
-              isRtl={isRtl}
-              options={[
-                { value: 'any', label: copy.search.anyPropertyType },
-                ...PROPERTY_TYPES.map((item) => ({ value: item.value, label: item[locale] }))
-              ]}
-            />
-            <SearchSelect
-              ariaLabel={copy.search.locationLabel}
-              value={location}
-              onChange={setLocation}
-              isRtl={isRtl}
-              options={[
-                { value: 'any', label: copy.search.anyLocation },
-                ...LOCATIONS.map((item) => ({ value: item.value, label: item[locale] }))
-              ]}
-            />
-            <SearchSelect
-              ariaLabel={copy.search.budgetLabel}
-              value={maxPrice}
-              onChange={setMaxPrice}
-              isRtl={isRtl}
-              options={[
-                { value: 'any', label: copy.search.anyBudget },
-                ...copy.search.priceBuckets.map((bucket) => ({ value: String(bucket.max), label: bucket.label }))
-              ]}
-            />
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div
+              className={`flex flex-col gap-2 sm:flex-1 sm:flex-row sm:items-center sm:gap-0 sm:divide-x sm:divide-white/10 ${
+                isRtl ? 'sm:divide-x-reverse' : ''
+              }`}
+            >
+              <SearchSelect
+                ariaLabel={copy.search.propertyTypeLabel}
+                value={propertyType}
+                onChange={setPropertyType}
+                isRtl={isRtl}
+                options={[
+                  { value: 'any', label: copy.search.anyPropertyType },
+                  ...PROPERTY_TYPES.map((item) => ({ value: item.value, label: item[locale] }))
+                ]}
+              />
+              <SearchSelect
+                ariaLabel={copy.search.locationLabel}
+                value={location}
+                onChange={setLocation}
+                isRtl={isRtl}
+                options={[
+                  { value: 'any', label: copy.search.anyLocation },
+                  ...LOCATIONS.map((item) => ({ value: item.value, label: item[locale] }))
+                ]}
+              />
+              <SearchSelect
+                ariaLabel={copy.search.budgetLabel}
+                value={maxPrice}
+                onChange={setMaxPrice}
+                isRtl={isRtl}
+                options={[
+                  { value: 'any', label: copy.search.anyBudget },
+                  ...copy.search.priceBuckets.map((bucket) => ({ value: String(bucket.max), label: bucket.label }))
+                ]}
+              />
+            </div>
+            <button
+              type="submit"
+              className="btn-gold inline-flex h-12 items-center justify-center gap-2 whitespace-nowrap rounded-full px-7 text-sm font-medium uppercase tracking-[0.18em]"
+            >
+              {copy.search.submit}
+            </button>
           </div>
-          <button
-            type="submit"
-            className="btn-gold inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full px-6 py-3 text-sm font-medium uppercase tracking-[0.18em]"
-          >
-            {copy.search.submit}
-          </button>
-        </motion.form>
+        </form>
 
-        <motion.div
-          variants={fadeUp}
-          initial="hidden"
-          animate="show"
-          transition={{ duration: 0.8, ease: 'easeOut', delay: 0.18 }}
-          className="mt-12 grid w-full max-w-2xl grid-cols-3 gap-4 rounded-[1.75rem] border border-white/10 bg-white/6 p-5 backdrop-blur-sm"
-        >
-          {[
-            { label: copy.statLabel1, value: copy.statValue1 },
-            { label: copy.statLabel2, value: copy.statValue2 },
-            { label: copy.statLabel3, value: copy.statValue3 }
-          ].map((item) => (
-            <div key={item.label} className="space-y-2 text-center">
-              <div className="text-xs uppercase tracking-[0.28em] text-white/56">{item.label}</div>
-              <div className="gold-gradient-text text-2xl font-medium tracking-[0.16em]">{item.value}</div>
+        <dl className="mt-10 grid max-w-xl grid-cols-3 gap-4 border-t border-white/[0.12] pt-6">
+          {stats.map((item) => (
+            <div key={item.label}>
+              <dt className="text-xs uppercase tracking-[0.28em] text-white/55">{item.label}</dt>
+              <dd className="gold-gradient-text mt-2 text-2xl font-medium tracking-[0.16em]">
+                {item.value}
+              </dd>
             </div>
           ))}
-        </motion.div>
+        </dl>
       </div>
     </section>
   );
@@ -174,23 +174,16 @@ export function HeroSearch({
 
 export function TrustStrip({ copy, isRtl }: { copy: SiteCopy['home']['trust']; isRtl: boolean }) {
   return (
-    <SurfaceShell variant="dark" className="px-4 py-20 sm:px-6 lg:px-8">
+    <SurfaceShell variant="dark" className="px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <SectionTitle eyebrow={copy.eyebrow} title={copy.title} isRtl={isRtl} tone="dark" />
-        <div className="mt-12 grid gap-8 border-t border-white/10 pt-10 md:grid-cols-2 xl:grid-cols-4 md:gap-x-10 md:gap-y-10">
-          {copy.items.map((item, index) => (
-            <motion.article
-              key={item.title}
-              variants={fadeUp}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, margin: '-120px' }}
-              transition={{ duration: 0.7, delay: index * 0.05 }}
-            >
+        <div className="mt-12 grid gap-x-10 gap-y-12 border-t border-white/10 pt-10 sm:grid-cols-2 xl:grid-cols-4">
+          {copy.items.map((item) => (
+            <article key={item.title}>
               <LineIcon icon={item.icon} gold />
               <h3 className="mt-6 text-xl font-medium uppercase tracking-[0.14em] text-white">{item.title}</h3>
-              <p className="mt-4 text-sm leading-7 text-white/68">{item.description}</p>
-            </motion.article>
+              <p className="mt-4 text-sm leading-7 text-white/[0.68]">{item.description}</p>
+            </article>
           ))}
         </div>
       </div>
@@ -202,41 +195,39 @@ export function FeaturedProperties({
   copy,
   properties,
   locale,
-  isRtl
+  isRtl,
+  viewDetailsLabel
 }: {
   copy: SiteCopy['home']['featured'];
   properties: Property[];
   locale: 'en' | 'ar';
   isRtl: boolean;
+  /** What each card's button says; the section's own "view all" is a different action. */
+  viewDetailsLabel: string;
 }) {
   return (
-    <SurfaceShell variant="light" className="px-4 py-20 sm:px-6 lg:px-8">
+    <SurfaceShell variant="light" className="px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <div
-          className={`flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between ${
-            isRtl ? 'sm:flex-row-reverse' : ''
-          }`}
-        >
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <SectionTitle eyebrow={copy.eyebrow} title={copy.title} isRtl={isRtl} tone="light" />
           <Link
             href="/properties"
             locale={locale}
-            className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-[rgba(35,31,32,0.15)] px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#231F20] transition hover:border-[#B8860B] hover:text-[#B8860B]"
+            className="inline-flex items-center gap-2 self-start whitespace-nowrap rounded-full border border-[rgba(35,31,32,0.15)] px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#231F20] transition hover:border-[#B8860B] hover:text-[#B8860B] sm:self-auto"
           >
             {copy.viewAllCta}
             <ArrowIcon rtl={isRtl} />
           </Link>
         </div>
 
-        <div className="mt-12 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 md:gap-6 xl:grid-cols-4">
-          {properties.map((property, index) => (
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {properties.map((property) => (
             <PropertyCard
               key={property.id}
               property={property}
               locale={locale}
               isRtl={isRtl}
-              viewDetailsLabel={copy.viewAllCta}
-              delay={index * 0.06}
+              viewDetailsLabel={viewDetailsLabel}
             />
           ))}
         </div>
@@ -247,7 +238,7 @@ export function FeaturedProperties({
 
 export function HomePartners({ copy, isRtl }: { copy: SiteCopy['home']['partners']; isRtl: boolean }) {
   return (
-    <SurfaceShell variant="dark" className="py-16">
+    <SurfaceShell variant="dark" className="py-16 sm:py-20">
       <PartnersMarquee eyebrow={copy.eyebrow} title={copy.title} isRtl={isRtl} />
     </SurfaceShell>
   );
@@ -268,32 +259,27 @@ export function RentalDeskPromo({
   ];
 
   return (
-    <SurfaceShell variant="dark" className="px-4 py-20 sm:px-6 lg:px-8">
+    <SurfaceShell variant="dark" className="px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <SectionTitle eyebrow={copy.eyebrow} title={copy.title} intro={copy.subtitle} isRtl={isRtl} tone="dark" />
-        <div className="mt-12 grid gap-6 border-t border-white/10 pt-10 sm:grid-cols-2">
-          {cards.map((card, index) => (
-            <motion.div
+        <div className="mt-12 grid gap-5 sm:grid-cols-2">
+          {cards.map((card) => (
+            <div
               key={card.title}
-              variants={fadeUp}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, margin: '-120px' }}
-              transition={{ duration: 0.7, delay: index * 0.06 }}
-              className="rounded-[1.75rem] border border-white/10 bg-white/5 p-7 backdrop-blur-sm"
+              className="flex flex-col rounded-[1.25rem] bg-white/[0.035] p-7 ring-1 ring-white/10 transition hover:ring-[rgba(217,179,85,0.35)] sm:p-9"
             >
               <LineIcon icon={card.icon} gold />
               <h3 className="mt-6 text-xl font-medium uppercase tracking-[0.14em] text-white">{card.title}</h3>
-              <p className="mt-4 text-sm leading-7 text-white/68">{card.body}</p>
+              <p className="mt-4 text-sm leading-7 text-white/[0.68]">{card.body}</p>
               <Link
                 href={card.href}
                 locale={locale}
-                className="mt-6 inline-flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.2em] text-[#D9B355]"
+                className="mt-auto inline-flex items-center gap-3 self-start pt-7 text-sm font-semibold uppercase tracking-[0.2em] text-[#D9B355] transition hover:text-[#ECD08A]"
               >
                 {card.cta}
                 <ArrowIcon rtl={isRtl} />
               </Link>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
@@ -311,17 +297,15 @@ export function ContactCta({
   isRtl: boolean;
 }) {
   return (
-    <SurfaceShell variant="spotlight" className="px-4 py-20 text-center sm:px-6 lg:px-8">
+    <SurfaceShell variant="spotlight" className="px-4 py-24 text-center sm:px-6 sm:py-28 lg:px-8">
       <div className="mx-auto max-w-2xl">
         <div className="font-serif text-xs uppercase tracking-[0.42em] text-[rgba(217,179,85,0.88)]">{copy.eyebrow}</div>
-        <h2 className="mt-4 text-3xl font-medium uppercase tracking-[0.14em] text-white sm:text-4xl">
-          {copy.title}
-        </h2>
-        <p className="mt-4 text-base leading-8 text-white/72">{copy.subtitle}</p>
+        <h2 className="mt-4 text-3xl font-medium uppercase tracking-[0.14em] text-white sm:text-4xl">{copy.title}</h2>
+        <p className="mx-auto mt-4 max-w-xl text-base leading-8 text-white/[0.72]">{copy.subtitle}</p>
         <Link
           href="/contact"
           locale={locale}
-          className="btn-gold mt-8 inline-flex items-center gap-3 rounded-full px-7 py-3 text-sm font-medium uppercase tracking-[0.2em]"
+          className="btn-gold mt-8 inline-flex h-12 items-center gap-3 rounded-full px-8 text-sm font-medium uppercase tracking-[0.2em]"
         >
           {copy.cta}
           <ArrowIcon rtl={isRtl} />

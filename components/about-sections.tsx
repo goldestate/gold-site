@@ -11,30 +11,30 @@ const SUBBRAND_HREFS: Record<'estate' | 'life' | 'management' | 'export', string
   export: '/gold-export'
 };
 
+// Alignment and order follow the page's direction, so nothing below mirrors by hand.
+
 export function StorySection({ copy, isRtl }: { copy: SiteCopy['about']; isRtl: boolean }) {
   return (
-    <SurfaceShell variant="light" className="px-4 pb-16 pt-32 sm:px-6 sm:pt-36 lg:px-8">
-      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-        <div className={isRtl ? 'text-right' : ''}>
+    <SurfaceShell variant="light" className="px-4 pb-20 pt-32 sm:px-6 sm:pt-40 lg:px-8">
+      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1fr_0.9fr] lg:items-center lg:gap-16">
+        <div>
           <SectionTitle eyebrow={copy.eyebrow} title={copy.title} isRtl={isRtl} tone="light" />
-          <div className="mt-8 max-w-2xl">
-            <div className="font-serif text-xs uppercase tracking-[0.38em] text-[#B8860B]">
-              {copy.story.eyebrow}
-            </div>
-            <p className="mt-5 font-serif text-2xl leading-snug text-[#231F20] sm:text-3xl">
-              {copy.story.quote}
-            </p>
+          <div className="mt-10 max-w-2xl border-t border-[rgba(35,31,32,0.12)] pt-8">
+            <div className="font-serif text-xs uppercase tracking-[0.38em] text-[#B8860B]">{copy.story.eyebrow}</div>
+            <p className="mt-5 font-serif text-2xl leading-snug text-[#231F20] sm:text-3xl">{copy.story.quote}</p>
             <p className="mt-6 text-base leading-8 text-[rgba(35,31,32,0.82)]">{copy.story.body}</p>
           </div>
         </div>
 
-        <div className="relative overflow-hidden rounded-[2rem] border border-black/10">
+        {/* One of GOLD's own homes: Swan Lake, Gouna. */}
+        <div className="relative overflow-hidden rounded-[1.5rem] shadow-[0_30px_60px_-30px_rgba(35,31,32,0.55)]">
           <Image
-            src="https://images.unsplash.com/photo-1449844908441-8829872d2607?auto=format&fit=crop&w=1200&q=80"
-            alt="Modern architecture detail"
-            width={1000}
-            height={1200}
-            className="h-[26rem] w-full object-cover object-center"
+            src="/hero/swan-lake-gouna.jpg"
+            alt={isRtl ? 'سوان ليك في الجونة، والمباني تنعكس على البحيرة' : 'Swan Lake in Gouna, its buildings reflected in the lagoon'}
+            width={931}
+            height={900}
+            sizes="(min-width: 1024px) 40vw, 100vw"
+            className="h-[24rem] w-full object-cover object-center sm:h-[30rem]"
           />
         </div>
       </div>
@@ -42,56 +42,43 @@ export function StorySection({ copy, isRtl }: { copy: SiteCopy['about']; isRtl: 
   );
 }
 
-export function MissionVisionSection({ copy, isRtl }: { copy: SiteCopy['about']; isRtl: boolean }) {
+export function MissionVisionSection({ copy }: { copy: SiteCopy['about']; isRtl: boolean }) {
   return (
-    <SurfaceShell variant="dark" className="px-4 py-16 sm:px-6 lg:px-8">
+    <SurfaceShell variant="dark" className="px-4 py-20 sm:px-6 lg:px-8">
       <div className="mx-auto grid max-w-7xl gap-5 md:grid-cols-2">
-        <div className="rounded-[1.6rem] border border-white/10 bg-white/6 p-7">
+        <div className="rounded-[1.25rem] bg-white/[0.035] p-8 ring-1 ring-white/10 sm:p-10">
           <div className="font-serif text-xs uppercase tracking-[0.38em] text-[rgba(217,179,85,0.9)]">
             {copy.missionVision.missionLabel}
           </div>
-          <p className={`mt-4 text-base leading-8 text-white/78 ${isRtl ? 'text-right' : ''}`}>
-            {copy.missionVision.mission}
-          </p>
+          <p className="mt-4 text-base leading-8 text-white/[0.78]">{copy.missionVision.mission}</p>
         </div>
-        <div className="rounded-[1.6rem] border border-white/10 bg-white/6 p-7">
+        <div className="rounded-[1.25rem] bg-white/[0.035] p-8 ring-1 ring-white/10 sm:p-10">
           <div className="font-serif text-xs uppercase tracking-[0.38em] text-[rgba(217,179,85,0.9)]">
             {copy.missionVision.visionLabel}
           </div>
-          <p className={`mt-4 text-base leading-8 text-white/78 ${isRtl ? 'text-right' : ''}`}>
-            {copy.missionVision.vision}
-          </p>
+          <p className="mt-4 text-base leading-8 text-white/[0.78]">{copy.missionVision.vision}</p>
         </div>
       </div>
     </SurfaceShell>
   );
 }
 
-export function WhatWeDoAndWhyChooseUsSection({ copy, isRtl }: { copy: SiteCopy['about']; isRtl: boolean }) {
+export function WhatWeDoAndWhyChooseUsSection({ copy }: { copy: SiteCopy['about']; isRtl: boolean }) {
   return (
-    <SurfaceShell variant="light" className="px-4 py-16 sm:px-6 lg:px-8">
-      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-2">
-        <div className={isRtl ? 'text-right' : ''}>
-          <div className="font-serif text-xs uppercase tracking-[0.38em] text-[#B8860B]">
-            {copy.whatWeDo.eyebrow}
-          </div>
+    <SurfaceShell variant="light" className="px-4 py-20 sm:px-6 lg:px-8">
+      <div className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-2 lg:gap-20">
+        <div>
+          <div className="font-serif text-xs uppercase tracking-[0.38em] text-[#B8860B]">{copy.whatWeDo.eyebrow}</div>
           <h3 className="mt-3 text-2xl font-medium text-[#231F20]">{copy.whatWeDo.title}</h3>
           <p className="mt-4 text-base leading-8 text-[rgba(35,31,32,0.82)]">{copy.whatWeDo.body}</p>
         </div>
-        <div className={isRtl ? 'text-right' : ''}>
-          <div className="font-serif text-xs uppercase tracking-[0.38em] text-[#B8860B]">
-            {copy.whyChooseUs.eyebrow}
-          </div>
+        <div>
+          <div className="font-serif text-xs uppercase tracking-[0.38em] text-[#B8860B]">{copy.whyChooseUs.eyebrow}</div>
           <h3 className="mt-3 text-2xl font-medium text-[#231F20]">{copy.whyChooseUs.title}</h3>
-          <ul className="mt-5 space-y-3">
+          <ul className="mt-6 divide-y divide-[rgba(35,31,32,0.1)] border-y border-[rgba(35,31,32,0.1)]">
             {copy.whyChooseUs.items.map((item) => (
-              <li
-                key={item}
-                className={`flex items-start gap-3 text-sm leading-6 text-[rgba(35,31,32,0.82)] ${
-                  isRtl ? 'flex-row-reverse text-right' : ''
-                }`}
-              >
-                <span className="mt-1.5 h-1.5 w-1.5 flex-none rounded-full bg-[#B8860B]" />
+              <li key={item} className="flex items-center gap-3 py-3.5 text-sm leading-6 text-[rgba(35,31,32,0.82)]">
+                <span className="h-1.5 w-1.5 flex-none rounded-full bg-[#8B6508]" />
                 {item}
               </li>
             ))}
@@ -102,35 +89,32 @@ export function WhatWeDoAndWhyChooseUsSection({ copy, isRtl }: { copy: SiteCopy[
   );
 }
 
-export function AchievementsSection({ copy, isRtl }: { copy: SiteCopy['about']; isRtl: boolean }) {
+export function AchievementsSection({ copy }: { copy: SiteCopy['about']; isRtl: boolean }) {
   return (
-    <SurfaceShell variant="spotlight" className="relative overflow-hidden px-4 py-16 sm:px-6 lg:px-8">
-      <GMark tone="gold" size={480} className={`-top-20 opacity-[0.05] ${isRtl ? '-left-20' : '-right-20'}`} />
+    <SurfaceShell variant="spotlight" className="relative overflow-hidden px-4 py-20 sm:px-6 lg:px-8">
+      <GMark tone="gold" size={480} className="-end-20 -top-20 opacity-[0.05]" />
       <div className="relative mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.7fr_1.3fr] lg:items-center">
-        <div className={isRtl ? 'text-right' : ''}>
+        <div>
           <div className="font-serif text-xs uppercase tracking-[0.38em] text-[rgba(217,179,85,0.9)]">
             {copy.achievements.eyebrow}
           </div>
-          <div className="gold-gradient-text mt-3 text-5xl font-medium tracking-[0.04em]">
-            {copy.achievements.stat}
-          </div>
-          <div className="mt-2 text-sm uppercase tracking-[0.24em] text-white/60">
-            {copy.achievements.statLabel}
-          </div>
+          <div className="gold-gradient-text mt-3 text-5xl font-medium tracking-[0.04em]">{copy.achievements.stat}</div>
+          <div className="mt-2 text-sm uppercase tracking-[0.24em] text-white/60">{copy.achievements.statLabel}</div>
         </div>
-        <p className={`text-base leading-8 text-white/76 ${isRtl ? 'text-right' : ''}`}>
-          {copy.achievements.body}
-        </p>
+        <p className="max-w-2xl text-base leading-8 text-white/[0.76]">{copy.achievements.body}</p>
       </div>
     </SurfaceShell>
   );
 }
 
-export function RentalAndGoldLifeSection({ copy, isRtl }: { copy: SiteCopy['about']; isRtl: boolean }) {
+export function RentalAndGoldLifeSection({ copy }: { copy: SiteCopy['about']; isRtl: boolean }) {
+  const card =
+    'flex flex-col rounded-[1.25rem] bg-[#FBFAF6] p-8 shadow-[0_24px_50px_-30px_rgba(35,31,32,0.45)] ring-1 ring-[rgba(35,31,32,0.07)] sm:p-10';
+
   return (
-    <SurfaceShell variant="light" className="px-4 py-16 sm:px-6 lg:px-8">
+    <SurfaceShell variant="light" className="px-4 py-20 sm:px-6 lg:px-8">
       <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-2">
-        <div className={`rounded-[1.6rem] border border-[rgba(35,31,32,0.1)] bg-white p-8 shadow-[0_18px_50px_rgba(35,31,32,0.08)] ${isRtl ? 'text-right' : ''}`}>
+        <div className={card}>
           <LineIcon icon="key" className="h-10 w-10" gold />
           <div className="mt-5 font-serif text-xs uppercase tracking-[0.38em] text-[#B8860B]">
             {copy.rentalProgram.eyebrow}
@@ -139,14 +123,14 @@ export function RentalAndGoldLifeSection({ copy, isRtl }: { copy: SiteCopy['abou
           <p className="mt-4 text-sm leading-7 text-[rgba(35,31,32,0.78)]">{copy.rentalProgram.body}</p>
         </div>
 
-        <div className={`rounded-[1.6rem] border border-[rgba(35,31,32,0.1)] bg-white p-8 shadow-[0_18px_50px_rgba(35,31,32,0.08)] ${isRtl ? 'text-right' : ''}`}>
+        <div className={card}>
           <LineIcon icon="life" className="h-10 w-10" gold />
           <div className="mt-5 font-serif text-xs uppercase tracking-[0.38em] text-[#B8860B]">
             {copy.goldLife.eyebrow}
           </div>
           <h3 className="mt-3 text-xl font-medium text-[#231F20]">{copy.goldLife.title}</h3>
           <p className="mt-4 text-sm leading-7 text-[rgba(35,31,32,0.78)]">{copy.goldLife.body}</p>
-          <div className={`mt-5 flex flex-wrap gap-2 ${isRtl ? 'justify-end' : ''}`}>
+          <div className="mt-6 flex flex-wrap gap-2">
             {copy.goldLife.services.map((service) => (
               <span
                 key={service}
@@ -167,7 +151,6 @@ export function RentalAndGoldLifeSection({ copy, isRtl }: { copy: SiteCopy['abou
 
 export function SubbrandStrip({
   copy,
-  isRtl,
   locale
 }: {
   copy: SiteCopy['about']['subbrands'];
@@ -175,33 +158,22 @@ export function SubbrandStrip({
   locale: 'en' | 'ar';
 }) {
   return (
-    <section
-      id="subbrands"
-      className="relative overflow-hidden border-y border-white/10 bg-[#1a1718] px-4 py-20 sm:px-6 lg:px-8"
-    >
-      <GMark tone="gold" size={520} className={`-top-24 opacity-[0.05] ${isRtl ? '-left-24' : '-right-24'}`} />
+    <section id="subbrands" className="relative overflow-hidden bg-[#171314] px-4 py-24 sm:px-6 lg:px-8">
+      <GMark tone="gold" size={520} className="-end-24 -top-24 opacity-[0.05]" />
       <div className="relative mx-auto max-w-7xl">
-        <div className={isRtl ? 'text-right' : ''}>
-          <div className="font-serif text-xs uppercase tracking-[0.42em] text-[rgba(217,179,85,0.88)]">
-            {copy.eyebrow}
-          </div>
-          <h2 className="mt-4 text-3xl font-medium uppercase tracking-[0.16em] text-white sm:text-4xl">
-            {copy.title}
-          </h2>
-        </div>
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="font-serif text-xs uppercase tracking-[0.42em] text-[rgba(217,179,85,0.88)]">{copy.eyebrow}</div>
+        <h2 className="mt-4 text-3xl font-medium uppercase tracking-[0.16em] text-white sm:text-4xl">{copy.title}</h2>
+        <div className="mt-12 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
           {copy.items.map((item) => (
             <Link
               key={item.name}
               href={SUBBRAND_HREFS[item.icon]}
               locale={locale}
-              className={`group rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-7 transition hover:-translate-y-1 hover:border-[rgba(217,179,85,0.4)] hover:bg-white/[0.06] ${
-                isRtl ? 'text-right' : ''
-              }`}
+              className="group flex flex-col rounded-[1.25rem] bg-white/[0.035] p-7 ring-1 ring-white/10 transition hover:-translate-y-1 hover:bg-white/[0.055] hover:ring-[rgba(217,179,85,0.4)]"
             >
-              <LineIcon icon={item.icon} gold className="h-11 w-11 transition group-hover:scale-110" />
+              <LineIcon icon={item.icon} gold className="h-11 w-11 transition group-hover:scale-105" />
               <div className="mt-6 text-base font-semibold tracking-[0.1em] text-white">{item.name}</div>
-              <p className="mt-3 text-sm leading-6 text-white/58">{item.description}</p>
+              <p className="mt-3 text-sm leading-6 text-white/[0.58]">{item.description}</p>
             </Link>
           ))}
         </div>

@@ -49,7 +49,13 @@ export default async function HomePage({ params }: { params: { locale: Locale } 
       <HeroSearch copy={copy.home.hero} locale={locale} isRtl={isRtl} />
       <HomePartners copy={copy.home.partners} isRtl={isRtl} />
       {featured.length > 0 ? (
-        <FeaturedProperties copy={copy.home.featured} properties={featured} locale={locale} isRtl={isRtl} />
+        <FeaturedProperties
+          copy={copy.home.featured}
+          properties={featured}
+          locale={locale}
+          isRtl={isRtl}
+          viewDetailsLabel={copy.propertiesPage.filters.viewDetails}
+        />
       ) : null}
       <TrustStrip copy={copy.home.trust} isRtl={isRtl} />
       <RentalDeskPromo copy={copy.home.rentalDesk} locale={locale} isRtl={isRtl} />

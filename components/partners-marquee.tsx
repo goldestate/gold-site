@@ -24,7 +24,7 @@ export function PartnersMarquee({
 }) {
   const isLight = variant === 'light';
   const tint = isLight ? 'gold' : 'white';
-  const edgeColor = isLight ? '#e2e1d4' : '#1b1819';
+  const edgeColor = isLight ? '#e2e1d4' : '#1e1a1b';
 
   const track = (keySuffix: string) => (
     <div className="flex shrink-0 items-center gap-16 pr-16" aria-hidden={keySuffix === 'b'}>

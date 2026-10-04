@@ -64,3 +64,11 @@ export function inviteMessage(code: string, nameEn: string, nameAr?: string): st
 export function whatsappComposeUrl(text: string): string {
   return `https://wa.me/?text=${encodeURIComponent(text)}`;
 }
+
+/** GOLD's WhatsApp line (the hotline's mobile number), in the digits-only form wa.me wants. */
+export const GOLD_WHATSAPP_NUMBER = '201066377883';
+
+/** Opens a chat with GOLD with the message already typed, so nobody has to explain which unit they mean. */
+export function goldWhatsAppUrl(text: string): string {
+  return `https://wa.me/${GOLD_WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
+}

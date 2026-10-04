@@ -32,7 +32,7 @@ export type NdaPageState =
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 
 const cardClass =
-  'rounded-[2rem] border border-white/10 bg-[rgba(35,31,32,0.78)] p-6 shadow-[0_24px_64px_rgba(0,0,0,0.28)] backdrop-blur-md sm:p-8';
+  'rounded-[1.5rem] bg-[#1B1718] p-6 shadow-[0_30px_70px_-35px_rgba(0,0,0,0.7)] ring-1 ring-white/10 sm:p-9';
 const eyebrowClass = 'font-serif text-xs uppercase tracking-[0.4em] text-[rgba(217,179,85,0.9)]';
 
 /**
@@ -136,11 +136,11 @@ export function NdaSignSection({
   const message = (title: string, body: string) => (
     <div className={`${cardClass} py-10 text-center`}>
       <div className={eyebrowClass}>{title}</div>
-      <p className="mx-auto mt-4 max-w-md text-sm leading-7 text-white/74">{body}</p>
+      <p className="mx-auto mt-4 max-w-md text-sm leading-7 text-white/[0.74]">{body}</p>
       <div className="mt-8">
         <Link
           href="/"
-          className="btn-gold inline-flex items-center gap-3 rounded-full px-6 py-3 text-sm font-medium uppercase tracking-[0.2em] transition hover:-translate-y-0.5"
+          className="btn-gold inline-flex h-12 items-center gap-3 rounded-full px-8 text-sm font-medium uppercase tracking-[0.2em]"
         >
           {copy.backHome}
           <ArrowIcon rtl={isRtl} />
@@ -355,7 +355,7 @@ export function NdaSignSection({
             type="button"
             onClick={submit}
             disabled={busy}
-            className="btn-gold mt-6 inline-flex w-full items-center justify-center gap-3 rounded-full px-6 py-3.5 text-sm font-medium uppercase tracking-[0.2em] transition hover:-translate-y-0.5 disabled:opacity-60 sm:w-auto"
+            className="btn-gold mt-6 inline-flex h-12 w-full items-center justify-center gap-3 rounded-full px-8 text-sm font-medium uppercase tracking-[0.2em] disabled:opacity-60 sm:w-auto"
           >
             {busy ? copy.submitting : copy.submit}
             <ArrowIcon rtl={isRtl} />

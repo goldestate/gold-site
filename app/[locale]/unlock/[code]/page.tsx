@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { OG_LOCALE, SHARE_IMAGE, getSiteCopy } from '@/lib/site-content';
 import { isCodeShaped, normalizeCode } from '@/lib/directory-taxonomy';
-import { APP_STORE_URL, appSchemeUnlockUrl } from '@/lib/app-links';
+import { APP_STORE_URL, appSchemeUnlockUrl, goldWhatsAppUrl } from '@/lib/app-links';
 import { type Locale } from '@/i18n/routing';
 import { Link } from '@/i18n/navigation';
 import { PageShell } from '@/components/page-shell';
@@ -28,8 +28,6 @@ import { PageShell } from '@/components/page-shell';
  * code's SHAPE, which needs no lookup: anything else in the URL is never shown,
  * so gold-eg.com can't be made to display "PAY EGP 500 TO ..." as someone's code.
  */
-
-const WHATSAPP_NUMBER = '201066377883';
 
 type Params = { locale: Locale; code: string };
 
@@ -71,10 +69,6 @@ function decodeSegment(segment: string): string | null {
   }
 }
 
-function whatsappLink(text: string): string {
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
-}
-
 export default function UnlockPage({ params }: { params: Params }) {
   const { locale } = params;
   const copy = getSiteCopy(locale);
@@ -89,7 +83,7 @@ export default function UnlockPage({ params }: { params: Params }) {
   const decoded = decodeSegment(params.code);
   const code = decoded !== null && isCodeShaped(decoded) ? normalizeCode(decoded) : null;
 
-  const whatsappHref = whatsappLink(
+  const whatsappHref = goldWhatsAppUrl(
     code ? t.whatsappMessage.replace('{code}', code) : t.whatsappMessageNoCode
   );
 

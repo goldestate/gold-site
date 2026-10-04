@@ -1,10 +1,7 @@
-'use client';
-
-import { motion } from 'framer-motion';
 import type { Property } from '@/lib/properties-store';
 import { formatPrice } from '@/lib/format-price';
 import { locationLabel, priceSuffixLabel, propertyTypeLabel, showsArea, unitTypeLabel } from '@/lib/property-taxonomy';
-import { fadeUp, ArrowIcon, StatIcon } from './section-ui';
+import { ArrowIcon, StatIcon } from './section-ui';
 import { Link } from '@/i18n/navigation';
 
 function formatArea(area: number, locale: 'en' | 'ar'): string {
@@ -12,12 +9,16 @@ function formatArea(area: number, locale: 'en' | 'ar'): string {
   return locale === 'ar' ? `${number} م²` : `${number} m²`;
 }
 
+/**
+ * One listing in a grid. Photo first, at a size that sells a home on a phone
+ * (one card per row there), then price, name and the facts. The "view details"
+ * link stretches over the whole card, so a tap anywhere opens the listing while
+ * keyboard users still land on one clear link.
+ */
 export function PropertyCard({
   property,
   locale,
-  isRtl,
-  viewDetailsLabel,
-  delay = 0
+  viewDetailsLabel
 }: {
   property: Property;
   locale: 'en' | 'ar';
@@ -27,72 +28,60 @@ export function PropertyCard({
 }) {
   const propertyShowsArea = showsArea(property.propertyType) && property.area > 0;
   const priceSuffix = priceSuffixLabel(property.pricePeriod, locale);
+  const isRtl = locale === 'ar';
 
   return (
-    <motion.article
-      variants={fadeUp}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: '-120px' }}
-      transition={{ duration: 0.7, delay }}
-      className="group overflow-hidden rounded-[0.85rem] border border-[rgba(35,31,32,0.1)] bg-white transition hover:border-[rgba(184,134,11,0.4)] hover:shadow-[0_10px_24px_rgba(35,31,32,0.1)] sm:rounded-[1rem]"
-    >
-      <div className="relative aspect-[3/2] overflow-hidden">
+    <article className="group relative flex flex-col overflow-hidden rounded-[1.15rem] bg-[#FBFAF6] shadow-[0_1px_0_rgba(35,31,32,0.04),0_18px_40px_-24px_rgba(35,31,32,0.45)] ring-1 ring-[rgba(35,31,32,0.07)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_1px_0_rgba(35,31,32,0.04),0_26px_50px_-24px_rgba(35,31,32,0.55)]">
+      <div className="relative aspect-[4/3] overflow-hidden bg-[rgba(35,31,32,0.06)]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={property.images[0]}
           alt={property.name}
           loading="lazy"
-          className={`h-full w-full object-cover object-center transition duration-700 group-hover:scale-[1.04] ${
+          decoding="async"
+          className={`h-full w-full object-cover object-center transition duration-700 group-hover:scale-[1.03] ${
             property.tone === 'mono' ? 'grayscale contrast-110' : ''
           }`}
         />
-        <div className="absolute left-2 top-2 rounded-full bg-[#231F20]/85 px-2 py-0.5 text-[8px] font-semibold uppercase tracking-[0.14em] text-white sm:left-3 sm:top-3 sm:px-2.5 sm:py-1 sm:text-[10px] sm:tracking-[0.18em]">
+        <span className="absolute start-3 top-3 rounded-full bg-[#231F20]/85 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white">
           {propertyTypeLabel(property.propertyType, locale)}
-        </div>
+        </span>
       </div>
 
-      <div className="p-2.5 sm:p-3.5">
-        <span className={`flex items-baseline gap-1.5 ${isRtl ? 'flex-row-reverse' : ''}`}>
-          <span className="text-sm font-bold tracking-[0.01em] text-[#B8860B] sm:text-lg">
+      <div className="flex flex-1 flex-col p-5">
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-xl font-bold tracking-[0.01em] text-[#8B6508]">
             {formatPrice(property.price, locale)}
           </span>
           {priceSuffix ? (
-            <span dir="ltr" className="text-[9px] font-medium text-[#58595B] sm:text-[11px]">
+            <span dir="ltr" className="text-sm font-medium text-[#58595B]">
               {priceSuffix}
             </span>
           ) : null}
-        </span>
+        </div>
 
-        <h3 className="mt-1 truncate text-xs font-semibold tracking-[0.01em] text-[#231F20] sm:mt-1.5 sm:text-sm">
-          {property.name}
-        </h3>
-
-        <p className="mt-0.5 truncate text-[9px] uppercase tracking-[0.1em] text-[#58595B] sm:text-[10px] sm:tracking-[0.16em]">
+        <h3 className="mt-2 truncate text-base font-semibold tracking-[0.01em] text-[#231F20]">{property.name}</h3>
+        <p className="mt-1 truncate text-xs uppercase tracking-[0.16em] text-[#58595B]">
           {unitTypeLabel(property.unitType, locale)} · {locationLabel(property.location, locale)}
         </p>
 
         {property.bedrooms > 0 || property.bathrooms > 0 || propertyShowsArea ? (
-          <div
-            className={`mt-1.5 flex items-center gap-x-2.5 gap-y-1 border-t border-[rgba(35,31,32,0.08)] pt-1.5 text-[10px] text-[#231F20] sm:mt-2 sm:gap-x-3.5 sm:pt-2 sm:text-xs ${
-              isRtl ? 'flex-row-reverse' : ''
-            }`}
-          >
+          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-[rgba(35,31,32,0.08)] pt-3.5 text-sm text-[#231F20]">
             {property.bedrooms > 0 ? (
-              <span className="inline-flex items-center gap-1">
-                <StatIcon icon="bed" className="h-3 w-3 text-[#B8860B] sm:h-3.5 sm:w-3.5" />
+              <span className="inline-flex items-center gap-1.5">
+                <StatIcon icon="bed" className="h-4 w-4 text-[#8B6508]" />
                 {property.bedrooms}
               </span>
             ) : null}
             {property.bathrooms > 0 ? (
-              <span className="inline-flex items-center gap-1">
-                <StatIcon icon="bath" className="h-3 w-3 text-[#B8860B] sm:h-3.5 sm:w-3.5" />
+              <span className="inline-flex items-center gap-1.5">
+                <StatIcon icon="bath" className="h-4 w-4 text-[#8B6508]" />
                 {property.bathrooms}
               </span>
             ) : null}
             {propertyShowsArea ? (
-              <span className="inline-flex items-center gap-1">
-                <StatIcon icon="area" className="h-3 w-3 text-[#B8860B] sm:h-3.5 sm:w-3.5" />
+              <span className="inline-flex items-center gap-1.5">
+                <StatIcon icon="area" className="h-4 w-4 text-[#8B6508]" />
                 {formatArea(property.area, locale)}
               </span>
             ) : null}
@@ -102,12 +91,12 @@ export function PropertyCard({
         <Link
           href={`/properties/${property.id}`}
           locale={locale}
-          className="mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-[rgba(35,31,32,0.16)] py-1.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-[#231F20] transition group-hover:border-[#B8860B] group-hover:text-[#B8860B] sm:mt-2.5 sm:py-2 sm:text-[10px] sm:tracking-[0.16em]"
+          className="mt-auto inline-flex items-center gap-2 self-start pt-5 text-xs font-semibold uppercase tracking-[0.16em] text-[#231F20] transition after:absolute after:inset-0 after:content-[''] group-hover:text-[#B8860B]"
         >
           {viewDetailsLabel}
           <ArrowIcon rtl={isRtl} />
         </Link>
       </div>
-    </motion.article>
+    </article>
   );
 }

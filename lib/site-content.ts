@@ -36,6 +36,8 @@ export type SiteCopy = {
       statValue2: string;
       statLabel3: string;
       statValue3: string;
+      /** Describes the opening photo (one of GOLD's homes) for screen readers. */
+      heroImageAlt: string;
     };
     trust: {
       eyebrow: string;
@@ -106,6 +108,13 @@ export type SiteCopy = {
     bathroomsLabel: string;
     areaLabel: string;
     descriptionLabel: string;
+    whatsappCta: string;
+    /**
+     * Typed into WhatsApp for the visitor. "{property}", "{location}", "{price}"
+     * and "{url}" are filled in by the page; the link is what tells the team
+     * exactly which unit is meant.
+     */
+    whatsappMessage: string;
     enquireCta: string;
     callCta: string;
     notFoundTitle: string;
@@ -180,6 +189,9 @@ export type SiteCopy = {
     address: string;
     hotlineLabel: string;
     hotline: string;
+    whatsappLabel: string;
+    /** Typed into WhatsApp when someone starts a chat from the contact page. */
+    whatsappMessage: string;
     emailLabel: string;
     emailValue: string;
     mapCta: string;
@@ -196,8 +208,27 @@ export type SiteCopy = {
   footer: {
     tagline: string;
     legal: string;
-    /** The App Store link under the tagline, on every page. */
-    getTheApp: string;
+    /**
+     * The app card under the tagline, on every page. "App Store" and "iPhone"
+     * stay in English in both languages: Apple's rules forbid translating or
+     * transliterating its trademarks.
+     */
+    app: {
+      title: string;
+      body: string;
+      /** Under the QR code, which only shows on wide screens. */
+      scanHint: string;
+      /** The card is a single link; this is what a screen reader announces for it. */
+      linkLabel: string;
+    };
+    /** The credit Apple requires wherever its badge appears, placed with the legal line. */
+    appleCredit: string;
+    /**
+     * GOLD's commercial register and tax card numbers, which Egypt's Consumer
+     * Protection Law (181/2018, art. 37) asks a business selling at a distance
+     * to give. Kept in the footer's small print, where people look for it.
+     */
+    registration: string;
   };
   rentalRequestPage: {
     eyebrow: string;
@@ -437,7 +468,8 @@ export const siteCopy: Record<Locale, SiteCopy> = {
         statLabel2: 'Sales Achieved',
         statValue2: 'EGP 1B+',
         statLabel3: 'Sub-brands',
-        statValue3: '4'
+        statValue3: '4',
+        heroImageAlt: 'Hacienda West on the North Coast at dusk, with the sea behind a lit pool'
       },
       trust: {
         eyebrow: 'Why Choose Us',
@@ -534,6 +566,8 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       bathroomsLabel: 'Bathrooms',
       areaLabel: 'Area',
       descriptionLabel: 'About this property',
+      whatsappCta: 'WhatsApp us',
+      whatsappMessage: 'Hello GOLD, I’m interested in {property} ({location}, {price}). {url}',
       enquireCta: 'Enquire About This Property',
       callCta: 'Call Now',
       notFoundTitle: 'Property not found',
@@ -661,6 +695,8 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       address: 'The Office, Tolip El Narge, El Tagmoa El Khames, 90th Street, New Cairo, Egypt',
       hotlineLabel: 'Phone',
       hotline: '+20 106 637 7883',
+      whatsappLabel: 'WhatsApp',
+      whatsappMessage: 'Hello GOLD, I have a question.',
       emailLabel: 'Email',
       emailValue: 'gold.domain01@gmail.com',
       mapCta: 'Open map',
@@ -677,7 +713,15 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     footer: {
       tagline: 'Golden Opportunity Of Leading Domain.',
       legal: '© 2026 GOLD Investment Opportunities. All rights reserved.',
-      getTheApp: 'Get the GOLD app on the App Store'
+      app: {
+        title: 'Download the GOLD app',
+        body: 'Browse every listing, save the ones you like and find trusted help in your compound. Free, no sign-up.',
+        scanHint: 'Scan with your iPhone',
+        linkLabel: 'Download the GOLD app on the App Store'
+      },
+      appleCredit:
+        'Apple and the Apple logo are trademarks of Apple Inc., registered in the U.S. and other countries. App Store is a service mark of Apple Inc.',
+      registration: 'Commercial Register No. 33859 · Tax Card No. 764-027-395'
     },
     rentalRequestPage: {
       eyebrow: 'Rental Desk / Gold Partners',
@@ -859,7 +903,8 @@ export const siteCopy: Record<Locale, SiteCopy> = {
         statLabel2: 'مبيعات محققة',
         statValue2: '1 مليار+ جنيه',
         statLabel3: 'القطاعات',
-        statValue3: '4'
+        statValue3: '4',
+        heroImageAlt: 'هاسيندا ويست في الساحل الشمالي عند الغروب، والبحر خلف حمام سباحة مضاء'
       },
       trust: {
         eyebrow: 'لماذا نحن',
@@ -955,6 +1000,8 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       bathroomsLabel: 'الحمامات',
       areaLabel: 'المساحة',
       descriptionLabel: 'عن هذا العقار',
+      whatsappCta: 'راسلنا على واتساب',
+      whatsappMessage: 'مرحباً جولد، أنا مهتم بـ {property} ({location}، {price}). {url}',
       enquireCta: 'استفسر عن هذا العقار',
       callCta: 'اتصل الآن',
       notFoundTitle: 'العقار غير موجود',
@@ -1081,6 +1128,8 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       address: 'المكتب، توليب النرجس، التجمع الخامس، شارع 90، القاهرة الجديدة، مصر',
       hotlineLabel: 'الهاتف',
       hotline: '+20 106 637 7883',
+      whatsappLabel: 'واتساب',
+      whatsappMessage: 'مرحباً جولد، لدي استفسار.',
       emailLabel: 'البريد',
       emailValue: 'gold.domain01@gmail.com',
       mapCta: 'عرض الخريطة',
@@ -1097,7 +1146,21 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     footer: {
       tagline: 'الفرصة الذهبية لمجال ريادي.',
       legal: '© 2026 GOLD Investment Opportunities. جميع الحقوق محفوظة.',
-      getTheApp: 'حمّل تطبيق جولد من App Store'
+      app: {
+        title: 'حمّل تطبيق جولد',
+        body: 'تصفّح كل العقارات، واحفظ ما يعجبك، واعثر على فنيين موثوقين في الكمبوند. مجاني وبدون تسجيل.',
+        scanHint: 'امسح الرمز بكاميرا iPhone',
+        // The words on Apple's Arabic badge, so what is read out matches what is seen.
+        linkLabel: 'حمّل تطبيق جولد: تنزيل من App Store'
+      },
+      // The \u200E (an invisible left-to-right mark) after each "Inc." keeps its full
+      // stop with the English name; without it the Arabic line pulls the stop to
+      // the wrong side.
+      appleCredit:
+        'Apple وشعار Apple علامتان تجاريتان لشركة Apple Inc.\u200E، مسجّلتان في الولايات المتحدة ودول أخرى. App Store علامة خدمة لشركة Apple Inc.\u200E',
+      // \u200E before each number: right after Arabic letters, browsers read the
+      // dash-separated tax card number as Arabic numerals and flip its groups.
+      registration: 'سجل تجاري رقم \u200E33859 · بطاقة ضريبية رقم \u200E764-027-395'
     },
     rentalRequestPage: {
       eyebrow: 'مكتب الإيجارات / شركاء GOLD',

@@ -29,8 +29,8 @@ export default function PrivacyPage({ params }: { params: { locale: Locale } }) 
 
   return (
     <PageShell locale={locale} copy={copy}>
-      <section className="bg-spotlight-black px-4 pb-24 pt-32 sm:px-6 sm:pt-36 lg:px-8">
-        <div className={`mx-auto max-w-2xl ${isRtl ? 'text-right' : ''}`}>
+      <section className="bg-spotlight-black px-4 pb-24 pt-32 sm:px-6 sm:pt-40 lg:px-8">
+        <div className="mx-auto max-w-2xl">
           <div className="font-serif text-xs uppercase tracking-[0.38em] text-[rgba(217,179,85,0.9)]">
             {privacy.eyebrow}
           </div>

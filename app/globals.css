@@ -44,11 +44,13 @@ a {
     linear-gradient(180deg, #343031 0%, #231f20 45%, #111010 100%);
 }
 
+/* The ground of the dark sections. Nearly flat, with a soft light from above,
+   so dark sections that follow one another read as one surface instead of a
+   stack of bands. */
 .bg-middle-black {
   background:
-    radial-gradient(circle at 85% 12%, rgba(255, 255, 255, 0.04), transparent 22%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0)),
-    linear-gradient(135deg, #2b2627, #231f20 46%, #1b1819);
+    radial-gradient(120% 70% at 50% 0%, rgba(255, 255, 255, 0.028), transparent 62%),
+    #1e1a1b;
 }
 
 .gold-gradient-text {
@@ -88,10 +90,34 @@ a {
   background: var(--gold-metal);
   color: #231f20;
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset, 0 16px 34px rgba(184, 134, 11, 0.22);
+  transition: box-shadow 0.2s ease, filter 0.2s ease, transform 0.15s ease;
 }
 
 .btn-gold:hover {
+  filter: brightness(1.05);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset, 0 20px 42px rgba(184, 134, 11, 0.32);
+}
+
+.btn-gold:active {
+  transform: translateY(1px);
+}
+
+/* Arabic letters join up, and spacing them apart breaks the joins. Any
+   letter-spacing utility on an Arabic page is undone here (this selector
+   outranks the utility), so markup can stay shared between languages. */
+[dir='rtl'] [class*='tracking-'] {
+  letter-spacing: normal;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+:where(a, button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid #d9b355;
+  outline-offset: 3px;
 }
 
 .watermark-mark {
@@ -99,6 +125,15 @@ a {
   pointer-events: none;
   opacity: 0.06;
   user-select: none;
+}
+
+/* Trims a watermark that hangs off the edge. `hidden` alone makes the box
+   scrollable: tabbing to a link inside it scrolled the whole footer sideways
+   and left it there. `clip` trims without that; browsers too old for it keep
+   `hidden`. */
+.clip-overflow {
+  overflow: hidden;
+  overflow: clip;
 }
 
 input,

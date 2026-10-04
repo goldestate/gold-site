@@ -11,8 +11,8 @@ import { GoldSelect, type GoldSelectOption } from './gold-select';
 import { SectionTitle, SurfaceShell, ArrowIcon } from './section-ui';
 
 const inputClass =
-  'w-full rounded-[1rem] border bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)]';
-const labelClass = 'mb-2 block text-sm font-medium uppercase tracking-[0.18em] text-white/72';
+  'w-full rounded-xl border bg-white/[0.04] px-4 py-3.5 text-[0.95rem] text-white outline-none transition placeholder:text-white/30 focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)]';
+const labelClass = 'mb-2 block text-sm font-medium uppercase tracking-[0.18em] text-white/[0.72]';
 
 type PhotoItem = {
   key: string;
@@ -48,6 +48,15 @@ const emptyForm: FormState = {
   availableFrom: ''
 };
 
+/**
+ * Phone numbers and email addresses read left to right even on Arabic pages
+ * (otherwise "+20 1..." shows as "...1 20+"). Those are the fields whose example
+ * is written in Latin characters, so the example decides.
+ */
+function fieldDirection(isRtl: boolean, placeholder?: string): 'rtl' | 'ltr' {
+  return isRtl && !/^[\x21-\x7E]/.test(placeholder ?? '') ? 'rtl' : 'ltr';
+}
+
 function Field({
   label,
   value,
@@ -73,8 +82,8 @@ function Field({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        dir={isRtl ? 'rtl' : 'ltr'}
-        className={`${inputClass} ${error ? 'border-red-400/70' : 'border-white/12'}`}
+        dir={fieldDirection(isRtl, placeholder)}
+        className={`${inputClass} ${error ? 'border-red-400/70' : 'border-white/[0.12]'}`}
       />
       {error ? <p className="mt-2 text-xs text-red-300">{error}</p> : null}
     </label>
@@ -108,7 +117,7 @@ function SelectField({
         options={options}
         placeholder={placeholder}
         isRtl={isRtl}
-        triggerClassName={`${inputClass} ${error ? 'border-red-400/70' : 'border-white/12'}`}
+        triggerClassName={`${inputClass} ${error ? 'border-red-400/70' : 'border-white/[0.12]'}`}
       />
       {error ? <p className="mt-2 text-xs text-red-300">{error}</p> : null}
     </div>
@@ -279,18 +288,18 @@ export function ListPropertySection({
       <div className="relative mx-auto max-w-3xl">
         <SectionTitle eyebrow={copy.eyebrow} title={copy.title} intro={copy.intro} isRtl={isRtl} />
 
-        <div className="mt-12 rounded-[2rem] border border-white/10 bg-[rgba(35,31,32,0.78)] p-6 shadow-[0_24px_64px_rgba(0,0,0,0.28)] backdrop-blur-md sm:p-8">
+        <div className="mt-12 rounded-[1.5rem] bg-[#1B1718] p-6 shadow-[0_30px_70px_-35px_rgba(0,0,0,0.7)] ring-1 ring-white/10 sm:p-9">
           {submitted ? (
             <div className="py-6 text-center">
               <div className="font-serif text-xs uppercase tracking-[0.4em] text-[rgba(217,179,85,0.9)]">
                 {copy.successTitle}
               </div>
-              <p className="mx-auto mt-4 max-w-md text-sm leading-7 text-white/74">{copy.successBody}</p>
+              <p className="mx-auto mt-4 max-w-md text-sm leading-7 text-white/[0.74]">{copy.successBody}</p>
               <div className="mt-8">
                 <button
                   type="button"
                   onClick={startOver}
-                  className="btn-gold inline-flex items-center gap-3 rounded-full px-6 py-3 text-sm font-medium uppercase tracking-[0.2em] transition hover:-translate-y-0.5"
+                  className="btn-gold inline-flex h-12 items-center gap-3 rounded-full px-8 text-sm font-medium uppercase tracking-[0.2em]"
                 >
                   {copy.submitAnother}
                   <ArrowIcon rtl={isRtl} />
@@ -339,7 +348,7 @@ export function ListPropertySection({
                 {photos.length > 0 ? (
                   <div className="mb-4 grid grid-cols-3 gap-3 sm:grid-cols-4">
                     {photos.map((photo) => (
-                      <div key={photo.key} className="relative aspect-square overflow-hidden rounded-[0.75rem] border border-white/12 bg-white/5">
+                      <div key={photo.key} className="relative aspect-square overflow-hidden rounded-[0.75rem] border border-white/[0.12] bg-white/5">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={photo.previewUrl} alt="" className="h-full w-full object-cover" />
                         {photo.status === 'uploading' ? (
@@ -377,7 +386,7 @@ export function ListPropertySection({
               <button
                 type="submit"
                 disabled={isSubmitting || isUploading}
-                className="btn-gold inline-flex items-center gap-3 rounded-full px-6 py-3 text-sm font-medium uppercase tracking-[0.2em] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+                className="btn-gold inline-flex h-12 items-center gap-3 rounded-full px-8 text-sm font-medium uppercase tracking-[0.2em] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSubmitting ? copy.submitting : copy.submit}
                 <ArrowIcon rtl={isRtl} />
