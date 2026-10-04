@@ -29,7 +29,7 @@ export function SiteFooter({ copy, locale }: SiteFooterProps) {
       <GMark tone="gold" size={520} className="-bottom-28 -end-28 opacity-[0.045]" />
       <div className="relative mx-auto flex max-w-7xl flex-col gap-10">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
-          <div className="max-w-lg">
+          <div className="max-w-xl">
             <BrandLogo />
             <p className="mt-6 max-w-sm text-sm leading-7 text-white/[0.68]">{copy.footer.tagline}</p>
             <AppDownloadCard copy={copy.footer.app} locale={locale} />

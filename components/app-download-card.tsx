@@ -41,7 +41,7 @@ export function AppDownloadCard({
       target="_blank"
       rel="noopener noreferrer"
       aria-label={copy.linkLabel}
-      className="mt-8 flex max-w-lg items-start gap-4 rounded-[1.25rem] border border-white/10 bg-white/[0.03] p-5 transition-colors hover:border-[rgba(217,179,85,0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D9B355] focus-visible:ring-offset-2 focus-visible:ring-offset-[#171314] sm:gap-5 sm:p-6"
+      className="mt-8 flex max-w-xl items-start gap-4 rounded-[1.25rem] border border-white/10 bg-white/[0.03] p-5 transition-colors hover:border-[rgba(217,179,85,0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D9B355] focus-visible:ring-offset-2 focus-visible:ring-offset-[#171314] sm:gap-5 sm:p-6"
     >
       <Image
         src="/app-icon.png"
@@ -55,7 +55,7 @@ export function AppDownloadCard({
 
       <div className="min-w-0 flex-1">
         {/* Baskerville is the brand's accent face, but it has no Arabic letters. */}
-        <p className={`text-lg leading-7 text-white ${isRtl ? 'font-medium' : 'font-serif'}`}>{copy.title}</p>
+        <p className={`text-balance text-lg leading-7 text-white ${isRtl ? 'font-medium' : 'font-serif'}`}>{copy.title}</p>
         <p className="mt-1.5 text-sm leading-6 text-white/[0.62]">{copy.body}</p>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={BADGE[locale]} alt="" width={132} height={44} className="mt-4 h-11 w-auto" />

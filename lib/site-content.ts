@@ -714,10 +714,10 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       tagline: 'Golden Opportunity Of Leading Domain.',
       legal: '© 2026 GOLD Investment Opportunities. All rights reserved.',
       app: {
-        title: 'GOLD for iPhone',
+        title: 'Download the GOLD app',
         body: 'Browse every listing, save the ones you like and find trusted help in your compound. Free, no sign-up.',
         scanHint: 'Scan with your iPhone',
-        linkLabel: 'GOLD for iPhone: Download on the App Store'
+        linkLabel: 'Download the GOLD app on the App Store'
       },
       appleCredit:
         'Apple and the Apple logo are trademarks of Apple Inc., registered in the U.S. and other countries. App Store is a service mark of Apple Inc.',
@@ -1147,11 +1147,11 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       tagline: 'الفرصة الذهبية لمجال ريادي.',
       legal: '© 2026 GOLD Investment Opportunities. جميع الحقوق محفوظة.',
       app: {
-        title: 'جولد لأجهزة iPhone',
+        title: 'حمّل تطبيق جولد',
         body: 'تصفّح كل العقارات، واحفظ ما يعجبك، واعثر على فنيين موثوقين في الكمبوند. مجاني وبدون تسجيل.',
         scanHint: 'امسح الرمز بكاميرا iPhone',
         // The words on Apple's Arabic badge, so what is read out matches what is seen.
-        linkLabel: 'جولد لأجهزة iPhone: تنزيل من App Store'
+        linkLabel: 'حمّل تطبيق جولد: تنزيل من App Store'
       },
       // The \u200E (an invisible left-to-right mark) after each "Inc." keeps its full
       // stop with the English name; without it the Arabic line pulls the stop to
