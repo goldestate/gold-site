@@ -12,7 +12,7 @@ import { SectionTitle, SurfaceShell, ArrowIcon } from './section-ui';
 
 const inputClass =
   'w-full rounded-xl border bg-white/[0.04] px-4 py-3.5 text-[0.95rem] text-white outline-none transition placeholder:text-white/30 focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)]';
-const labelClass = 'label-caps mb-2 block text-white/65';
+const labelClass = 'mb-2 block text-sm font-medium uppercase tracking-[0.18em] text-white/[0.72]';
 
 type FormState = {
   name: string;
@@ -227,19 +227,19 @@ export function RentalRequestSection({
         <div className="mt-12 rounded-[1.5rem] bg-[#1B1718] p-6 shadow-[0_30px_70px_-35px_rgba(0,0,0,0.7)] ring-1 ring-white/10 sm:p-9">
           {referenceCode ? (
             <div className="py-6 text-center">
-              <div className="eyebrow text-[#D9B355]">
+              <div className="font-serif text-xs uppercase tracking-[0.4em] text-[rgba(217,179,85,0.9)]">
                 {copy.successTitle}
               </div>
               <p className="mx-auto mt-4 max-w-md text-sm leading-7 text-white/[0.74]">{copy.successBody}</p>
               <div className="mt-6 inline-flex flex-col items-center gap-1 rounded-[1.2rem] border border-white/10 bg-black/[0.22] px-6 py-4">
-                <span className="label-caps text-white/50">{copy.referenceLabel}</span>
-                <span className="text-2xl font-semibold tracking-[0.12em] text-[#E2C774]">{referenceCode}</span>
+                <span className="text-xs uppercase tracking-[0.26em] text-white/50">{copy.referenceLabel}</span>
+                <span className="gold-gradient-text text-2xl font-medium tracking-[0.16em]">{referenceCode}</span>
               </div>
               <div className="mt-8">
                 <button
                   type="button"
                   onClick={startOver}
-                  className="btn-gold inline-flex h-12 items-center gap-3 rounded-full px-8 text-sm font-semibold uppercase tracking-[0.14em]"
+                  className="btn-gold inline-flex h-12 items-center gap-3 rounded-full px-8 text-sm font-medium uppercase tracking-[0.2em]"
                 >
                   {copy.submitAnother}
                   <ArrowIcon rtl={isRtl} />
@@ -249,7 +249,7 @@ export function RentalRequestSection({
           ) : (
             <form onSubmit={handleSubmit} className="space-y-8">
               <div>
-                <div className="eyebrow text-[#D9B355]">
+                <div className="font-serif text-xs uppercase tracking-[0.4em] text-[rgba(217,179,85,0.9)]">
                   {copy.brokerSectionTitle}
                 </div>
                 <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -269,7 +269,7 @@ export function RentalRequestSection({
               </div>
 
               <div>
-                <div className="eyebrow text-[#D9B355]">
+                <div className="font-serif text-xs uppercase tracking-[0.4em] text-[rgba(217,179,85,0.9)]">
                   {copy.requestSectionTitle}
                 </div>
                 <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -297,7 +297,7 @@ export function RentalRequestSection({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="btn-gold inline-flex h-12 items-center gap-3 rounded-full px-8 text-sm font-semibold uppercase tracking-[0.14em] disabled:cursor-not-allowed disabled:opacity-60"
+                className="btn-gold inline-flex h-12 items-center gap-3 rounded-full px-8 text-sm font-medium uppercase tracking-[0.2em] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSubmitting ? copy.submitting : copy.submit}
                 <ArrowIcon rtl={isRtl} />

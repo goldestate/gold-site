@@ -50,7 +50,7 @@ function Pill({
 }
 
 function FilterLabel({ children }: { children: ReactNode }) {
-  return <div className="label-caps text-[#58595B]">{children}</div>;
+  return <div className="text-xs font-semibold uppercase tracking-[0.22em] text-[#58595B]">{children}</div>;
 }
 
 function ChevronIcon({ open }: { open: boolean }) {
@@ -187,14 +187,14 @@ export function PropertiesPageClient({
         >
           <div className="flex items-center justify-between gap-3 sm:items-start">
             <div className="hidden sm:block">
-              <h2 className="font-display text-2xl text-[#231F20]">{copy.filters.panelTitle}</h2>
+              <h2 className="text-xl font-semibold tracking-[0.06em] text-[#231F20]">{copy.filters.panelTitle}</h2>
               <p className="mt-1 text-sm text-[rgba(35,31,32,0.6)]">{copy.filters.panelSubtitle}</p>
             </div>
             <span className="text-sm font-semibold text-[#231F20] sm:hidden">{copy.filters.panelSubtitle}</span>
             <button
               type="button"
               onClick={resetFilters}
-              className="inline-flex min-h-[40px] flex-none items-center gap-2 rounded-full border border-[rgba(35,31,32,0.15)] px-4 text-xs font-semibold uppercase tracking-[0.14em] text-[#231F20] transition hover:border-[#8B6508] hover:text-[#8B6508]"
+              className="inline-flex min-h-[40px] flex-none items-center gap-2 rounded-full border border-[rgba(35,31,32,0.15)] px-4 text-xs font-semibold uppercase tracking-[0.18em] text-[#231F20] transition hover:border-[#8B6508] hover:text-[#8B6508]"
             >
               {copy.filters.resetLabel}
             </button>
@@ -337,11 +337,11 @@ export function PropertiesPageClient({
       </div>
       </div>
 
-      <div className="label-caps mt-8 hidden text-[#58595B] sm:block">{resultsLabel}</div>
+      <div className="mt-8 hidden text-sm font-medium uppercase tracking-[0.2em] text-[#58595B] sm:block">{resultsLabel}</div>
 
       {filtered.length === 0 ? (
         <div className="mt-6 rounded-[1.75rem] bg-[#FBFAF6] p-12 text-center ring-1 ring-[rgba(35,31,32,0.07)]">
-          <p className="font-display text-2xl text-[#231F20]">{copy.filters.noResultsTitle}</p>
+          <p className="text-lg font-medium text-[#231F20]">{copy.filters.noResultsTitle}</p>
           <p className="mt-2 text-sm text-[rgba(35,31,32,0.68)]">{copy.filters.noResultsBody}</p>
         </div>
       ) : (

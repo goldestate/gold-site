@@ -33,7 +33,7 @@ const MAX_FILE_BYTES = 10 * 1024 * 1024;
 
 const cardClass =
   'rounded-[1.5rem] bg-[#1B1718] p-6 shadow-[0_30px_70px_-35px_rgba(0,0,0,0.7)] ring-1 ring-white/10 sm:p-9';
-const eyebrowClass = 'eyebrow text-[#D9B355]';
+const eyebrowClass = 'font-serif text-xs uppercase tracking-[0.4em] text-[rgba(217,179,85,0.9)]';
 
 /**
  * The confidentiality agreement's signing page: the step after "Request a unit"
@@ -140,7 +140,7 @@ export function NdaSignSection({
       <div className="mt-8">
         <Link
           href="/"
-          className="btn-gold inline-flex h-12 items-center gap-3 rounded-full px-8 text-sm font-semibold uppercase tracking-[0.14em]"
+          className="btn-gold inline-flex h-12 items-center gap-3 rounded-full px-8 text-sm font-medium uppercase tracking-[0.2em]"
         >
           {copy.backHome}
           <ArrowIcon rtl={isRtl} />
@@ -183,7 +183,7 @@ export function NdaSignSection({
             <dl className="mt-5 grid gap-4 sm:grid-cols-2">
               {details.map((item) => (
                 <div key={item.label}>
-                  <dt className="label-caps text-white/45">{item.label}</dt>
+                  <dt className="text-xs uppercase tracking-[0.18em] text-white/45">{item.label}</dt>
                   <dd className="mt-1 break-words text-sm text-white" dir="auto">
                     {item.value}
                   </dd>
@@ -215,7 +215,7 @@ export function NdaSignSection({
             aria-label={NDA_TITLE}
             className="mt-5 max-h-[26rem] overflow-y-auto rounded-[1.25rem] border border-white/10 bg-black/25 p-5 text-left text-sm leading-7 text-white/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D9B355] sm:p-6"
           >
-            <h3 className="font-display text-xl text-[#F4F0E8]">{NDA_TITLE}</h3>
+            <h3 className="text-base font-medium uppercase tracking-[0.12em] text-white">{NDA_TITLE}</h3>
             <p className="mt-4">{NDA_PARTIES_INTRO}</p>
             <p className="mt-3 text-white">{NDA_GOLD_PARTY}</p>
             <p>{NDA_GOLD_ALIAS}</p>
@@ -355,7 +355,7 @@ export function NdaSignSection({
             type="button"
             onClick={submit}
             disabled={busy}
-            className="btn-gold mt-6 inline-flex h-12 w-full items-center justify-center gap-3 rounded-full px-8 text-sm font-semibold uppercase tracking-[0.14em] disabled:opacity-60 sm:w-auto"
+            className="btn-gold mt-6 inline-flex h-12 w-full items-center justify-center gap-3 rounded-full px-8 text-sm font-medium uppercase tracking-[0.2em] disabled:opacity-60 sm:w-auto"
           >
             {busy ? copy.submitting : copy.submit}
             <ArrowIcon rtl={isRtl} />

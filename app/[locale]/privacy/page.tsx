@@ -31,17 +31,19 @@ export default function PrivacyPage({ params }: { params: { locale: Locale } }) 
     <PageShell locale={locale} copy={copy}>
       <section className="bg-spotlight-black px-4 pb-24 pt-32 sm:px-6 sm:pt-40 lg:px-8">
         <div className="mx-auto max-w-2xl">
-          <div className="eyebrow text-[#D9B355]">{privacy.eyebrow}</div>
-          <h1 className="font-display mt-4 text-3xl leading-tight text-[#F4F0E8] sm:text-[2.6rem]">
+          <div className="font-serif text-xs uppercase tracking-[0.38em] text-[rgba(217,179,85,0.9)]">
+            {privacy.eyebrow}
+          </div>
+          <h1 className="mt-5 font-serif text-3xl leading-tight text-white sm:text-4xl">
             {privacy.title}
           </h1>
-          <p className="label-caps mt-4 text-white/40">{privacy.updated}</p>
+          <p className="mt-4 text-xs uppercase tracking-[0.2em] text-white/40">{privacy.updated}</p>
           <p className="mt-6 text-base leading-8 text-white/70">{privacy.intro}</p>
 
           <div className="mt-12 space-y-10">
             {privacy.sections.map((section) => (
               <div key={section.heading}>
-                <h2 className="font-display text-xl text-[#F4F0E8]">{section.heading}</h2>
+                <h2 className="font-serif text-xl text-white">{section.heading}</h2>
 
                 {section.paragraphs?.map((paragraph) => (
                   <p key={paragraph} className="mt-4 text-[15px] leading-8 text-white/65">

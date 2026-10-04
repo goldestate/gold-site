@@ -98,11 +98,13 @@ export function HeroSearch({
 
       <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl">
-          <div className="eyebrow text-[#D9B355]">{copy.eyebrow}</div>
-          <h1 className="font-display mt-4 text-[2.7rem] leading-[1.04] text-[#F4F0E8] sm:text-6xl lg:text-[4.6rem]">
-            {copy.title}
+          <div className="font-serif text-xs uppercase tracking-[0.48em] text-[rgba(217,179,85,0.9)]">{copy.eyebrow}</div>
+          <h1 className="mt-6 text-4xl font-medium uppercase leading-[1.15] tracking-[0.1em] sm:text-5xl lg:text-6xl">
+            <span className="bg-[linear-gradient(90deg,#8B6508_0%,#D4AF37_28%,#F1D878_50%,#D4AF37_72%,#8B6508_100%)] bg-clip-text text-transparent">
+              {copy.title}
+            </span>
           </h1>
-          <p className="mt-6 max-w-xl text-base leading-8 text-white/80 sm:text-lg">{copy.subtitle}</p>
+          <p className="mt-7 max-w-xl text-base leading-8 text-white/80 sm:text-lg">{copy.subtitle}</p>
         </div>
 
         <form
@@ -148,7 +150,7 @@ export function HeroSearch({
             </div>
             <button
               type="submit"
-              className="btn-gold inline-flex h-12 items-center justify-center gap-2 whitespace-nowrap rounded-full px-7 text-sm font-semibold uppercase tracking-[0.14em]"
+              className="btn-gold inline-flex h-12 items-center justify-center gap-2 whitespace-nowrap rounded-full px-7 text-sm font-medium uppercase tracking-[0.18em]"
             >
               {copy.search.submit}
             </button>
@@ -158,8 +160,8 @@ export function HeroSearch({
         <dl className="mt-10 grid max-w-xl grid-cols-3 gap-4 border-t border-white/[0.12] pt-6">
           {stats.map((item) => (
             <div key={item.label}>
-              <dt className="label-caps text-white/55">{item.label}</dt>
-              <dd className="font-display mt-2 text-2xl text-[#E2C774] [font-variant-numeric:lining-nums] sm:text-3xl">
+              <dt className="text-xs uppercase tracking-[0.28em] text-white/55">{item.label}</dt>
+              <dd className="gold-gradient-text mt-2 text-2xl font-medium tracking-[0.16em]">
                 {item.value}
               </dd>
             </div>
@@ -179,8 +181,8 @@ export function TrustStrip({ copy, isRtl }: { copy: SiteCopy['home']['trust']; i
           {copy.items.map((item) => (
             <article key={item.title}>
               <LineIcon icon={item.icon} gold />
-              <h3 className="mt-5 text-lg font-medium text-[#F4F0E8]">{item.title}</h3>
-              <p className="mt-3 text-sm leading-7 text-white/65">{item.description}</p>
+              <h3 className="mt-6 text-xl font-medium uppercase tracking-[0.14em] text-white">{item.title}</h3>
+              <p className="mt-4 text-sm leading-7 text-white/[0.68]">{item.description}</p>
             </article>
           ))}
         </div>
@@ -211,7 +213,7 @@ export function FeaturedProperties({
           <Link
             href="/properties"
             locale={locale}
-            className="inline-flex items-center gap-2 self-start whitespace-nowrap pb-1 text-sm font-semibold text-[#231F20] underline decoration-[rgba(139,101,8,0.45)] decoration-1 underline-offset-[7px] transition hover:text-[#8B6508] sm:self-auto"
+            className="inline-flex items-center gap-2 self-start whitespace-nowrap rounded-full border border-[rgba(35,31,32,0.15)] px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#231F20] transition hover:border-[#B8860B] hover:text-[#B8860B] sm:self-auto"
           >
             {copy.viewAllCta}
             <ArrowIcon rtl={isRtl} />
@@ -267,12 +269,12 @@ export function RentalDeskPromo({
               className="flex flex-col rounded-[1.25rem] bg-white/[0.035] p-7 ring-1 ring-white/10 transition hover:ring-[rgba(217,179,85,0.35)] sm:p-9"
             >
               <LineIcon icon={card.icon} gold />
-              <h3 className="mt-6 text-xl font-medium text-[#F4F0E8]">{card.title}</h3>
-              <p className="mt-3 text-sm leading-7 text-white/65">{card.body}</p>
+              <h3 className="mt-6 text-xl font-medium uppercase tracking-[0.14em] text-white">{card.title}</h3>
+              <p className="mt-4 text-sm leading-7 text-white/[0.68]">{card.body}</p>
               <Link
                 href={card.href}
                 locale={locale}
-                className="mt-auto inline-flex items-center gap-2.5 self-start pt-7 text-sm font-semibold uppercase tracking-[0.12em] text-[#D9B355] transition hover:text-[#ECD08A]"
+                className="mt-auto inline-flex items-center gap-3 self-start pt-7 text-sm font-semibold uppercase tracking-[0.2em] text-[#D9B355] transition hover:text-[#ECD08A]"
               >
                 {card.cta}
                 <ArrowIcon rtl={isRtl} />
@@ -297,13 +299,13 @@ export function ContactCta({
   return (
     <SurfaceShell variant="spotlight" className="px-4 py-24 text-center sm:px-6 sm:py-28 lg:px-8">
       <div className="mx-auto max-w-2xl">
-        <div className="eyebrow text-[#D9B355]">{copy.eyebrow}</div>
-        <h2 className="font-display mt-3 text-[2rem] leading-[1.15] text-[#F4F0E8] sm:text-[2.6rem]">{copy.title}</h2>
-        <p className="mx-auto mt-5 max-w-xl text-base leading-8 text-white/70">{copy.subtitle}</p>
+        <div className="font-serif text-xs uppercase tracking-[0.42em] text-[rgba(217,179,85,0.88)]">{copy.eyebrow}</div>
+        <h2 className="mt-4 text-3xl font-medium uppercase tracking-[0.14em] text-white sm:text-4xl">{copy.title}</h2>
+        <p className="mx-auto mt-4 max-w-xl text-base leading-8 text-white/[0.72]">{copy.subtitle}</p>
         <Link
           href="/contact"
           locale={locale}
-          className="btn-gold mt-9 inline-flex h-12 items-center gap-3 rounded-full px-8 text-sm font-semibold uppercase tracking-[0.14em]"
+          className="btn-gold mt-8 inline-flex h-12 items-center gap-3 rounded-full px-8 text-sm font-medium uppercase tracking-[0.2em]"
         >
           {copy.cta}
           <ArrowIcon rtl={isRtl} />

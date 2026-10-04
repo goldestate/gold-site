@@ -43,14 +43,14 @@ export function PropertyCard({
             property.tone === 'mono' ? 'grayscale contrast-110' : ''
           }`}
         />
-        <span className="absolute start-3 top-3 rounded-full bg-[rgba(23,19,20,0.78)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#F4F0E8] backdrop-blur-sm">
+        <span className="absolute start-3 top-3 rounded-full bg-[#231F20]/85 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white">
           {propertyTypeLabel(property.propertyType, locale)}
         </span>
       </div>
 
       <div className="flex flex-1 flex-col p-5">
         <div className="flex items-baseline gap-1.5">
-          <span className="text-xl font-semibold text-[#8B6508] [font-variant-numeric:tabular-nums]">
+          <span className="text-xl font-bold tracking-[0.01em] text-[#8B6508]">
             {formatPrice(property.price, locale)}
           </span>
           {priceSuffix ? (
@@ -60,8 +60,8 @@ export function PropertyCard({
           ) : null}
         </div>
 
-        <h3 className="font-display mt-2 truncate text-[1.2rem] leading-snug text-[#231F20]">{property.name}</h3>
-        <p className="mt-1 truncate text-sm text-[#58595B]">
+        <h3 className="mt-2 truncate text-base font-semibold tracking-[0.01em] text-[#231F20]">{property.name}</h3>
+        <p className="mt-1 truncate text-xs uppercase tracking-[0.16em] text-[#58595B]">
           {unitTypeLabel(property.unitType, locale)} · {locationLabel(property.location, locale)}
         </p>
 
@@ -91,7 +91,7 @@ export function PropertyCard({
         <Link
           href={`/properties/${property.id}`}
           locale={locale}
-          className="mt-auto inline-flex items-center gap-2 self-start pt-5 text-sm font-semibold text-[#231F20] transition after:absolute after:inset-0 after:content-[''] group-hover:text-[#8B6508]"
+          className="mt-auto inline-flex items-center gap-2 self-start pt-5 text-xs font-semibold uppercase tracking-[0.16em] text-[#231F20] transition after:absolute after:inset-0 after:content-[''] group-hover:text-[#B8860B]"
         >
           {viewDetailsLabel}
           <ArrowIcon rtl={isRtl} />

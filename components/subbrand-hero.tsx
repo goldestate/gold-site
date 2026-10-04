@@ -34,7 +34,7 @@ export function SubbrandHero({
         <Link
           href="/about#subbrands"
           locale={locale}
-          className="label-caps inline-flex items-center gap-2 text-white/50 transition hover:text-white/80"
+          className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-white/50 transition hover:text-white/80"
         >
           <ArrowIcon rtl={!isRtl} />
           {backLabel}
@@ -43,24 +43,24 @@ export function SubbrandHero({
         <div className="mt-10 flex items-center gap-4">
           <LineIcon icon={icon} gold className="h-12 w-12" />
           {comingSoonLabel ? (
-            <span className="rounded-full bg-[rgba(217,179,85,0.12)] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#D9B355]">
+            <span className="rounded-full border border-[rgba(217,179,85,0.4)] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.24em] text-[rgba(217,179,85,0.9)]">
               {comingSoonLabel}
             </span>
           ) : null}
         </div>
 
-        <div className="eyebrow mt-7 text-[#D9B355]">{eyebrow}</div>
-        <h1 className="font-display mt-3 text-[2.4rem] leading-[1.1] text-[#F4F0E8] sm:text-[3.2rem]">{title}</h1>
-        <p className="mt-6 text-base leading-8 text-white/75 sm:text-lg">{body}</p>
+        <div className="mt-6 font-serif text-xs uppercase tracking-[0.38em] text-[rgba(217,179,85,0.9)]">{eyebrow}</div>
+        <h1 className="mt-3 text-3xl font-medium uppercase tracking-[0.1em] text-white sm:text-4xl">{title}</h1>
+        <p className="mt-6 text-base leading-8 text-white/[0.76]">{body}</p>
 
         {services ? (
           <div className="mt-8">
-            <div className="label-caps text-white/50">{services.label}</div>
+            <div className="text-xs uppercase tracking-[0.24em] text-white/50">{services.label}</div>
             <div className="mt-3 flex flex-wrap gap-2">
               {services.items.map((item) => (
                 <span
                   key={item}
-                  className="rounded-full bg-white/[0.06] px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-[#D9B355] ring-1 ring-white/10"
+                  className="rounded-full border border-[rgba(217,179,85,0.3)] px-3 py-1 text-xs font-medium uppercase tracking-[0.14em] text-[rgba(217,179,85,0.9)]"
                 >
                   {item}
                 </span>
@@ -70,7 +70,7 @@ export function SubbrandHero({
         ) : null}
 
         {partners ? (
-          <p className="mt-6 text-sm text-white/55">
+          <p className="mt-6 text-xs uppercase tracking-[0.2em] text-white/50">
             {partners.label}: {partners.items.join(' · ')}
           </p>
         ) : null}
@@ -78,7 +78,7 @@ export function SubbrandHero({
         <Link
           href="/contact"
           locale={locale}
-          className="btn-gold mt-10 inline-flex h-12 items-center gap-3 rounded-full px-8 text-sm font-semibold uppercase tracking-[0.14em]"
+          className="btn-gold mt-10 inline-flex h-12 items-center gap-3 rounded-full px-8 text-sm font-medium uppercase tracking-[0.2em]"
         >
           {ctaLabel}
           <ArrowIcon rtl={isRtl} />

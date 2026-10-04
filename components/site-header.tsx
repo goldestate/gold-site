@@ -46,7 +46,7 @@ export function SiteHeader({ copy, locale }: SiteHeaderProps) {
         </Link>
 
         <div className="hidden items-center gap-8 lg:flex">
-          <nav aria-label="Primary" className="flex items-center gap-7 text-sm">
+          <nav aria-label="Primary" className="flex items-center gap-7 text-sm font-medium">
             {navItems.map((item) => {
               const current = isCurrent(item.href);
               return (
@@ -55,10 +55,10 @@ export function SiteHeader({ copy, locale }: SiteHeaderProps) {
                   href={item.href}
                   locale={locale}
                   aria-current={current ? 'page' : undefined}
-                  className={`relative py-2 tracking-[0.04em] transition after:absolute after:inset-x-0 after:-bottom-px after:h-px after:origin-center after:bg-[#D9B355] after:transition-transform after:duration-300 ${
+                  className={`relative py-2 tracking-[0.16em] transition after:absolute after:inset-x-0 after:-bottom-px after:h-px after:origin-center after:bg-[#D9B355] after:transition-transform after:duration-300 ${
                     current
-                      ? 'text-[#F4F0E8] after:scale-x-100'
-                      : 'text-white/70 after:scale-x-0 hover:text-[#F4F0E8] hover:after:scale-x-100'
+                      ? 'text-[#D9B355] after:scale-x-100'
+                      : 'text-white/80 after:scale-x-0 hover:text-[#D9B355] hover:after:scale-x-100'
                   }`}
                 >
                   {item.label}
@@ -76,7 +76,7 @@ export function SiteHeader({ copy, locale }: SiteHeaderProps) {
               href={currentPath}
               locale="en"
               lang="en"
-              className={`rounded-full px-3 py-1 text-xs font-semibold tracking-[0.2em] transition ${
+              className={`rounded-full px-3 py-1 text-xs font-semibold tracking-[0.24em] transition ${
                 locale === 'en' ? 'btn-gold' : 'text-white/65 hover:text-white'
               }`}
             >
@@ -123,8 +123,8 @@ export function SiteHeader({ copy, locale }: SiteHeaderProps) {
                   locale={locale}
                   aria-current={current ? 'page' : undefined}
                   onClick={() => setMenuOpen(false)}
-                  className={`font-display flex min-h-[52px] items-center justify-between border-b border-white/[0.07] text-[1.35rem] transition ${
-                    current ? 'text-[#D9B355]' : 'text-[#F4F0E8] hover:text-[#D9B355]'
+                  className={`flex min-h-[52px] items-center justify-between border-b border-white/[0.07] text-base font-medium tracking-[0.12em] transition ${
+                    current ? 'text-[#D9B355]' : 'text-white/[0.85] hover:text-[#D9B355]'
                   }`}
                 >
                   {item.label}
@@ -137,7 +137,7 @@ export function SiteHeader({ copy, locale }: SiteHeaderProps) {
                 href={currentPath}
                 locale={switchLocale}
                 lang={switchLocale}
-                className="inline-flex min-h-[44px] items-center rounded-full border border-[rgba(217,179,85,0.35)] px-5 text-sm font-semibold tracking-[0.2em] text-[#D9B355]"
+                className="inline-flex min-h-[44px] items-center rounded-full border border-[rgba(217,179,85,0.3)] px-5 text-xs font-semibold tracking-[0.22em] text-[#D9B355]"
               >
                 {switchLocale === 'en' ? t('english') : t('arabic')}
               </Link>

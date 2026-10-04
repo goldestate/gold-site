@@ -102,50 +102,6 @@ a {
   transform: translateY(1px);
 }
 
-/* Headlines: Baskerville, the brand book's accent face, in sentence case. It
-   has no Arabic letters, so on Arabic pages headlines switch to Tajawal, bolder
-   and unspaced. */
-.font-display {
-  font-family: var(--font-serif), Baskerville, Georgia, serif;
-  font-weight: 400;
-  letter-spacing: -0.015em;
-}
-
-[dir='rtl'] .font-display {
-  font-family: var(--font-arabic), Tajawal, Tahoma, sans-serif;
-  font-weight: 700;
-  letter-spacing: 0;
-}
-
-/* The short line above a headline: italic Baskerville in gold. */
-.eyebrow {
-  font-family: var(--font-serif), Baskerville, Georgia, serif;
-  font-style: italic;
-  font-size: 0.95rem;
-  line-height: 1.4;
-}
-
-[dir='rtl'] .eyebrow {
-  font-family: var(--font-arabic), Tajawal, Tahoma, sans-serif;
-  font-style: normal;
-  font-weight: 500;
-}
-
-/* Small labels: form fields, spec names, badges. */
-.label-caps {
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-[dir='rtl'] .label-caps {
-  font-size: 0.85rem;
-  font-weight: 500;
-  letter-spacing: normal;
-  text-transform: none;
-}
-
 /* Arabic letters join up, and spacing them apart breaks the joins. Any
    letter-spacing utility on an Arabic page is undone here (this selector
    outranks the utility), so markup can stay shared between languages. */

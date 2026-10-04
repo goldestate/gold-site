@@ -118,7 +118,7 @@ function InquiryForm({ labels, locale, isRtl }: { labels: SiteCopy['contact']; l
         isRtl={isRtl}
       />
       <div className="block">
-        <span className="label-caps mb-2 block text-white/65">
+        <span className="mb-2 block text-sm font-medium uppercase tracking-[0.18em] text-white/[0.72]">
           {labels.interest}
         </span>
         <GoldSelect
@@ -137,7 +137,7 @@ function InquiryForm({ labels, locale, isRtl }: { labels: SiteCopy['contact']; l
         {errors.interest ? <p className="mt-2 text-xs text-red-300">{errors.interest}</p> : null}
       </div>
       <label className="block">
-        <span className="label-caps mb-2 block text-white/65">
+        <span className="mb-2 block text-sm font-medium uppercase tracking-[0.18em] text-white/[0.72]">
           {labels.message}
         </span>
         <textarea
@@ -155,7 +155,7 @@ function InquiryForm({ labels, locale, isRtl }: { labels: SiteCopy['contact']; l
       <button
         type="submit"
         disabled={isSubmitting}
-        className="btn-gold inline-flex h-12 items-center gap-3 rounded-full px-8 text-sm font-semibold uppercase tracking-[0.14em] disabled:cursor-not-allowed disabled:opacity-60"
+        className="btn-gold inline-flex h-12 items-center gap-3 rounded-full px-8 text-sm font-medium uppercase tracking-[0.2em] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isSubmitting ? (isRtl ? 'جار الإرسال...' : 'Sending...') : labels.submit}
         <ArrowIcon rtl={isRtl} />
@@ -193,7 +193,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="label-caps mb-2 block text-white/65">
+      <span className="mb-2 block text-sm font-medium uppercase tracking-[0.18em] text-white/[0.72]">
         {label}
       </span>
       <input
@@ -229,7 +229,7 @@ function InfoCard({
 
   return (
     <div className="rounded-xl bg-white/[0.03] px-4 py-4 ring-1 ring-white/10">
-      <div className="label-caps text-white/50">{label}</div>
+      <div className="text-xs uppercase tracking-[0.26em] text-white/50">{label}</div>
       {href ? (
         <a
           href={href}
@@ -262,7 +262,9 @@ export function ContactSection({
 
         <div className="mt-12 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="rounded-[1.5rem] bg-[#1B1718] p-6 shadow-[0_30px_70px_-35px_rgba(0,0,0,0.7)] ring-1 ring-white/10 sm:p-9">
-            <h2 className="font-display text-[1.7rem] leading-tight text-[#F4F0E8]">{copy.formTitle}</h2>
+            <div className="font-serif text-xs uppercase tracking-[0.4em] text-[rgba(217,179,85,0.9)]">
+              {copy.formTitle}
+            </div>
             <div className="mt-6">
               <InquiryForm labels={copy} locale={locale} isRtl={isRtl} />
             </div>
@@ -270,7 +272,9 @@ export function ContactSection({
 
           <div className="grid gap-6">
             <div className="rounded-[1.5rem] bg-white/[0.035] p-6 ring-1 ring-white/10 sm:p-9">
-              <div className="eyebrow text-[#D9B355]">{copy.addressLabel}</div>
+              <div className="font-serif text-xs uppercase tracking-[0.4em] text-[rgba(217,179,85,0.9)]">
+                {copy.addressLabel}
+              </div>
               <p className="mt-4 max-w-md text-sm leading-7 text-white/[0.74]">{copy.address}</p>
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
                 <InfoCard
@@ -294,7 +298,7 @@ export function ContactSection({
                 href={`https://www.google.com/maps?q=${MAP_QUERY}`}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-7 inline-flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.12em] text-[#D9B355] transition hover:text-[#ECD08A]"
+                className="mt-6 inline-flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.2em] text-[#D9B355] transition hover:text-[#ECD08A]"
               >
                 {copy.mapCta}
                 <ArrowIcon rtl={isRtl} />
