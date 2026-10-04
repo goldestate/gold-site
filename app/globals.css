@@ -44,11 +44,13 @@ a {
     linear-gradient(180deg, #343031 0%, #231f20 45%, #111010 100%);
 }
 
+/* The ground of the dark sections. Nearly flat, with a soft light from above,
+   so dark sections that follow one another read as one surface instead of a
+   stack of bands. */
 .bg-middle-black {
   background:
-    radial-gradient(circle at 85% 12%, rgba(255, 255, 255, 0.04), transparent 22%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0)),
-    linear-gradient(135deg, #2b2627, #231f20 46%, #1b1819);
+    radial-gradient(120% 70% at 50% 0%, rgba(255, 255, 255, 0.028), transparent 62%),
+    #1e1a1b;
 }
 
 .gold-gradient-text {
@@ -88,10 +90,78 @@ a {
   background: var(--gold-metal);
   color: #231f20;
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset, 0 16px 34px rgba(184, 134, 11, 0.22);
+  transition: box-shadow 0.2s ease, filter 0.2s ease, transform 0.15s ease;
 }
 
 .btn-gold:hover {
+  filter: brightness(1.05);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset, 0 20px 42px rgba(184, 134, 11, 0.32);
+}
+
+.btn-gold:active {
+  transform: translateY(1px);
+}
+
+/* Headlines: Baskerville, the brand book's accent face, in sentence case. It
+   has no Arabic letters, so on Arabic pages headlines switch to Tajawal, bolder
+   and unspaced. */
+.font-display {
+  font-family: var(--font-serif), Baskerville, Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+}
+
+[dir='rtl'] .font-display {
+  font-family: var(--font-arabic), Tajawal, Tahoma, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+/* The short line above a headline: italic Baskerville in gold. */
+.eyebrow {
+  font-family: var(--font-serif), Baskerville, Georgia, serif;
+  font-style: italic;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+[dir='rtl'] .eyebrow {
+  font-family: var(--font-arabic), Tajawal, Tahoma, sans-serif;
+  font-style: normal;
+  font-weight: 500;
+}
+
+/* Small labels: form fields, spec names, badges. */
+.label-caps {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+[dir='rtl'] .label-caps {
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+/* Arabic letters join up, and spacing them apart breaks the joins. Any
+   letter-spacing utility on an Arabic page is undone here (this selector
+   outranks the utility), so markup can stay shared between languages. */
+[dir='rtl'] [class*='tracking-'] {
+  letter-spacing: normal;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+:where(a, button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid #d9b355;
+  outline-offset: 3px;
 }
 
 .watermark-mark {

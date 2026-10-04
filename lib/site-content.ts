@@ -36,6 +36,8 @@ export type SiteCopy = {
       statValue2: string;
       statLabel3: string;
       statValue3: string;
+      /** Describes the opening photo (one of GOLD's homes) for screen readers. */
+      heroImageAlt: string;
     };
     trust: {
       eyebrow: string;
@@ -460,7 +462,8 @@ export const siteCopy: Record<Locale, SiteCopy> = {
         statLabel2: 'Sales Achieved',
         statValue2: 'EGP 1B+',
         statLabel3: 'Sub-brands',
-        statValue3: '4'
+        statValue3: '4',
+        heroImageAlt: 'Hacienda West on the North Coast at dusk, with the sea behind a lit pool'
       },
       trust: {
         eyebrow: 'Why Choose Us',
@@ -893,7 +896,8 @@ export const siteCopy: Record<Locale, SiteCopy> = {
         statLabel2: 'مبيعات محققة',
         statValue2: '1 مليار+ جنيه',
         statLabel3: 'القطاعات',
-        statValue3: '4'
+        statValue3: '4',
+        heroImageAlt: 'هاسيندا ويست في الساحل الشمالي عند الغروب، والبحر خلف حمام سباحة مضاء'
       },
       trust: {
         eyebrow: 'لماذا نحن',

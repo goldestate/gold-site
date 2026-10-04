@@ -1,19 +1,20 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { motion } from 'framer-motion';
 
-export const fadeUp = {
-  hidden: { opacity: 0, y: 28 },
-  show: { opacity: 1, y: 0 }
-};
-
+/**
+ * A section's eyebrow, headline and intro. Headlines are set in Baskerville in
+ * sentence case (Tajawal on Arabic pages, via .font-display); alignment follows
+ * the page's direction, so nothing here mirrors by hand.
+ *
+ * Sections used to fade in on scroll from opacity 0, which left whole pages
+ * blank until the scripts ran. They are visible from the first paint now.
+ */
 export function SectionTitle({
   eyebrow,
   title,
   intro,
   align = 'left',
-  isRtl,
   tone = 'dark'
 }: {
   eyebrow: string;
@@ -23,27 +24,18 @@ export function SectionTitle({
   isRtl: boolean;
   tone?: 'dark' | 'light';
 }) {
-  const titleClass = tone === 'light' ? 'text-[#231F20]' : 'text-white';
-  const eyebrowClass = tone === 'light' ? 'text-[rgba(184,134,11,0.88)]' : 'text-[rgba(217,179,85,0.88)]';
-  const introClass = tone === 'light' ? 'text-[rgba(35,31,32,0.78)]' : 'text-white/72';
+  const titleClass = tone === 'light' ? 'text-[#231F20]' : 'text-[#F4F0E8]';
+  const eyebrowClass = tone === 'light' ? 'text-[#8B6508]' : 'text-[#D9B355]';
+  const introClass = tone === 'light' ? 'text-[rgba(35,31,32,0.74)]' : 'text-white/70';
 
   return (
-    <motion.div
-      variants={fadeUp}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: '-120px' }}
-      transition={{ duration: 0.7, ease: 'easeOut' }}
-      className={`max-w-3xl ${align === 'center' ? 'mx-auto text-center' : ''} ${
-        isRtl ? 'text-right' : 'text-left'
-      }`}
-    >
-      <div className={`font-serif text-xs uppercase tracking-[0.42em] ${eyebrowClass}`}>{eyebrow}</div>
-      <h2 className={`mt-4 text-3xl font-medium uppercase tracking-[0.18em] sm:text-4xl lg:text-[2.65rem] ${titleClass}`}>
+    <div className={`max-w-3xl ${align === 'center' ? 'mx-auto text-center' : 'text-start'}`}>
+      <div className={`eyebrow ${eyebrowClass}`}>{eyebrow}</div>
+      <h2 className={`font-display mt-3 text-[2rem] leading-[1.15] sm:text-[2.5rem] lg:text-[2.8rem] ${titleClass}`}>
         {title}
       </h2>
       {intro ? <p className={`mt-5 max-w-2xl text-base leading-8 ${introClass}`}>{intro}</p> : null}
-    </motion.div>
+    </div>
   );
 }
 
@@ -66,18 +58,9 @@ export function SurfaceShell({
         : 'bg-middle-black';
 
   return (
-    <motion.section
-      id={id}
-      variants={fadeUp}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: '-80px' }}
-      transition={{ duration: 0.7, ease: 'easeOut' }}
-      className={`relative overflow-hidden ${background} ${className}`}
-    >
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02),rgba(255,255,255,0.02))] opacity-70" />
+    <section id={id} className={`relative overflow-hidden ${background} ${className}`}>
       {children}
-    </motion.section>
+    </section>
   );
 }
 

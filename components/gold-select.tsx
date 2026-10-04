@@ -249,7 +249,7 @@ export function GoldSelect({
                   : { top: placement.top })
               }}
               className={`z-[80] min-w-[12rem] overflow-y-auto overscroll-contain rounded-[1.1rem] border p-1.5 shadow-[0_24px_60px_rgba(0,0,0,0.35)] ${
-                dark ? 'border-white/12 bg-[#231F20] text-white' : 'border-[rgba(35,31,32,0.12)] bg-white text-[#231F20]'
+                dark ? 'border-white/[0.12] bg-[#231F20] text-white' : 'border-[rgba(35,31,32,0.12)] bg-white text-[#231F20]'
               }`}
             >
               {options.map((option, index) => {

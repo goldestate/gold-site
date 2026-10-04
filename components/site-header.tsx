@@ -12,7 +12,12 @@ type SiteHeaderProps = {
   isRtl: boolean;
 };
 
-export function SiteHeader({ copy, locale, isRtl }: SiteHeaderProps) {
+/**
+ * The menu is listed once, in reading order; the page's right-to-left direction
+ * mirrors it for Arabic. (It used to be reversed by hand as well, which flipped
+ * it back, so the Arabic menu read Contact first and Home last.)
+ */
+export function SiteHeader({ copy, locale }: SiteHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const t = useTranslations('common');
 
@@ -24,50 +29,55 @@ export function SiteHeader({ copy, locale, isRtl }: SiteHeaderProps) {
     { label: copy.nav.goldLife, href: '/gold-life' },
     { label: copy.nav.contact, href: '/contact' }
   ];
-  const orderedNavItems = isRtl ? [...navItems].reverse() : navItems;
 
   const switchLocale = locale === 'en' ? 'ar' : 'en';
   // The current page without its locale ("/unlock/GOLD-AB-CDEF"), so switching
   // language changes the language and nothing else. These links used to go to
   // "/", which on an unlock page threw away the guest's code with the page.
   const currentPath = usePathname();
+  const isCurrent = (href: string) =>
+    href === '/' ? currentPath === '/' : currentPath === href || currentPath.startsWith(`${href}/`);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[rgba(35,31,32,0.96)] shadow-[0_14px_40px_rgba(0,0,0,0.3)] backdrop-blur-xl">
-      <div
-        className={`mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8 ${
-          isRtl ? 'flex-row-reverse' : ''
-        }`}
-      >
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.07] bg-[rgba(23,19,20,0.86)] backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3.5 sm:px-6 lg:px-8">
         <Link href="/" locale={locale} aria-label="GOLD home" className="relative z-10">
           <BrandLogo compact />
         </Link>
 
         <div className="hidden items-center gap-8 lg:flex">
-          <nav aria-label="Primary" className="flex items-center gap-7 text-sm font-medium">
-            {orderedNavItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                locale={locale}
-                className="tracking-[0.16em] text-white/80 transition hover:text-[#D9B355]"
-              >
-                {item.label}
-              </Link>
-            ))}
+          <nav aria-label="Primary" className="flex items-center gap-7 text-sm">
+            {navItems.map((item) => {
+              const current = isCurrent(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  locale={locale}
+                  aria-current={current ? 'page' : undefined}
+                  className={`relative py-2 tracking-[0.04em] transition after:absolute after:inset-x-0 after:-bottom-px after:h-px after:origin-center after:bg-[#D9B355] after:transition-transform after:duration-300 ${
+                    current
+                      ? 'text-[#F4F0E8] after:scale-x-100'
+                      : 'text-white/70 after:scale-x-0 hover:text-[#F4F0E8] hover:after:scale-x-100'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
 
           <div
             role="group"
             aria-label={t('language')}
-            className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 p-1"
+            className="flex items-center gap-1 rounded-full bg-white/[0.06] p-1 ring-1 ring-white/10"
           >
             <Link
               href={currentPath}
               locale="en"
               lang="en"
-              className={`rounded-full px-3 py-1 text-xs font-semibold tracking-[0.24em] transition ${
-                locale === 'en' ? 'btn-gold' : 'text-white/70 hover:text-white'
+              className={`rounded-full px-3 py-1 text-xs font-semibold tracking-[0.2em] transition ${
+                locale === 'en' ? 'btn-gold' : 'text-white/65 hover:text-white'
               }`}
             >
               {t('english')}
@@ -76,8 +86,8 @@ export function SiteHeader({ copy, locale, isRtl }: SiteHeaderProps) {
               href={currentPath}
               locale="ar"
               lang="ar"
-              className={`rounded-full px-3 py-1 text-xs font-semibold tracking-[0.24em] transition ${
-                locale === 'ar' ? 'btn-gold' : 'text-white/70 hover:text-white'
+              className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                locale === 'ar' ? 'btn-gold' : 'text-white/65 hover:text-white'
               }`}
             >
               {t('arabic')}
@@ -87,7 +97,7 @@ export function SiteHeader({ copy, locale, isRtl }: SiteHeaderProps) {
 
         <button
           type="button"
-          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white lg:hidden"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.06] text-white ring-1 ring-white/[0.12] transition active:scale-95 lg:hidden"
           aria-expanded={menuOpen}
           aria-label="Toggle menu"
           onClick={() => setMenuOpen((value) => !value)}
@@ -102,30 +112,32 @@ export function SiteHeader({ copy, locale, isRtl }: SiteHeaderProps) {
       </div>
 
       {menuOpen ? (
-        <div className="border-t border-white/10 bg-[rgba(35,31,32,0.98)] px-4 pb-5 pt-2 backdrop-blur-xl lg:hidden">
-          <nav
-            aria-label="Mobile"
-            className={`mx-auto flex max-w-7xl flex-col gap-4 text-base font-medium ${
-              isRtl ? 'items-end text-right' : 'items-start text-left'
-            }`}
-          >
-            {orderedNavItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                locale={locale}
-                onClick={() => setMenuOpen(false)}
-                className="tracking-[0.12em] text-white/85 transition hover:text-[#D9B355]"
-              >
-                {item.label}
-              </Link>
-            ))}
-            <div className="mt-3 flex gap-2">
+        <div className="border-t border-white/[0.07] bg-[rgba(23,19,20,0.98)] px-4 pb-6 pt-2 backdrop-blur-xl sm:px-6 lg:hidden">
+          <nav aria-label="Mobile" className="mx-auto flex max-w-7xl flex-col text-start">
+            {navItems.map((item) => {
+              const current = isCurrent(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  locale={locale}
+                  aria-current={current ? 'page' : undefined}
+                  onClick={() => setMenuOpen(false)}
+                  className={`font-display flex min-h-[52px] items-center justify-between border-b border-white/[0.07] text-[1.35rem] transition ${
+                    current ? 'text-[#D9B355]' : 'text-[#F4F0E8] hover:text-[#D9B355]'
+                  }`}
+                >
+                  {item.label}
+                  {current ? <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[#D9B355]" /> : null}
+                </Link>
+              );
+            })}
+            <div className="mt-5 flex">
               <Link
                 href={currentPath}
                 locale={switchLocale}
                 lang={switchLocale}
-                className="inline-flex min-h-[44px] items-center rounded-full border border-[rgba(217,179,85,0.3)] px-5 text-xs font-semibold tracking-[0.22em] text-[#D9B355]"
+                className="inline-flex min-h-[44px] items-center rounded-full border border-[rgba(217,179,85,0.35)] px-5 text-sm font-semibold tracking-[0.2em] text-[#D9B355]"
               >
                 {switchLocale === 'en' ? t('english') : t('arabic')}
               </Link>

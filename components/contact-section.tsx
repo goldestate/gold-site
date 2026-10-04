@@ -118,7 +118,7 @@ function InquiryForm({ labels, locale, isRtl }: { labels: SiteCopy['contact']; l
         isRtl={isRtl}
       />
       <div className="block">
-        <span className="mb-2 block text-sm font-medium uppercase tracking-[0.18em] text-white/72">
+        <span className="label-caps mb-2 block text-white/65">
           {labels.interest}
         </span>
         <GoldSelect
@@ -127,8 +127,8 @@ function InquiryForm({ labels, locale, isRtl }: { labels: SiteCopy['contact']; l
           onChange={(value) => update('interest', value)}
           isRtl={isRtl}
           placeholder={labels.placeholderInterest}
-          triggerClassName={`w-full rounded-[1rem] border bg-white/5 px-4 py-3 text-sm text-white outline-none transition focus-visible:border-[#D9B355] focus-visible:ring-2 focus-visible:ring-[rgba(217,179,85,0.22)] ${
-            errors.interest ? 'border-red-400/70' : 'border-white/12'
+          triggerClassName={`w-full rounded-xl border bg-white/[0.04] px-4 py-3.5 text-[0.95rem] text-white outline-none transition focus-visible:border-[#D9B355] focus-visible:ring-2 focus-visible:ring-[rgba(217,179,85,0.22)] ${
+            errors.interest ? 'border-red-400/70' : 'border-white/[0.12]'
           }`}
           // The enquiry has always sent the label in the visitor's language, so
           // the value stays the label.
@@ -137,15 +137,15 @@ function InquiryForm({ labels, locale, isRtl }: { labels: SiteCopy['contact']; l
         {errors.interest ? <p className="mt-2 text-xs text-red-300">{errors.interest}</p> : null}
       </div>
       <label className="block">
-        <span className="mb-2 block text-sm font-medium uppercase tracking-[0.18em] text-white/72">
+        <span className="label-caps mb-2 block text-white/65">
           {labels.message}
         </span>
         <textarea
           value={form.message}
           onChange={(event) => update('message', event.target.value)}
           rows={5}
-          className={`w-full rounded-[1rem] border bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)] ${
-            errors.message ? 'border-red-400/70' : 'border-white/12'
+          className={`w-full rounded-xl border bg-white/[0.04] px-4 py-3.5 text-[0.95rem] text-white outline-none transition placeholder:text-white/30 focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)] ${
+            errors.message ? 'border-red-400/70' : 'border-white/[0.12]'
           }`}
           placeholder={labels.message}
         />
@@ -155,7 +155,7 @@ function InquiryForm({ labels, locale, isRtl }: { labels: SiteCopy['contact']; l
       <button
         type="submit"
         disabled={isSubmitting}
-        className="btn-gold inline-flex items-center gap-3 rounded-full px-6 py-3 text-sm font-medium uppercase tracking-[0.2em] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+        className="btn-gold inline-flex h-12 items-center gap-3 rounded-full px-8 text-sm font-semibold uppercase tracking-[0.14em] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isSubmitting ? (isRtl ? 'جار الإرسال...' : 'Sending...') : labels.submit}
         <ArrowIcon rtl={isRtl} />
@@ -165,6 +165,15 @@ function InquiryForm({ labels, locale, isRtl }: { labels: SiteCopy['contact']; l
       {submitted ? <p className="text-sm text-[#D9B355]">{labels.success}</p> : null}
     </form>
   );
+}
+
+/**
+ * Phone numbers and email addresses read left to right even on Arabic pages
+ * (otherwise "+20 1..." shows as "...1 20+"). Those are the fields whose example
+ * is written in Latin characters, so the example decides.
+ */
+function fieldDirection(isRtl: boolean, placeholder?: string): 'rtl' | 'ltr' {
+  return isRtl && !/^[\x21-\x7E]/.test(placeholder ?? '') ? 'rtl' : 'ltr';
 }
 
 function Field({
@@ -184,16 +193,16 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-sm font-medium uppercase tracking-[0.18em] text-white/72">
+      <span className="label-caps mb-2 block text-white/65">
         {label}
       </span>
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        dir={isRtl ? 'rtl' : 'ltr'}
-        className={`w-full rounded-[1rem] border bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)] ${
-          error ? 'border-red-400/70' : 'border-white/12'
+        dir={fieldDirection(isRtl, placeholder)}
+        className={`w-full rounded-xl border bg-white/[0.04] px-4 py-3.5 text-[0.95rem] text-white outline-none transition placeholder:text-white/30 focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)] ${
+          error ? 'border-red-400/70' : 'border-white/[0.12]'
         }`}
       />
       {error ? <p className="mt-2 text-xs text-red-300">{error}</p> : null}
@@ -219,18 +228,18 @@ function InfoCard({
   const text = ltr ? <span dir="ltr">{value}</span> : value;
 
   return (
-    <div className="rounded-[1.2rem] border border-white/10 bg-black/22 px-4 py-4">
-      <div className="text-xs uppercase tracking-[0.26em] text-white/52">{label}</div>
+    <div className="rounded-xl bg-white/[0.03] px-4 py-4 ring-1 ring-white/10">
+      <div className="label-caps text-white/50">{label}</div>
       {href ? (
         <a
           href={href}
           {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-          className="mt-3 block text-sm font-medium leading-6 text-white transition hover:text-[#D9B355]"
+          className="mt-2 block text-[0.95rem] font-medium leading-6 text-white transition hover:text-[#D9B355]"
         >
           {text}
         </a>
       ) : (
-        <div className="mt-3 text-sm font-medium leading-6 text-white">{text}</div>
+        <div className="mt-2 text-[0.95rem] font-medium leading-6 text-white">{text}</div>
       )}
     </div>
   );
@@ -246,31 +255,23 @@ export function ContactSection({
   isRtl: boolean;
 }) {
   return (
-    <SurfaceShell id="contact" variant="spotlight" className="px-4 pb-20 pt-32 sm:px-6 sm:pt-36 lg:px-8">
-      <GMark tone="gold" size={560} className={`-bottom-24 opacity-[0.05] ${isRtl ? '-right-24' : '-left-24'}`} />
+    <SurfaceShell id="contact" variant="spotlight" className="px-4 pb-24 pt-32 sm:px-6 sm:pt-40 lg:px-8">
+      <GMark tone="gold" size={560} className="-bottom-24 -start-24 opacity-[0.05]" />
       <div className="relative mx-auto max-w-7xl">
         <SectionTitle eyebrow={copy.eyebrow} title={copy.title} intro={copy.intro} isRtl={isRtl} />
 
         <div className="mt-12 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-          <div
-            className={`rounded-[2rem] border border-white/10 bg-[rgba(35,31,32,0.78)] p-6 shadow-[0_24px_64px_rgba(0,0,0,0.28)] backdrop-blur-md sm:p-8 ${
-              isRtl ? 'lg:order-2' : 'lg:order-1'
-            }`}
-          >
-            <div className="font-serif text-xs uppercase tracking-[0.4em] text-[rgba(217,179,85,0.9)]">
-              {copy.formTitle}
-            </div>
+          <div className="rounded-[1.5rem] bg-[#1B1718] p-6 shadow-[0_30px_70px_-35px_rgba(0,0,0,0.7)] ring-1 ring-white/10 sm:p-9">
+            <h2 className="font-display text-[1.7rem] leading-tight text-[#F4F0E8]">{copy.formTitle}</h2>
             <div className="mt-6">
               <InquiryForm labels={copy} locale={locale} isRtl={isRtl} />
             </div>
           </div>
 
-          <div className={`grid gap-6 ${isRtl ? 'lg:order-1' : 'lg:order-2'}`}>
-            <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-[0_24px_64px_rgba(0,0,0,0.28)] backdrop-blur-md sm:p-8">
-              <div className="font-serif text-xs uppercase tracking-[0.4em] text-[rgba(217,179,85,0.9)]">
-                {copy.addressLabel}
-              </div>
-              <p className="mt-4 max-w-md text-sm leading-7 text-white/74">{copy.address}</p>
+          <div className="grid gap-6">
+            <div className="rounded-[1.5rem] bg-white/[0.035] p-6 ring-1 ring-white/10 sm:p-9">
+              <div className="eyebrow text-[#D9B355]">{copy.addressLabel}</div>
+              <p className="mt-4 max-w-md text-sm leading-7 text-white/[0.74]">{copy.address}</p>
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
                 <InfoCard
                   label={copy.whatsappLabel}
@@ -293,14 +294,14 @@ export function ContactSection({
                 href={`https://www.google.com/maps?q=${MAP_QUERY}`}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-6 inline-flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.2em] text-[#D9B355]"
+                className="mt-7 inline-flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.12em] text-[#D9B355] transition hover:text-[#ECD08A]"
               >
                 {copy.mapCta}
                 <ArrowIcon rtl={isRtl} />
               </a>
             </div>
 
-            <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-black/25 shadow-[0_24px_64px_rgba(0,0,0,0.28)]">
+            <div className="overflow-hidden rounded-[1.5rem] bg-black/25 ring-1 ring-white/10">
               <iframe
                 title="GOLD office map"
                 src={MAP_SRC}

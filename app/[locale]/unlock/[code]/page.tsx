@@ -113,14 +113,8 @@ export default function UnlockPage({ params }: { params: Params }) {
             </Link>
           </div>
 
-          <div
-            className={`mt-4 font-serif text-[rgba(217,179,85,0.9)] ${
-              isRtl ? 'text-sm' : 'text-xs uppercase tracking-[0.38em]'
-            }`}
-          >
-            {t.eyebrow}
-          </div>
-          <h1 className="mt-5 font-serif text-4xl leading-tight text-white sm:text-5xl">
+          <div className="eyebrow mt-4 text-[#D9B355]">{t.eyebrow}</div>
+          <h1 className="font-display mt-4 text-4xl leading-tight text-[#F4F0E8] sm:text-5xl">
             {code ? t.title : t.incompleteTitle}
           </h1>
           <p className="mt-6 text-base leading-8 text-white/70">{code ? t.intro : t.incompleteIntro}</p>

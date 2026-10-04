@@ -31,7 +31,7 @@ export function SiteFooter({ copy, locale }: SiteFooterProps) {
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-lg">
             <BrandLogo />
-            <p className="mt-6 max-w-sm text-sm leading-7 text-white/68">{copy.footer.tagline}</p>
+            <p className="mt-6 max-w-sm text-sm leading-7 text-white/[0.68]">{copy.footer.tagline}</p>
             <AppDownloadCard copy={copy.footer.app} locale={locale} />
           </div>
 
@@ -41,7 +41,7 @@ export function SiteFooter({ copy, locale }: SiteFooterProps) {
                 key={item.href}
                 href={item.href}
                 locale={locale}
-                className={`text-sm text-white/72 transition hover:text-[#D9B355] ${isRtl ? '' : 'tracking-[0.18em]'}`}
+                className={`text-sm text-white/[0.72] transition hover:text-[#D9B355] ${isRtl ? '' : 'tracking-[0.18em]'}`}
               >
                 {item.label}
               </Link>
@@ -49,7 +49,7 @@ export function SiteFooter({ copy, locale }: SiteFooterProps) {
           </nav>
         </div>
 
-        <div className="flex flex-col gap-4 border-t border-white/10 pt-6 text-sm text-white/58 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 border-t border-white/10 pt-6 text-sm text-white/[0.58] sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
               <p>{copy.footer.legal}</p>

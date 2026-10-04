@@ -37,10 +37,11 @@ function Pill({
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex min-w-[2.75rem] items-center justify-center rounded-full border px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.1em] transition ${
+      aria-pressed={active}
+      className={`inline-flex min-h-[40px] min-w-[2.75rem] items-center justify-center rounded-full border px-4 text-xs font-semibold uppercase tracking-[0.1em] transition active:scale-[0.97] ${
         active
-          ? 'border-transparent bg-[#231F20] text-white shadow-[0_10px_24px_rgba(35,31,32,0.18)]'
-          : 'border-[rgba(35,31,32,0.14)] bg-white text-[#231F20] hover:border-[#B8860B] hover:text-[#B8860B]'
+          ? 'border-transparent bg-[#231F20] text-white'
+          : 'border-[rgba(35,31,32,0.14)] bg-white text-[#231F20] hover:border-[#8B6508] hover:text-[#8B6508]'
       }`}
     >
       {children}
@@ -49,7 +50,7 @@ function Pill({
 }
 
 function FilterLabel({ children }: { children: ReactNode }) {
-  return <div className="text-xs font-semibold uppercase tracking-[0.22em] text-[#58595B]">{children}</div>;
+  return <div className="label-caps text-[#58595B]">{children}</div>;
 }
 
 function ChevronIcon({ open }: { open: boolean }) {
@@ -158,7 +159,10 @@ export function PropertiesPageClient({
   const resultsLabel = copy.filters.resultsCount.replace('{count}', String(filtered.length));
 
   return (
-    <div className="mx-auto max-w-7xl px-4 pb-24 pt-32 sm:px-6 lg:px-8">
+    // The light ground the cards and the dark-text title are drawn for. Without
+    // it the page sat on the site's black, and the title could not be seen.
+    <div className="bg-[#E2E1D4] text-[#231F20]">
+    <div className="mx-auto max-w-7xl px-4 pb-24 pt-32 sm:px-6 sm:pt-36 lg:px-8">
       <SectionTitle eyebrow={copy.eyebrow} title={copy.title} intro={copy.intro} isRtl={isRtl} tone="light" />
 
       <div className="mt-8 sm:mt-10">
@@ -166,12 +170,10 @@ export function PropertiesPageClient({
           type="button"
           onClick={() => setFiltersOpen((open) => !open)}
           aria-expanded={filtersOpen}
-          className={`flex w-full items-center justify-between gap-3 rounded-full border border-[rgba(35,31,32,0.14)] bg-white px-5 py-3.5 shadow-[0_10px_28px_rgba(35,31,32,0.08)] transition active:scale-[0.98] active:shadow-[0_4px_14px_rgba(35,31,32,0.1)] sm:hidden ${
-            isRtl ? 'flex-row-reverse' : ''
-          }`}
+          className="flex w-full items-center justify-between gap-3 rounded-full bg-[#FBFAF6] px-5 py-3.5 shadow-[0_12px_30px_-18px_rgba(35,31,32,0.45)] ring-1 ring-[rgba(35,31,32,0.08)] transition active:scale-[0.98] sm:hidden"
         >
-          <span className={`flex items-center gap-2.5 ${isRtl ? 'flex-row-reverse' : ''}`}>
-            <FunnelIcon className="text-[#B8860B]" />
+          <span className="flex items-center gap-2.5">
+            <FunnelIcon className="text-[#8B6508]" />
             <span className="text-sm font-semibold text-[#231F20]">{copy.filters.panelTitle}</span>
             <span className="rounded-full bg-[#231F20] px-2 py-0.5 text-[10px] font-bold text-white">
               {filtered.length}
@@ -181,20 +183,18 @@ export function PropertiesPageClient({
         </button>
 
         <div
-          className={`${filtersOpen ? 'mt-3 block' : 'hidden'} rounded-[1.4rem] border border-[rgba(35,31,32,0.08)] bg-white p-4 shadow-[0_18px_50px_rgba(35,31,32,0.08)] sm:mt-0 sm:block sm:rounded-[2rem] sm:p-8 ${
-            isRtl ? 'text-right' : 'text-left'
-          }`}
+          className={`${filtersOpen ? 'mt-3 block' : 'hidden'} rounded-[1.5rem] bg-[#FBFAF6] p-5 text-start shadow-[0_24px_60px_-34px_rgba(35,31,32,0.5)] ring-1 ring-[rgba(35,31,32,0.07)] sm:mt-0 sm:block sm:rounded-[1.75rem] sm:p-9`}
         >
-          <div className={`flex items-center justify-between gap-3 sm:items-start ${isRtl ? 'flex-row-reverse' : ''}`}>
+          <div className="flex items-center justify-between gap-3 sm:items-start">
             <div className="hidden sm:block">
-              <h2 className="text-xl font-semibold tracking-[0.06em] text-[#231F20]">{copy.filters.panelTitle}</h2>
+              <h2 className="font-display text-2xl text-[#231F20]">{copy.filters.panelTitle}</h2>
               <p className="mt-1 text-sm text-[rgba(35,31,32,0.6)]">{copy.filters.panelSubtitle}</p>
             </div>
             <span className="text-sm font-semibold text-[#231F20] sm:hidden">{copy.filters.panelSubtitle}</span>
             <button
               type="button"
               onClick={resetFilters}
-              className="inline-flex flex-none items-center gap-2 rounded-full border border-[rgba(35,31,32,0.15)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#231F20] transition hover:border-[#B8860B] hover:text-[#B8860B]"
+              className="inline-flex min-h-[40px] flex-none items-center gap-2 rounded-full border border-[rgba(35,31,32,0.15)] px-4 text-xs font-semibold uppercase tracking-[0.14em] text-[#231F20] transition hover:border-[#8B6508] hover:text-[#8B6508]"
             >
               {copy.filters.resetLabel}
             </button>
@@ -220,7 +220,7 @@ export function PropertiesPageClient({
 
           <div>
             <FilterLabel>{copy.filters.propertyTypeLabel}</FilterLabel>
-            <div className={`mt-2.5 flex flex-wrap gap-1.5 sm:mt-3 sm:gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
+            <div className="mt-3 flex flex-wrap gap-2">
               <Pill active={propertyType === 'any'} onClick={() => setPropertyType('any')}>
                 {copy.filters.anyPropertyType}
               </Pill>
@@ -234,14 +234,14 @@ export function PropertiesPageClient({
 
           <div>
             <FilterLabel>{copy.filters.unitTypeLabel}</FilterLabel>
-            <div className={`mt-2.5 flex flex-wrap gap-1.5 sm:mt-3 sm:gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
+            <div className="mt-3 flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => setUnitType('any')}
-                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] transition sm:gap-2 sm:px-4 sm:py-2.5 sm:text-xs ${
+                className={`inline-flex min-h-[40px] items-center gap-2 rounded-full border px-4 text-xs font-semibold uppercase tracking-[0.1em] transition active:scale-[0.97] ${
                   unitType === 'any'
-                    ? 'border-transparent bg-[#231F20] text-white shadow-[0_10px_24px_rgba(35,31,32,0.18)]'
-                    : 'border-[rgba(35,31,32,0.14)] bg-white text-[#231F20] hover:border-[#B8860B] hover:text-[#B8860B]'
+                    ? 'border-transparent bg-[#231F20] text-white'
+                    : 'border-[rgba(35,31,32,0.14)] bg-white text-[#231F20] hover:border-[#8B6508] hover:text-[#8B6508]'
                 }`}
               >
                 {copy.filters.anyUnitType}
@@ -251,13 +251,13 @@ export function PropertiesPageClient({
                   key={item.value}
                   type="button"
                   onClick={() => setUnitType(item.value)}
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] transition sm:gap-2 sm:px-4 sm:py-2.5 sm:text-xs ${
+                  className={`inline-flex min-h-[40px] items-center gap-2 rounded-full border px-4 text-xs font-semibold uppercase tracking-[0.1em] transition active:scale-[0.97] ${
                     unitType === item.value
-                      ? 'border-transparent bg-[#231F20] text-white shadow-[0_10px_24px_rgba(35,31,32,0.18)]'
-                      : 'border-[rgba(35,31,32,0.14)] bg-white text-[#231F20] hover:border-[#B8860B] hover:text-[#B8860B]'
+                      ? 'border-transparent bg-[#231F20] text-white'
+                      : 'border-[rgba(35,31,32,0.14)] bg-white text-[#231F20] hover:border-[#8B6508] hover:text-[#8B6508]'
                   }`}
                 >
-                  <UnitTypeIcon type={item.value} className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <UnitTypeIcon type={item.value} className="h-4 w-4" />
                   {item[locale]}
                 </button>
               ))}
@@ -267,7 +267,7 @@ export function PropertiesPageClient({
           <div className="grid gap-5 sm:grid-cols-2 sm:gap-8">
             <div>
               <FilterLabel>{copy.filters.bedroomsLabel}</FilterLabel>
-              <div className={`mt-2.5 flex flex-wrap gap-1.5 sm:mt-3 sm:gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
+              <div className="mt-3 flex flex-wrap gap-2">
                 <Pill active={bedrooms === 'any'} onClick={() => setBedrooms('any')}>
                   {copy.filters.anyCount}
                 </Pill>
@@ -280,7 +280,7 @@ export function PropertiesPageClient({
             </div>
             <div>
               <FilterLabel>{copy.filters.bathroomsLabel}</FilterLabel>
-              <div className={`mt-2.5 flex flex-wrap gap-1.5 sm:mt-3 sm:gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
+              <div className="mt-3 flex flex-wrap gap-2">
                 <Pill active={bathrooms === 'any'} onClick={() => setBathrooms('any')}>
                   {copy.filters.anyCount}
                 </Pill>
@@ -337,33 +337,27 @@ export function PropertiesPageClient({
       </div>
       </div>
 
-      <div
-        className={`mt-6 hidden text-sm font-medium uppercase tracking-[0.2em] text-[#58595B] sm:block sm:mt-8 ${
-          isRtl ? 'text-right' : 'text-left'
-        }`}
-      >
-        {resultsLabel}
-      </div>
+      <div className="label-caps mt-8 hidden text-[#58595B] sm:block">{resultsLabel}</div>
 
       {filtered.length === 0 ? (
-        <div className="mt-6 rounded-[1.9rem] border border-[rgba(35,31,32,0.1)] bg-white/70 p-12 text-center">
-          <p className="text-lg font-medium text-[#231F20]">{copy.filters.noResultsTitle}</p>
+        <div className="mt-6 rounded-[1.75rem] bg-[#FBFAF6] p-12 text-center ring-1 ring-[rgba(35,31,32,0.07)]">
+          <p className="font-display text-2xl text-[#231F20]">{copy.filters.noResultsTitle}</p>
           <p className="mt-2 text-sm text-[rgba(35,31,32,0.68)]">{copy.filters.noResultsBody}</p>
         </div>
       ) : (
-        <div className="mt-5 grid grid-cols-2 gap-3 sm:mt-6 sm:gap-5 md:grid-cols-3 md:gap-6 xl:grid-cols-4">
-          {filtered.map((property, index) => (
+        <div className="mt-5 grid gap-6 sm:mt-5 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((property) => (
             <PropertyCard
               key={property.id}
               property={property}
               locale={locale}
               isRtl={isRtl}
               viewDetailsLabel={copy.filters.viewDetails}
-              delay={(index % 3) * 0.06}
             />
           ))}
         </div>
       )}
+    </div>
     </div>
   );
 }

@@ -30,7 +30,7 @@ export function PropertyGallery({
   };
 
   if (images.length === 0) {
-    return <div className="h-[26rem] w-full bg-[rgba(35,31,32,0.06)]" />;
+    return <div className="h-[21rem] w-full bg-[rgba(35,31,32,0.06)] sm:h-[28rem] lg:h-[34rem]" />;
   }
 
   return (
@@ -38,7 +38,7 @@ export function PropertyGallery({
       <div
         ref={scrollerRef}
         onScroll={handleScroll}
-        className="no-scrollbar flex h-[26rem] snap-x snap-mandatory overflow-x-auto scroll-smooth"
+        className="no-scrollbar flex h-[21rem] snap-x snap-mandatory overflow-x-auto scroll-smooth sm:h-[28rem] lg:h-[34rem]"
       >
         {images.map((src, index) => (
           // eslint-disable-next-line @next/next/no-img-element

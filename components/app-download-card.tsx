@@ -56,7 +56,7 @@ export function AppDownloadCard({
       <div className="min-w-0 flex-1">
         {/* Baskerville is the brand's accent face, but it has no Arabic letters. */}
         <p className={`text-lg leading-7 text-white ${isRtl ? 'font-medium' : 'font-serif'}`}>{copy.title}</p>
-        <p className="mt-1.5 text-sm leading-6 text-white/62">{copy.body}</p>
+        <p className="mt-1.5 text-sm leading-6 text-white/[0.62]">{copy.body}</p>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={BADGE[locale]} alt="" width={132} height={44} className="mt-4 h-11 w-auto" />
       </div>
@@ -64,7 +64,7 @@ export function AppDownloadCard({
       <div className="hidden flex-none flex-col items-center gap-2.5 border-s border-white/10 ps-5 lg:flex">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/badges/app-store-qr.svg" alt="" width={104} height={104} className="h-[104px] w-[104px] rounded-xl" />
-        <span className="max-w-[7.5rem] text-center text-[11px] leading-4 text-white/48">{copy.scanHint}</span>
+        <span className="max-w-[7.5rem] text-center text-[11px] leading-4 text-white/[0.48]">{copy.scanHint}</span>
       </div>
     </a>
   );
