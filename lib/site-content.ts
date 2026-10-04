@@ -223,6 +223,12 @@ export type SiteCopy = {
     };
     /** The credit Apple requires wherever its badge appears, placed with the legal line. */
     appleCredit: string;
+    /**
+     * GOLD's commercial register and tax card numbers, which Egypt's Consumer
+     * Protection Law (181/2018, art. 37) asks a business selling at a distance
+     * to give. Kept in the footer's small print, where people look for it.
+     */
+    registration: string;
   };
   rentalRequestPage: {
     eyebrow: string;
@@ -714,7 +720,8 @@ export const siteCopy: Record<Locale, SiteCopy> = {
         linkLabel: 'GOLD for iPhone: Download on the App Store'
       },
       appleCredit:
-        'Apple and the Apple logo are trademarks of Apple Inc., registered in the U.S. and other countries. App Store is a service mark of Apple Inc.'
+        'Apple and the Apple logo are trademarks of Apple Inc., registered in the U.S. and other countries. App Store is a service mark of Apple Inc.',
+      registration: 'Commercial Register No. 33859 · Tax Card No. 764-027-395'
     },
     rentalRequestPage: {
       eyebrow: 'Rental Desk / Gold Partners',
@@ -1146,10 +1153,14 @@ export const siteCopy: Record<Locale, SiteCopy> = {
         // The words on Apple's Arabic badge, so what is read out matches what is seen.
         linkLabel: 'جولد لأجهزة iPhone: تنزيل من App Store'
       },
-      // ‎ keeps each "Inc." full stop with the English name; without it the
-      // Arabic line around it pulls the stop to the wrong side.
+      // The \u200E (an invisible left-to-right mark) after each "Inc." keeps its full
+      // stop with the English name; without it the Arabic line pulls the stop to
+      // the wrong side.
       appleCredit:
-        'Apple وشعار Apple علامتان تجاريتان لشركة Apple Inc.‎، مسجّلتان في الولايات المتحدة ودول أخرى. App Store علامة خدمة لشركة Apple Inc.‎'
+        'Apple وشعار Apple علامتان تجاريتان لشركة Apple Inc.\u200E، مسجّلتان في الولايات المتحدة ودول أخرى. App Store علامة خدمة لشركة Apple Inc.\u200E',
+      // \u200E before each number: right after Arabic letters, browsers read the
+      // dash-separated tax card number as Arabic numerals and flip its groups.
+      registration: 'سجل تجاري رقم \u200E33859 · بطاقة ضريبية رقم \u200E764-027-395'
     },
     rentalRequestPage: {
       eyebrow: 'مكتب الإيجارات / شركاء GOLD',

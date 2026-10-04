@@ -57,7 +57,8 @@ export function SiteFooter({ copy, locale }: SiteFooterProps) {
                 {isRtl ? 'الخصوصية' : 'Privacy'}
               </Link>
             </div>
-            <p className="mt-2 max-w-2xl text-[11px] leading-5 text-white/40">{copy.footer.appleCredit}</p>
+            <p className="mt-2 text-[11px] leading-5 text-white/40">{copy.footer.registration}</p>
+            <p className="max-w-2xl text-[11px] leading-5 text-white/40">{copy.footer.appleCredit}</p>
           </div>
           <div className="flex items-center gap-3">
             <Link
