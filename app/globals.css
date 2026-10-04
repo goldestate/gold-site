@@ -101,6 +101,15 @@ a {
   user-select: none;
 }
 
+/* Trims a watermark that hangs off the edge. `hidden` alone makes the box
+   scrollable: tabbing to a link inside it scrolled the whole footer sideways
+   and left it there. `clip` trims without that; browsers too old for it keep
+   `hidden`. */
+.clip-overflow {
+  overflow: hidden;
+  overflow: clip;
+}
+
 input,
 textarea,
 select,
