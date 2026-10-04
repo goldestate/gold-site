@@ -3,6 +3,9 @@ import { checkRateLimit, getClientKey } from '@/lib/rate-limit';
 import { upsertOwnerByPhone, createRentalListing } from '@/lib/rental-desk-store';
 import { isLocation, type LocationValue } from '@/lib/property-taxonomy';
 import { isRentalPropertyType, type RentalPropertyTypeValue } from '@/lib/rental-taxonomy';
+import { openNdaFor } from '@/lib/nda-store';
+import { adminEmailAddress, isEmailShaped, sendEmail } from '@/lib/email';
+import { adminSubmissionEmail, listingReceivedEmail } from '@/lib/email-templates';
 
 type ListPropertyPayload = {
   name: string;
@@ -16,6 +19,8 @@ type ListPropertyPayload = {
   furnished?: boolean;
   availableFrom?: string;
   photos: string[];
+  /** The language the form was filled in. The app doesn't send it yet. */
+  locale?: 'en' | 'ar';
 };
 
 const isNonEmptyString = (value: unknown): value is string => typeof value === 'string' && value.trim().length > 0;
@@ -40,7 +45,8 @@ function isValidBody(body: unknown): body is ListPropertyPayload {
     (value.availableFrom === undefined || typeof value.availableFrom === 'string') &&
     Array.isArray(value.photos) &&
     value.photos.length > 0 &&
-    value.photos.every((item) => typeof item === 'string' && item.trim().length > 0)
+    value.photos.every((item) => typeof item === 'string' && item.trim().length > 0) &&
+    (value.locale === undefined || value.locale === 'en' || value.locale === 'ar')
   );
 }
 
@@ -87,7 +93,45 @@ export async function POST(request: NextRequest) {
       photos: body.photos.map((url) => url.trim())
     });
 
-    return NextResponse.json({ id: listing.id }, { status: 201 });
+    const email = isEmailShaped(body.email) ? body.email.trim() : null;
+    const nda = await openNdaFor(
+      { rentalListingId: listing.id },
+      { name: owner.name, company: '', phone: owner.phone ?? body.phone.trim(), email: email ?? '' }
+    );
+
+    // After the response, not before it: a slow or failing email must not hold
+    // up or fail a listing that is already saved.
+    const lang = body.locale ?? 'en';
+    if (email) {
+      void sendEmail(
+        listingReceivedEmail({
+          to: email,
+          lang,
+          name: owner.name,
+          propertyType: body.propertyType,
+          location: body.location,
+          ndaToken: nda?.token ?? null
+        })
+      );
+    }
+    const admin = adminEmailAddress();
+    if (admin) {
+      void sendEmail(
+        adminSubmissionEmail({
+          to: admin,
+          kind: 'listing',
+          name: owner.name,
+          phone: owner.phone ?? body.phone.trim(),
+          email,
+          propertyType: body.propertyType,
+          location: body.location
+        })
+      );
+    }
+
+    // ndaToken opens the signing page. Absent before migration 007; the form
+    // then shows its usual thank-you instead.
+    return NextResponse.json({ id: listing.id, ndaToken: nda?.token ?? null }, { status: 201 });
   } catch (error) {
     console.error('Failed to create rental listing', error);
     return NextResponse.json({ error: 'Could not submit your listing. Please try again.' }, { status: 500 });

@@ -1,65 +1,42 @@
 'use client';
 
 import Image from 'next/image';
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { useState, type FormEvent } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from '@/i18n/navigation';
 import { Link } from '@/i18n/navigation';
 import type { SiteCopy } from '@/lib/site-content';
 import type { Property } from '@/lib/properties-store';
 import { LOCATIONS, PROPERTY_TYPES } from '@/lib/property-taxonomy';
+import { GoldSelect, type GoldSelectOption } from './gold-select';
 import { GMark } from './gmark';
 import { fadeUp, SectionTitle, SurfaceShell, LineIcon, ArrowIcon } from './section-ui';
 import { PropertyCard } from './property-card';
 import { PartnersMarquee } from './partners-marquee';
-
-function SearchChevron({ isRtl }: { isRtl: boolean }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className={`pointer-events-none absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/50 ${
-        isRtl ? 'left-5' : 'right-5'
-      }`}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="m6 9 6 6 6-6" />
-    </svg>
-  );
-}
 
 function SearchSelect({
   ariaLabel,
   value,
   onChange,
   isRtl,
-  children
+  options
 }: {
   ariaLabel: string;
   value: string;
   onChange: (value: string) => void;
   isRtl: boolean;
-  children: ReactNode;
+  options: GoldSelectOption[];
 }) {
   return (
-    <label className="relative block w-full sm:flex-1">
-      <span className="sr-only">{ariaLabel}</span>
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        dir={isRtl ? 'rtl' : 'ltr'}
-        className={`w-full appearance-none rounded-full border border-white/15 bg-white/8 py-3 text-sm text-white outline-none transition focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)] sm:rounded-none sm:border-0 sm:bg-transparent sm:focus:ring-0 ${
-          isRtl ? 'pl-11 pr-5' : 'pl-5 pr-11'
-        }`}
-      >
-        {children}
-      </select>
-      <SearchChevron isRtl={isRtl} />
-    </label>
+    <GoldSelect
+      label={ariaLabel}
+      value={value}
+      onChange={onChange}
+      options={options}
+      isRtl={isRtl}
+      className="w-full sm:flex-1"
+      triggerClassName="w-full rounded-full border border-white/15 bg-white/8 px-5 py-3 text-sm text-white outline-none transition focus-visible:border-[#D9B355] focus-visible:ring-2 focus-visible:ring-[rgba(217,179,85,0.22)] sm:rounded-none sm:border-0 sm:bg-transparent sm:focus-visible:ring-0"
+    />
   );
 }
 
@@ -138,40 +115,31 @@ export function HeroSearch({
               value={propertyType}
               onChange={setPropertyType}
               isRtl={isRtl}
-            >
-              <option value="any">{copy.search.anyPropertyType}</option>
-              {PROPERTY_TYPES.map((item) => (
-                <option key={item.value} value={item.value}>
-                  {item[locale]}
-                </option>
-              ))}
-            </SearchSelect>
+              options={[
+                { value: 'any', label: copy.search.anyPropertyType },
+                ...PROPERTY_TYPES.map((item) => ({ value: item.value, label: item[locale] }))
+              ]}
+            />
             <SearchSelect
               ariaLabel={copy.search.locationLabel}
               value={location}
               onChange={setLocation}
               isRtl={isRtl}
-            >
-              <option value="any">{copy.search.anyLocation}</option>
-              {LOCATIONS.map((item) => (
-                <option key={item.value} value={item.value}>
-                  {item[locale]}
-                </option>
-              ))}
-            </SearchSelect>
+              options={[
+                { value: 'any', label: copy.search.anyLocation },
+                ...LOCATIONS.map((item) => ({ value: item.value, label: item[locale] }))
+              ]}
+            />
             <SearchSelect
               ariaLabel={copy.search.budgetLabel}
               value={maxPrice}
               onChange={setMaxPrice}
               isRtl={isRtl}
-            >
-              <option value="any">{copy.search.anyBudget}</option>
-              {copy.search.priceBuckets.map((bucket) => (
-                <option key={bucket.max} value={bucket.max}>
-                  {bucket.label}
-                </option>
-              ))}
-            </SearchSelect>
+              options={[
+                { value: 'any', label: copy.search.anyBudget },
+                ...copy.search.priceBuckets.map((bucket) => ({ value: String(bucket.max), label: bucket.label }))
+              ]}
+            />
           </div>
           <button
             type="submit"

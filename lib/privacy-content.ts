@@ -35,7 +35,7 @@ const ADDRESS =
 const en: PrivacyCopy = {
   eyebrow: 'Privacy',
   title: 'What we collect, and what we do not.',
-  updated: 'Last updated 25 September 2026',
+  updated: 'Last updated 4 October 2026',
   intro:
     'This policy covers the GOLD website at gold-eg.com and the GOLD iPhone app. It is written to be read, not to be survived — if something here is unclear, ask us and we will explain it.',
   sections: [
@@ -73,6 +73,7 @@ const en: PrivacyCopy = {
         'Enquiry form: your name, phone number, email address, the type of property you are interested in, and your message. This is emailed to our team and is not stored in our database.',
         'Rental request form: your name, company, phone, WhatsApp number, email, and what you are looking for — location, budget, bedrooms, dates and any notes you add.',
         'List your property form: your name, phone, WhatsApp number, email, the property details you enter, and any photos you upload.',
+        'After a rental request or a property listing, we ask you to sign GOLD’s confidentiality agreement. We keep the signature you draw on screen, or the signed copy you upload, with your name, company, phone, email and the time you signed. We email you a confirmation with a link to the agreement.',
         'Your IP address, to limit how many times the same visitor can send a form or try a code. The app’s identifier is counted the same way when a phone enters or checks codes. Both are used for that and nothing else.',
         'Messages you send us on WhatsApp — including from the “Ask GOLD on WhatsApp” button on a code link — reach us like any other WhatsApp message: we see your number and what you write.'
       ]
@@ -90,15 +91,16 @@ const en: PrivacyCopy = {
         'Three companies handle data on our behalf, and only to run the service:'
       ],
       bullets: [
-        'Supabase — stores our database and uploaded photos.',
+        'Supabase — stores our database, uploaded photos, and signed agreements.',
         'Railway — hosts the website.',
-        'Resend — delivers enquiry emails to our team.'
+        'Resend — delivers enquiry emails to our team, and the confirmation emails we send you.'
       ]
     },
     {
       heading: 'How long we keep it',
       paragraphs: [
         'Enquiries live in our team’s email for as long as we might need them to follow up with you. Rental requests and property listings stay in our database while they are relevant to a live search or listing.',
+        'A signed agreement stays with the request or listing it belongs to and is deleted with it. Because it protects both sides for 12 months after we last work together, we may keep it for that long even if you ask us to delete the rest.',
         'Code records — the app identifier, the code it entered and those two times — are kept after the code ends or is revoked, so our staff can still see how many phones a finished stay’s code reached. They are not deleted on a schedule: they stay until you ask us to delete them, or until we remove that compound from the guide. Tell us the code you were given and we will delete its records. The code itself, and the note our staff wrote on it, are kept with them.',
         'On your phone, the contacts a code opened are removed the next time the app can reach us after the code ends.',
         'Rate-limit counters hold an IP address or app identifier, a count, and when the count resets, 10 to 15 minutes later. For the website’s forms they are kept only in our server’s memory. For codes they are kept in our database and deleted, after they expire, by a clean-up that runs as the site is used. How soon depends on how busy the site is: it can take anywhere from minutes to more than a day.',
@@ -136,7 +138,7 @@ const en: PrivacyCopy = {
 const ar: PrivacyCopy = {
   eyebrow: 'الخصوصية',
   title: 'ما نجمعه، وما لا نجمعه.',
-  updated: 'آخر تحديث 25 سبتمبر 2026',
+  updated: 'آخر تحديث 4 أكتوبر 2026',
   intro:
     'تغطي هذه السياسة موقع جولد على gold-eg.com وتطبيق جولد على الآيفون. كُتبت لتُقرأ بوضوح — إذا كان أي شيء هنا غير واضح، اسألنا وسنشرحه.',
   sections: [
@@ -174,6 +176,7 @@ const ar: PrivacyCopy = {
         'نموذج الاستفسار: اسمك ورقم هاتفك وبريدك الإلكتروني ونوع العقار الذي يهمك ورسالتك. يُرسل إلى فريقنا بالبريد ولا يُخزَّن في قاعدة بياناتنا.',
         'نموذج طلب الإيجار: اسمك والشركة والهاتف ورقم واتساب والبريد وما تبحث عنه — الموقع والميزانية وعدد الغرف والتواريخ وأي ملاحظات تضيفها.',
         'نموذج عرض عقارك: اسمك والهاتف ورقم واتساب والبريد وتفاصيل العقار وأي صور ترفعها.',
+        'بعد طلب الإيجار أو عرض العقار، نطلب منك توقيع اتفاقية السرية الخاصة بجولد. نحتفظ بالتوقيع الذي ترسمه على الشاشة أو النسخة الموقّعة التي ترفعها، مع اسمك وشركتك وهاتفك وبريدك ووقت التوقيع. ونرسل لك رسالة تأكيد بالبريد فيها رابط الاتفاقية.',
         'عنوان الـ IP الخاص بك، للحد من عدد مرات إرسال النماذج أو تجربة الأكواد من نفس الزائر. ويُحتسب معرّف التطبيق بالطريقة نفسها عندما يُدخل هاتف أكواداً أو يتحقق منها. يُستخدمان لذلك فقط.',
         'الرسائل التي ترسلها إلينا على واتساب — بما فيها رسائل زر «تواصل مع جولد على واتساب» في رابط الكود — تصلنا مثل أي رسالة واتساب أخرى: نرى رقمك وما تكتبه.'
       ]
@@ -189,15 +192,16 @@ const ar: PrivacyCopy = {
       heading: 'من يمكنه الاطلاع عليها',
       paragraphs: ['ثلاث شركات تتعامل مع البيانات نيابة عنّا، ولتشغيل الخدمة فقط:'],
       bullets: [
-        'Supabase — تخزين قاعدة البيانات والصور المرفوعة.',
+        'Supabase — تخزين قاعدة البيانات والصور المرفوعة والاتفاقيات الموقّعة.',
         'Railway — استضافة الموقع.',
-        'Resend — إيصال رسائل الاستفسار إلى فريقنا.'
+        'Resend — إيصال رسائل الاستفسار إلى فريقنا، ورسائل التأكيد التي نرسلها إليك.'
       ]
     },
     {
       heading: 'مدة الاحتفاظ بها',
       paragraphs: [
         'تبقى الاستفسارات في بريد فريقنا طالما قد نحتاجها للرد عليك. تبقى طلبات الإيجار وعروض العقارات في قاعدة بياناتنا ما دامت ذات صلة ببحث أو عرض قائم.',
+        'تبقى الاتفاقية الموقّعة مع الطلب أو العرض الذي تخصه وتُحذف معه. ولأنها تحمي الطرفين لمدة 12 شهراً بعد آخر تعامل بيننا، قد نحتفظ بها طوال تلك المدة حتى لو طلبت حذف باقي بياناتك.',
         'سجلات الأكواد — معرّف التطبيق والكود الذي أُدخل عليه والوقتان المذكوران — نحتفظ بها بعد انتهاء الكود أو إلغائه، حتى يرى فريقنا عدد الهواتف التي وصل إليها كود إقامة انتهت. ولا تُحذف تلقائياً في موعد محدد: تبقى حتى تطلب منّا حذفها، أو حتى نزيل ذلك الكمبوند من الدليل. أخبرنا بالكود الذي وصلك وسنحذف سجلاته. ويبقى الكود نفسه والملاحظة التي كتبها فريقنا عليه معها.',
         'على هاتفك، تُزال جهات الاتصال التي فتحها الكود في أول مرة يتمكن فيها التطبيق من الوصول إلينا بعد انتهاء الكود.',
         'سجلات الحد من المحاولات تحتوي على عنوان IP أو معرّف التطبيق، وعدد المحاولات، ووقت إعادة ضبط العدد بعد 10 إلى 15 دقيقة. بالنسبة لنماذج الموقع تبقى في ذاكرة الخادم فقط. وبالنسبة للأكواد تُحفظ في قاعدة بياناتنا، وتحذفها بعد انتهائها عملية تنظيف تعمل مع استخدام الموقع. ويتوقف موعد الحذف على مدى نشاط الموقع: قد يكون بعد دقائق، وقد يستغرق أكثر من يوم.',

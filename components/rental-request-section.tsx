@@ -5,7 +5,9 @@ import { useState } from 'react';
 import type { SiteCopy } from '@/lib/site-content';
 import { LOCATIONS } from '@/lib/property-taxonomy';
 import { RENTAL_PERIODS, RENTAL_PROPERTY_TYPES } from '@/lib/rental-taxonomy';
+import { useRouter } from '@/i18n/navigation';
 import { GMark } from './gmark';
+import { GoldSelect, type GoldSelectOption } from './gold-select';
 import { SectionTitle, SurfaceShell, ArrowIcon } from './section-ui';
 
 const inputClass =
@@ -85,28 +87,31 @@ function SelectField({
   onChange,
   error,
   isRtl,
-  children
+  options,
+  placeholder
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   error?: string;
   isRtl: boolean;
-  children: React.ReactNode;
+  options: GoldSelectOption[];
+  placeholder?: string;
 }) {
   return (
-    <label className="block">
+    <div className="block">
       <span className={labelClass}>{label}</span>
-      <select
+      <GoldSelect
+        label={label}
         value={value}
-        onChange={(event) => onChange(event.target.value)}
-        dir={isRtl ? 'rtl' : 'ltr'}
-        className={`${inputClass} ${error ? 'border-red-400/70' : 'border-white/12'}`}
-      >
-        {children}
-      </select>
+        onChange={onChange}
+        options={options}
+        placeholder={placeholder}
+        isRtl={isRtl}
+        triggerClassName={`${inputClass} ${error ? 'border-red-400/70' : 'border-white/12'}`}
+      />
       {error ? <p className="mt-2 text-xs text-red-300">{error}</p> : null}
-    </label>
+    </div>
   );
 }
 
@@ -119,7 +124,10 @@ export function RentalRequestSection({
   locale: 'en' | 'ar';
   isRtl: boolean;
 }) {
+  const router = useRouter();
   const [form, setForm] = useState<FormState>(emptyForm);
+  // The dropdown's text before a required choice is made.
+  const chooseLabel = locale === 'ar' ? 'اختر' : 'Choose';
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [formError, setFormError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -137,6 +145,8 @@ export function RentalRequestSection({
     if (!/^[+()0-9\s-]{7,}$/.test(form.phone.trim())) nextErrors.phone = copy.errors.phone;
     if (!form.propertyType) nextErrors.propertyType = copy.errors.propertyType;
     if (!form.location) nextErrors.location = copy.errors.location;
+    // Required here, so the confirmation and the agreement have somewhere to go.
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) nextErrors.email = copy.errors.email;
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   };
@@ -158,6 +168,7 @@ export function RentalRequestSection({
           phone: form.phone.trim(),
           whatsapp: form.whatsapp.trim() || undefined,
           email: form.email.trim() || undefined,
+          locale,
           propertyType: form.propertyType,
           location: form.location,
           budgetMin: form.budgetMin ? Number(form.budgetMin) : undefined,
@@ -177,6 +188,12 @@ export function RentalRequestSection({
         return;
       }
 
+      // The agreement's signing page comes next, in place of the thank-you.
+      // Without a token (agreements not set up yet) the thank-you shows as before.
+      if (typeof body.ndaToken === 'string' && body.ndaToken) {
+        router.push(`/nda/${body.ndaToken}`);
+        return;
+      }
       setReferenceCode(body.referenceCode);
     } catch {
       setFormError(copy.errors.generic);
@@ -238,7 +255,7 @@ export function RentalRequestSection({
                     placeholder="+20 1..."
                   />
                   <Field label={copy.whatsapp} value={form.whatsapp} onChange={(v) => update('whatsapp', v)} isRtl={isRtl} placeholder="+20 1..." />
-                  <Field label={copy.email} value={form.email} onChange={(v) => update('email', v)} isRtl={isRtl} placeholder="name@example.com" />
+                  <Field label={copy.email} type="email" value={form.email} onChange={(v) => update('email', v)} error={errors.email} isRtl={isRtl} placeholder="name@example.com" />
                 </div>
               </div>
 
@@ -247,39 +264,14 @@ export function RentalRequestSection({
                   {copy.requestSectionTitle}
                 </div>
                 <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                  <SelectField label={copy.propertyTypeLabel} value={form.propertyType} onChange={(v) => update('propertyType', v)} error={errors.propertyType} isRtl={isRtl}>
-                    <option value="" className="bg-[#231F20] text-white/60" />
-                    {RENTAL_PROPERTY_TYPES.map((item) => (
-                      <option key={item.value} value={item.value} className="bg-[#231F20] text-white">
-                        {item[locale]}
-                      </option>
-                    ))}
-                  </SelectField>
-                  <SelectField label={copy.locationLabel} value={form.location} onChange={(v) => update('location', v)} error={errors.location} isRtl={isRtl}>
-                    <option value="" className="bg-[#231F20] text-white/60" />
-                    {LOCATIONS.map((item) => (
-                      <option key={item.value} value={item.value} className="bg-[#231F20] text-white">
-                        {item[locale]}
-                      </option>
-                    ))}
-                  </SelectField>
+                  <SelectField label={copy.propertyTypeLabel} value={form.propertyType} onChange={(v) => update('propertyType', v)} error={errors.propertyType} isRtl={isRtl} placeholder={chooseLabel} options={[...RENTAL_PROPERTY_TYPES.map((item) => ({ value: item.value, label: item[locale] }))]} />
+                  <SelectField label={copy.locationLabel} value={form.location} onChange={(v) => update('location', v)} error={errors.location} isRtl={isRtl} placeholder={chooseLabel} options={[...LOCATIONS.map((item) => ({ value: item.value, label: item[locale] }))]} />
                   <Field label={copy.budgetMinLabel} type="number" value={form.budgetMin} onChange={(v) => update('budgetMin', v)} isRtl={isRtl} />
                   <Field label={copy.budgetMaxLabel} type="number" value={form.budgetMax} onChange={(v) => update('budgetMax', v)} isRtl={isRtl} />
                   <Field label={copy.bedroomsLabel} type="number" value={form.bedrooms} onChange={(v) => update('bedrooms', v)} isRtl={isRtl} />
-                  <SelectField label={copy.furnishedLabel} value={form.furnished} onChange={(v) => update('furnished', v as FormState['furnished'])} isRtl={isRtl}>
-                    <option value="" className="bg-[#231F20] text-white">{copy.furnishedAny}</option>
-                    <option value="yes" className="bg-[#231F20] text-white">{copy.furnishedYes}</option>
-                    <option value="no" className="bg-[#231F20] text-white">{copy.furnishedNo}</option>
-                  </SelectField>
+                  <SelectField label={copy.furnishedLabel} value={form.furnished} onChange={(v) => update('furnished', v as FormState['furnished'])} isRtl={isRtl} options={[{ value: '', label: copy.furnishedAny }, { value: 'yes', label: copy.furnishedYes }, { value: 'no', label: copy.furnishedNo }]} />
                   <Field label={copy.moveInDateLabel} type="date" value={form.moveInDate} onChange={(v) => update('moveInDate', v)} isRtl={isRtl} />
-                  <SelectField label={copy.rentalPeriodLabel} value={form.rentalPeriod} onChange={(v) => update('rentalPeriod', v)} isRtl={isRtl}>
-                    <option value="" className="bg-[#231F20] text-white">{copy.rentalPeriodAny}</option>
-                    {RENTAL_PERIODS.map((item) => (
-                      <option key={item.value} value={item.value} className="bg-[#231F20] text-white">
-                        {item[locale]}
-                      </option>
-                    ))}
-                  </SelectField>
+                  <SelectField label={copy.rentalPeriodLabel} value={form.rentalPeriod} onChange={(v) => update('rentalPeriod', v)} isRtl={isRtl} options={[{ value: '', label: copy.rentalPeriodAny }, ...RENTAL_PERIODS.map((item) => ({ value: item.value, label: item[locale] }))]} />
                 </div>
                 <label className="mt-4 block">
                   <span className={labelClass}>{copy.notesLabel}</span>

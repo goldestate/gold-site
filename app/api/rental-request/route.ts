@@ -3,6 +3,9 @@ import { checkRateLimit, getClientKey } from '@/lib/rate-limit';
 import { upsertBrokerByPhone, createRentalRequest } from '@/lib/rental-desk-store';
 import { isLocation, type LocationValue } from '@/lib/property-taxonomy';
 import { isRentalPeriod, isRentalPropertyType, type RentalPeriodValue, type RentalPropertyTypeValue } from '@/lib/rental-taxonomy';
+import { openNdaFor } from '@/lib/nda-store';
+import { adminEmailAddress, isEmailShaped, sendEmail } from '@/lib/email';
+import { adminSubmissionEmail, requestReceivedEmail } from '@/lib/email-templates';
 
 type RentalRequestPayload = {
   name: string;
@@ -19,6 +22,8 @@ type RentalRequestPayload = {
   moveInDate?: string;
   rentalPeriod?: RentalPeriodValue;
   notes?: string;
+  /** The language the form was filled in. The app doesn't send it yet. */
+  locale?: 'en' | 'ar';
 };
 
 const isNonEmptyString = (value: unknown): value is string => typeof value === 'string' && value.trim().length > 0;
@@ -42,7 +47,8 @@ function isValidBody(body: unknown): body is RentalRequestPayload {
     (value.furnished === undefined || typeof value.furnished === 'boolean') &&
     (value.moveInDate === undefined || typeof value.moveInDate === 'string') &&
     (value.rentalPeriod === undefined || isRentalPeriod(value.rentalPeriod)) &&
-    (value.notes === undefined || typeof value.notes === 'string')
+    (value.notes === undefined || typeof value.notes === 'string') &&
+    (value.locale === undefined || value.locale === 'en' || value.locale === 'ar')
   );
 }
 
@@ -92,7 +98,50 @@ export async function POST(request: NextRequest) {
       notes: body.notes
     });
 
-    return NextResponse.json({ referenceCode: rentalRequest.referenceCode }, { status: 201 });
+    const email = isEmailShaped(body.email) ? body.email.trim() : null;
+    const nda = await openNdaFor(
+      { rentalRequestId: rentalRequest.id },
+      { name: broker.name, company: body.company?.trim() ?? '', phone: broker.phone, email: email ?? '' }
+    );
+
+    // After the response, not before it: a slow or failing email must not hold
+    // up or fail a request that is already saved.
+    const lang = body.locale ?? 'en';
+    if (email) {
+      void sendEmail(
+        requestReceivedEmail({
+          to: email,
+          lang,
+          name: broker.name,
+          referenceCode: rentalRequest.referenceCode,
+          propertyType: body.propertyType,
+          location: body.location,
+          ndaToken: nda?.token ?? null
+        })
+      );
+    }
+    const admin = adminEmailAddress();
+    if (admin) {
+      void sendEmail(
+        adminSubmissionEmail({
+          to: admin,
+          kind: 'request',
+          name: broker.name,
+          phone: broker.phone,
+          email,
+          propertyType: body.propertyType,
+          location: body.location,
+          referenceCode: rentalRequest.referenceCode
+        })
+      );
+    }
+
+    // ndaToken opens the signing page. Absent before migration 007; the form
+    // then shows its usual thank-you instead.
+    return NextResponse.json(
+      { referenceCode: rentalRequest.referenceCode, ndaToken: nda?.token ?? null },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Failed to create rental request', error);
     return NextResponse.json({ error: 'Could not submit your request. Please try again.' }, { status: 500 });

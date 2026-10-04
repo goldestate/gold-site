@@ -234,6 +234,7 @@ export type SiteCopy = {
       phone: string;
       propertyType: string;
       location: string;
+      email: string;
       generic: string;
     };
   };
@@ -269,8 +270,53 @@ export type SiteCopy = {
       location: string;
       price: string;
       photos: string;
+      email: string;
       generic: string;
     };
+  };
+  /**
+   * The confidentiality agreement's signing page, opened right after "Request a
+   * unit" or "List your property", and from the link in the confirmation email.
+   * The agreement itself is English (lib/nda.ts); everything around it is here.
+   * "{reference}" and "{date}" are filled in by the page.
+   */
+  ndaPage: {
+    eyebrow: string;
+    title: string;
+    intro: string;
+    receivedRequest: string;
+    receivedListing: string;
+    detailsTitle: string;
+    nameLabel: string;
+    companyLabel: string;
+    phoneLabel: string;
+    emailLabel: string;
+    agreementTitle: string;
+    agreementLanguageNote: string;
+    download: string;
+    signTitle: string;
+    drawTab: string;
+    uploadTab: string;
+    drawHint: string;
+    clear: string;
+    uploadHint: string;
+    chooseFile: string;
+    replaceFile: string;
+    agreeLabel: string;
+    submit: string;
+    submitting: string;
+    errorDraw: string;
+    errorFile: string;
+    errorFileType: string;
+    errorAgree: string;
+    errorGeneric: string;
+    doneTitle: string;
+    doneBody: string;
+    signedTitle: string;
+    signedBody: string;
+    invalidTitle: string;
+    invalidBody: string;
+    backHome: string;
   };
   /**
    * The page behind an unlock link. It is a handoff to the app, not a form: it
@@ -644,7 +690,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       company: 'Company (optional)',
       phone: 'Phone',
       whatsapp: 'WhatsApp (optional)',
-      email: 'Email (optional)',
+      email: 'Email',
       propertyTypeLabel: 'Property type',
       locationLabel: 'Location',
       budgetMinLabel: 'Budget min (EGP)',
@@ -669,6 +715,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
         phone: 'Please enter a valid phone number.',
         propertyType: 'Please select a property type.',
         location: 'Please select a location.',
+        email: 'Enter your email for the confirmation and the agreement.',
         generic: 'We could not submit your request right now. Please try again later.'
       }
     },
@@ -681,7 +728,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       name: 'Full name',
       phone: 'Phone',
       whatsapp: 'WhatsApp (optional)',
-      email: 'Email (optional)',
+      email: 'Email',
       propertyTypeLabel: 'Property type',
       locationLabel: 'Location',
       priceLabel: 'Monthly rent (EGP)',
@@ -704,8 +751,48 @@ export const siteCopy: Record<Locale, SiteCopy> = {
         location: 'Please select a location.',
         price: 'Please enter a valid monthly rent.',
         photos: 'Please upload at least one photo.',
+        email: 'Enter your email for the confirmation and the agreement.',
         generic: 'We could not submit your listing right now. Please try again later.'
       }
+    },
+    ndaPage: {
+      eyebrow: 'One last step',
+      title: 'Sign the confidentiality agreement',
+      intro:
+        'GOLD asks every client, broker and owner to keep the unit and client details we share confidential. Read the agreement, then sign it on screen or upload a signed copy.',
+      receivedRequest: 'Your request {reference} is with our team.',
+      receivedListing: 'Your property is with our team for review.',
+      detailsTitle: 'Your details',
+      nameLabel: 'Name',
+      companyLabel: 'Company',
+      phoneLabel: 'Contact number',
+      emailLabel: 'Email',
+      agreementTitle: 'The agreement',
+      agreementLanguageNote: '',
+      download: 'Download the PDF',
+      signTitle: 'Sign',
+      drawTab: 'Sign on screen',
+      uploadTab: 'Upload a signed copy',
+      drawHint: 'Sign in the box with your finger or mouse.',
+      clear: 'Clear',
+      uploadHint: 'Download the PDF, sign it, then upload a photo or PDF of the signed copy.',
+      chooseFile: 'Choose a photo or PDF',
+      replaceFile: 'Choose another file',
+      agreeLabel: 'I have read and agree to this agreement.',
+      submit: 'Sign and send',
+      submitting: 'Sending...',
+      errorDraw: 'Sign in the box first.',
+      errorFile: 'Choose the signed copy first.',
+      errorFileType: 'Use a photo (JPEG, PNG or WebP) or a PDF, under 10 MB.',
+      errorAgree: 'Tick the box to accept the agreement.',
+      errorGeneric: 'Could not send. Please try again.',
+      doneTitle: 'Thank you. The agreement is signed.',
+      doneBody: 'GOLD has your signed agreement. We will contact you on WhatsApp.',
+      signedTitle: 'This agreement is already signed.',
+      signedBody: 'Signed on {date}. There is nothing else to do.',
+      invalidTitle: 'This link isn’t valid.',
+      invalidBody: 'It may be incomplete. Ask GOLD on WhatsApp and we will send you a new signing link.',
+      backHome: 'Back to GOLD'
     },
     unlockPage: {
       metaTitle: 'Your GOLD compound guide',
@@ -1022,7 +1109,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       company: 'الشركة (اختياري)',
       phone: 'رقم الهاتف',
       whatsapp: 'واتساب (اختياري)',
-      email: 'البريد الإلكتروني (اختياري)',
+      email: 'البريد الإلكتروني',
       propertyTypeLabel: 'نوع العقار',
       locationLabel: 'الموقع',
       budgetMinLabel: 'أقل ميزانية (جنيه)',
@@ -1047,6 +1134,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
         phone: 'من فضلك أدخل رقم هاتف صحيح.',
         propertyType: 'من فضلك اختر نوع العقار.',
         location: 'من فضلك اختر الموقع.',
+        email: 'أدخل بريدك الإلكتروني لتصلك رسالة التأكيد والاتفاقية.',
         generic: 'تعذر إرسال طلبك الآن. حاول مرة أخرى لاحقاً.'
       }
     },
@@ -1059,7 +1147,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       name: 'الاسم الكامل',
       phone: 'رقم الهاتف',
       whatsapp: 'واتساب (اختياري)',
-      email: 'البريد الإلكتروني (اختياري)',
+      email: 'البريد الإلكتروني',
       propertyTypeLabel: 'نوع العقار',
       locationLabel: 'الموقع',
       priceLabel: 'الإيجار الشهري (جنيه)',
@@ -1082,8 +1170,48 @@ export const siteCopy: Record<Locale, SiteCopy> = {
         location: 'من فضلك اختر الموقع.',
         price: 'من فضلك أدخل إيجاراً شهرياً صحيحاً.',
         photos: 'من فضلك ارفع صورة واحدة على الأقل.',
+        email: 'أدخل بريدك الإلكتروني لتصلك رسالة التأكيد والاتفاقية.',
         generic: 'تعذر إرسال عرضك الآن. حاول مرة أخرى لاحقاً.'
       }
+    },
+    ndaPage: {
+      eyebrow: 'خطوة أخيرة',
+      title: 'وقّع اتفاقية السرية',
+      intro:
+        'تطلب جولد من كل عميل ووسيط ومالك الحفاظ على سرية تفاصيل الوحدات والعملاء التي نشاركها. اقرأ الاتفاقية، ثم وقّعها على الشاشة أو ارفع نسخة موقّعة.',
+      receivedRequest: 'طلبك {reference} لدى فريقنا الآن.',
+      receivedListing: 'عقارك لدى فريقنا للمراجعة.',
+      detailsTitle: 'بياناتك',
+      nameLabel: 'الاسم',
+      companyLabel: 'الشركة',
+      phoneLabel: 'رقم التواصل',
+      emailLabel: 'البريد الإلكتروني',
+      agreementTitle: 'الاتفاقية',
+      agreementLanguageNote: 'نص الاتفاقية باللغة الإنجليزية.',
+      download: 'حمّل ملف PDF',
+      signTitle: 'التوقيع',
+      drawTab: 'وقّع على الشاشة',
+      uploadTab: 'ارفع نسخة موقّعة',
+      drawHint: 'وقّع داخل المربع بإصبعك أو بالماوس.',
+      clear: 'مسح',
+      uploadHint: 'حمّل ملف PDF ووقّعه، ثم ارفع صورة أو ملف PDF للنسخة الموقّعة.',
+      chooseFile: 'اختر صورة أو ملف PDF',
+      replaceFile: 'اختر ملفاً آخر',
+      agreeLabel: 'قرأت هذه الاتفاقية وأوافق عليها.',
+      submit: 'وقّع وأرسل',
+      submitting: 'جارٍ الإرسال...',
+      errorDraw: 'وقّع داخل المربع أولاً.',
+      errorFile: 'اختر النسخة الموقّعة أولاً.',
+      errorFileType: 'استخدم صورة (JPEG أو PNG أو WebP) أو ملف PDF، أقل من 10 ميجابايت.',
+      errorAgree: 'ضع علامة في المربع للموافقة على الاتفاقية.',
+      errorGeneric: 'تعذّر الإرسال. حاول مرة أخرى.',
+      doneTitle: 'شكراً لك. تم توقيع الاتفاقية.',
+      doneBody: 'وصلت الاتفاقية الموقّعة إلى جولد. سنتواصل معك على واتساب.',
+      signedTitle: 'هذه الاتفاقية موقّعة بالفعل.',
+      signedBody: 'تم التوقيع في {date}. لا داعي لأي شيء آخر.',
+      invalidTitle: 'هذا الرابط غير صالح.',
+      invalidBody: 'قد يكون ناقصاً. تواصل مع جولد على واتساب وسنرسل لك رابط توقيع جديداً.',
+      backHome: 'العودة إلى جولد'
     },
     unlockPage: {
       metaTitle: 'دليل الكمبوند من جولد',

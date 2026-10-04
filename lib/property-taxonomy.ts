@@ -1,4 +1,4 @@
-export type PropertyTypeValue = 'primary' | 'rental' | 'resale' | 'commercial' | 'administrative';
+export type PropertyTypeValue = 'primary' | 'rental' | 'resale';
 export type UnitTypeValue =
   | 'studio'
   | 'cabin'
@@ -25,9 +25,7 @@ type TaxonomyOption<T extends string> = {
 export const PROPERTY_TYPES: TaxonomyOption<PropertyTypeValue>[] = [
   { value: 'primary', en: 'Primary', ar: 'أساسي' },
   { value: 'rental', en: 'Rental', ar: 'إيجار' },
-  { value: 'resale', en: 'Resale', ar: 'إعادة بيع' },
-  { value: 'commercial', en: 'Commercial', ar: 'تجاري' },
-  { value: 'administrative', en: 'Administrative', ar: 'إداري' }
+  { value: 'resale', en: 'Resale', ar: 'إعادة بيع' }
 ];
 
 // Ordered smallest-to-largest residential, then commercial-use units; the
