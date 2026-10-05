@@ -2,18 +2,14 @@
  * GOLD's Non-Disclosure & Brokerage Cooperation Agreement, word for word as GOLD
  * provided it.
  *
- * One copy, used everywhere: the signing page shows it, the downloadable PDF in
- * public/legal is generated from it, and the admin shows it next to each
- * signature. NDA_VERSION is stored with every signature, so a later edit to the
- * wording never changes what an earlier signer agreed to -- change the version
- * whenever the text changes, and regenerate the PDF.
+ * One copy, used everywhere: the signing page shows it and is where it's signed,
+ * and the admin shows it next to each signature. NDA_VERSION is stored with
+ * every signature, so a later edit to the wording never changes what an earlier
+ * signer agreed to -- change the version whenever the text changes.
  */
 export const NDA_VERSION = '2026-10';
 
 export const NDA_TITLE = 'Non-Disclosure & Brokerage Cooperation Agreement';
-
-/** The downloadable copy, with blank lines for the details and signature. */
-export const NDA_PDF_PATH = '/legal/gold-nda.pdf';
 
 export type NdaSection = {
   heading: string;

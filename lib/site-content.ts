@@ -317,28 +317,16 @@ export type SiteCopy = {
     intro: string;
     receivedRequest: string;
     receivedListing: string;
-    detailsTitle: string;
-    nameLabel: string;
-    companyLabel: string;
-    phoneLabel: string;
-    emailLabel: string;
     agreementTitle: string;
     agreementLanguageNote: string;
-    download: string;
-    signTitle: string;
-    drawTab: string;
-    uploadTab: string;
+    jumpToSign: string;
+    signHere: string;
     drawHint: string;
     clear: string;
-    uploadHint: string;
-    chooseFile: string;
-    replaceFile: string;
     agreeLabel: string;
     submit: string;
     submitting: string;
     errorDraw: string;
-    errorFile: string;
-    errorFileType: string;
     errorAgree: string;
     errorGeneric: string;
     doneTitle: string;
@@ -803,31 +791,19 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       eyebrow: 'One last step',
       title: 'Sign the confidentiality agreement',
       intro:
-        'GOLD asks every client, broker and owner to keep the unit and client details we share confidential. Read the agreement, then sign it on screen or upload a signed copy.',
+        'GOLD asks every client, broker and owner to keep the unit and client details we share confidential. Read the agreement below, then sign it at the bottom with your finger or mouse.',
       receivedRequest: 'Your request {reference} is with our team.',
       receivedListing: 'Your property is with our team for review.',
-      detailsTitle: 'Your details',
-      nameLabel: 'Name',
-      companyLabel: 'Company',
-      phoneLabel: 'Contact number',
-      emailLabel: 'Email',
       agreementTitle: 'The agreement',
       agreementLanguageNote: '',
-      download: 'Download the PDF',
-      signTitle: 'Sign',
-      drawTab: 'Sign on screen',
-      uploadTab: 'Upload a signed copy',
+      jumpToSign: 'Go to signature',
+      signHere: 'Sign here',
       drawHint: 'Sign in the box with your finger or mouse.',
       clear: 'Clear',
-      uploadHint: 'Download the PDF, sign it, then upload a photo or PDF of the signed copy.',
-      chooseFile: 'Choose a photo or PDF',
-      replaceFile: 'Choose another file',
       agreeLabel: 'I have read and agree to this agreement.',
       submit: 'Sign and send',
       submitting: 'Sending...',
       errorDraw: 'Sign in the box first.',
-      errorFile: 'Choose the signed copy first.',
-      errorFileType: 'Use a photo (JPEG, PNG or WebP) or a PDF, under 10 MB.',
       errorAgree: 'Tick the box to accept the agreement.',
       errorGeneric: 'Could not send. Please try again.',
       doneTitle: 'Thank you. The agreement is signed.',
@@ -1241,31 +1217,19 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       eyebrow: 'خطوة أخيرة',
       title: 'وقّع اتفاقية السرية',
       intro:
-        'تطلب جولد من كل عميل ووسيط ومالك الحفاظ على سرية تفاصيل الوحدات والعملاء التي نشاركها. اقرأ الاتفاقية، ثم وقّعها على الشاشة أو ارفع نسخة موقّعة.',
+        'تطلب جولد من كل عميل ووسيط ومالك الحفاظ على سرية تفاصيل الوحدات والعملاء التي نشاركها. اقرأ الاتفاقية أدناه، ثم وقّعها في آخرها بإصبعك أو بالماوس.',
       receivedRequest: 'طلبك {reference} لدى فريقنا الآن.',
       receivedListing: 'عقارك لدى فريقنا للمراجعة.',
-      detailsTitle: 'بياناتك',
-      nameLabel: 'الاسم',
-      companyLabel: 'الشركة',
-      phoneLabel: 'رقم التواصل',
-      emailLabel: 'البريد الإلكتروني',
       agreementTitle: 'الاتفاقية',
       agreementLanguageNote: 'نص الاتفاقية باللغة الإنجليزية.',
-      download: 'حمّل ملف PDF',
-      signTitle: 'التوقيع',
-      drawTab: 'وقّع على الشاشة',
-      uploadTab: 'ارفع نسخة موقّعة',
+      jumpToSign: 'انتقل إلى التوقيع',
+      signHere: 'وقّع هنا',
       drawHint: 'وقّع داخل المربع بإصبعك أو بالماوس.',
       clear: 'مسح',
-      uploadHint: 'حمّل ملف PDF ووقّعه، ثم ارفع صورة أو ملف PDF للنسخة الموقّعة.',
-      chooseFile: 'اختر صورة أو ملف PDF',
-      replaceFile: 'اختر ملفاً آخر',
       agreeLabel: 'قرأت هذه الاتفاقية وأوافق عليها.',
       submit: 'وقّع وأرسل',
       submitting: 'جارٍ الإرسال...',
       errorDraw: 'وقّع داخل المربع أولاً.',
-      errorFile: 'اختر النسخة الموقّعة أولاً.',
-      errorFileType: 'استخدم صورة (JPEG أو PNG أو WebP) أو ملف PDF، أقل من 10 ميجابايت.',
       errorAgree: 'ضع علامة في المربع للموافقة على الاتفاقية.',
       errorGeneric: 'تعذّر الإرسال. حاول مرة أخرى.',
       doneTitle: 'شكراً لك. تم توقيع الاتفاقية.',
