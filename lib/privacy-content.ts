@@ -35,7 +35,7 @@ const ADDRESS =
 const en: PrivacyCopy = {
   eyebrow: 'Privacy',
   title: 'What we collect, and what we do not.',
-  updated: 'Last updated 4 October 2026',
+  updated: 'Last updated 6 October 2026',
   intro:
     'This policy covers the GOLD website at gold-eg.com and the GOLD iPhone app. It is written to be read, not to be survived — if something here is unclear, ask us and we will explain it.',
   sections: [
@@ -93,7 +93,7 @@ const en: PrivacyCopy = {
       bullets: [
         'Supabase — stores our database, uploaded photos, and signed agreements.',
         'Railway — hosts the website.',
-        'Resend — delivers enquiry emails to our team, and the confirmation emails we send you.'
+        'Resend — delivers enquiry emails to our team, and the emails we send you about your request or listing: the confirmation, and updates from our team.'
       ]
     },
     {
@@ -138,7 +138,7 @@ const en: PrivacyCopy = {
 const ar: PrivacyCopy = {
   eyebrow: 'الخصوصية',
   title: 'ما نجمعه، وما لا نجمعه.',
-  updated: 'آخر تحديث 4 أكتوبر 2026',
+  updated: 'آخر تحديث 6 أكتوبر 2026',
   intro:
     'تغطي هذه السياسة موقع جولد على gold-eg.com وتطبيق جولد على الآيفون. كُتبت لتُقرأ بوضوح — إذا كان أي شيء هنا غير واضح، اسألنا وسنشرحه.',
   sections: [
@@ -194,7 +194,7 @@ const ar: PrivacyCopy = {
       bullets: [
         'Supabase — تخزين قاعدة البيانات والصور المرفوعة والاتفاقيات الموقّعة.',
         'Railway — استضافة الموقع.',
-        'Resend — إيصال رسائل الاستفسار إلى فريقنا، ورسائل التأكيد التي نرسلها إليك.'
+        'Resend — إيصال رسائل الاستفسار إلى فريقنا، والرسائل التي نرسلها إليك بخصوص طلبك أو عقارك: رسالة التأكيد، والتحديثات من فريقنا.'
       ]
     },
     {

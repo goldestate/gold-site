@@ -205,6 +205,37 @@ export async function readNdaSubject(
   return null;
 }
 
+/**
+ * Where a submission's signed files are. Read before the submission is deleted:
+ * its agreements go with it (on delete cascade), and with them the paths.
+ */
+export async function ndaFilePathsFor(
+  subject: { rentalRequestId: string } | { rentalListingId: string }
+): Promise<string[]> {
+  const query = supabase.from('nda_agreements').select('file_path');
+  const { data, error } =
+    'rentalRequestId' in subject
+      ? await query.eq('rental_request_id', subject.rentalRequestId)
+      : await query.eq('rental_listing_id', subject.rentalListingId);
+  if (error) {
+    if (isMissingTable(error)) return [];
+    throw error;
+  }
+  return ((data ?? []) as { file_path: string | null }[])
+    .map((row) => row.file_path)
+    .filter((path): path is string => typeof path === 'string' && path.length > 0);
+}
+
+/**
+ * Removes signed files from the private bucket. Logs rather than throws: the
+ * records they belonged to are already gone, and staff can't do anything more.
+ */
+export async function removeNdaFiles(paths: string[]): Promise<void> {
+  if (paths.length === 0) return;
+  const { error } = await supabase.storage.from(NDA_BUCKET).remove(paths);
+  if (error) console.error('Could not remove signed agreement files', error);
+}
+
 export async function uploadNdaFile(path: string, body: Buffer, contentType: string): Promise<void> {
   const { error } = await supabase.storage.from(NDA_BUCKET).upload(path, body, { contentType, upsert: false });
   if (error) throw error;

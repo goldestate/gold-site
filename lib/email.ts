@@ -65,7 +65,4 @@ export function adminEmailAddress(): string | null {
   return process.env.EMAIL_ADMIN_TO?.trim() || process.env.EMAIL_TO?.trim() || null;
 }
 
-/** A plausible address, worth sending to. Forms collect it as free text. */
-export function isEmailShaped(value: string | undefined | null): value is string {
-  return typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
-}
+export { isEmailShaped } from './email-address';

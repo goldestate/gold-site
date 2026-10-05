@@ -7,6 +7,8 @@ import { formatPrice } from '@/lib/format-price';
 import { locationLabel } from '@/lib/property-taxonomy';
 import { RENTAL_REQUEST_STATUS_LABELS, rentalPropertyTypeLabel, type RentalRequestStatusValue } from '@/lib/rental-taxonomy';
 import { NdaBadge, type NdaSummary } from './nda-badge';
+import { RentalDeskDeleteButton } from './rental-desk-delete';
+import { RentalDeskEmailBar, type EmailRecipient } from './rental-desk-email';
 
 const MAX_VISIBLE_MATCHES = 5;
 
@@ -88,6 +90,33 @@ export function RentalDeskRequestsPanel({
 }) {
   const router = useRouter();
   const [error, setError] = useState('');
+  const [selected, setSelected] = useState<Set<string>>(() => new Set());
+
+  const allSelected = requests.length > 0 && requests.every((request) => selected.has(request.id));
+  const recipients: EmailRecipient[] = requests
+    .filter((request) => selected.has(request.id))
+    .map((request) => ({
+      id: request.id,
+      name: request.broker.name,
+      email: request.broker.email,
+      propertyType: request.propertyType,
+      location: request.location,
+      referenceCode: request.referenceCode
+    }));
+
+  const toggle = (id: string) =>
+    setSelected((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  const forget = (id: string) =>
+    setSelected((current) => {
+      const next = new Set(current);
+      next.delete(id);
+      return next;
+    });
 
   const handleMarkSent = async (matchId: string) => {
     setError('');
@@ -119,6 +148,16 @@ export function RentalDeskRequestsPanel({
         </div>
       ) : null}
 
+      <label className="inline-flex min-h-[36px] cursor-pointer items-center gap-3 text-xs uppercase tracking-[0.14em] text-white/50">
+        <input
+          type="checkbox"
+          checked={allSelected}
+          onChange={() => setSelected(allSelected ? new Set() : new Set(requests.map((request) => request.id)))}
+          className="h-4 w-4 accent-[#D9B355]"
+        />
+        Select all
+      </label>
+
       {requests.map((request) => {
         const matches = matchesByRequest[request.id] ?? [];
         const visibleMatches = matches.slice(0, MAX_VISIBLE_MATCHES);
@@ -127,17 +166,26 @@ export function RentalDeskRequestsPanel({
         return (
           <div key={request.id} className="rounded-[1.5rem] border border-white/10 bg-white/5 p-6">
             <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <div className="font-serif text-xs uppercase tracking-[0.3em] text-[rgba(217,179,85,0.9)]">
-                  {request.referenceCode}
+              <div className="flex items-start gap-4">
+                <input
+                  type="checkbox"
+                  checked={selected.has(request.id)}
+                  onChange={() => toggle(request.id)}
+                  aria-label={`Select ${request.referenceCode} from ${request.broker.name}`}
+                  className="mt-0.5 h-4 w-4 shrink-0 accent-[#D9B355]"
+                />
+                <div>
+                  <div className="font-serif text-xs uppercase tracking-[0.3em] text-[rgba(217,179,85,0.9)]">
+                    {request.referenceCode}
+                  </div>
+                  <div className="mt-1 text-white">
+                    {request.broker.name}
+                    {request.broker.company ? ` · ${request.broker.company}` : ''}
+                  </div>
+                  <a href={`tel:${request.broker.phone}`} className="text-xs text-white/50 hover:text-[#D9B355]">
+                    {request.broker.phone}
+                  </a>
                 </div>
-                <div className="mt-1 text-white">
-                  {request.broker.name}
-                  {request.broker.company ? ` · ${request.broker.company}` : ''}
-                </div>
-                <a href={`tel:${request.broker.phone}`} className="text-xs text-white/50 hover:text-[#D9B355]">
-                  {request.broker.phone}
-                </a>
               </div>
               <div className="flex flex-col items-end gap-2">
                 <span
@@ -183,9 +231,24 @@ export function RentalDeskRequestsPanel({
                 </>
               )}
             </div>
+
+            <div className="mt-5 flex justify-end border-t border-white/10 pt-4">
+              <RentalDeskDeleteButton
+                url={`/api/rental-desk/requests/${request.id}`}
+                label={`request ${request.referenceCode}`}
+                onDeleted={() => forget(request.id)}
+              />
+            </div>
           </div>
         );
       })}
+
+      <RentalDeskEmailBar
+        audience="brokers"
+        recipients={recipients}
+        onClear={() => setSelected(new Set())}
+        onKeepOnly={(ids) => setSelected(new Set(ids))}
+      />
     </div>
   );
 }

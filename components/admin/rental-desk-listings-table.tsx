@@ -8,6 +8,8 @@ import { formatPrice } from '@/lib/format-price';
 import { locationLabel } from '@/lib/property-taxonomy';
 import { RENTAL_LISTING_STATUSES, rentalPropertyTypeLabel, type RentalListingStatusValue } from '@/lib/rental-taxonomy';
 import { NdaBadge, type NdaSummary } from './nda-badge';
+import { RentalDeskDeleteButton } from './rental-desk-delete';
+import { RentalDeskEmailBar, type EmailRecipient } from './rental-desk-email';
 
 function formatDate(iso: string): string {
   const date = new Date(iso);
@@ -33,6 +35,29 @@ export function RentalDeskListingsTable({
   const router = useRouter();
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [selected, setSelected] = useState<Set<string>>(() => new Set());
+
+  // GOLD's own units have no outside owner to email, and are deleted from Properties.
+  const outside = listings.filter((listing) => !listing.sourcePropertyId);
+  const allSelected = outside.length > 0 && outside.every((listing) => selected.has(listing.id));
+  const recipients: EmailRecipient[] = outside
+    .filter((listing) => selected.has(listing.id))
+    .map((listing) => ({
+      id: listing.id,
+      name: listing.owner.name,
+      email: listing.owner.email,
+      propertyType: listing.propertyType,
+      location: listing.location
+    }));
+
+  const toggle = (id: string) =>
+    setSelected((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  const toggleAll = () => setSelected(allSelected ? new Set() : new Set(outside.map((listing) => listing.id)));
 
   const changeStatus = async (listing: RentalListingWithOwner, status: RentalListingStatusValue) => {
     if (status === listing.status) return;
@@ -73,9 +98,19 @@ export function RentalDeskListingsTable({
       ) : null}
 
       <div className="overflow-x-auto rounded-[1.5rem] border border-white/10">
-        <table className="w-full min-w-[1000px] text-left text-sm">
+        <table className="w-full min-w-[1160px] text-left text-sm">
           <thead className="bg-white/5 text-xs uppercase tracking-[0.16em] text-white/50">
             <tr>
+              <th className="w-12 py-4 pl-5">
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={toggleAll}
+                  disabled={outside.length === 0}
+                  aria-label="Select every owner"
+                  className="h-4 w-4 accent-[#D9B355]"
+                />
+              </th>
               <th className="px-5 py-4">Owner</th>
               <th className="px-5 py-4">Property</th>
               <th className="px-5 py-4">Price</th>
@@ -83,11 +118,25 @@ export function RentalDeskListingsTable({
               <th className="px-5 py-4">Added</th>
               <th className="px-5 py-4">Status</th>
               <th className="px-5 py-4">Agreement</th>
+              <th className="px-5 py-4">
+                <span className="sr-only">Delete</span>
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/8">
             {listings.map((listing) => (
               <tr key={listing.id} className={pendingId === listing.id ? 'opacity-50' : ''}>
+                <td className="py-4 pl-5">
+                  {listing.sourcePropertyId ? null : (
+                    <input
+                      type="checkbox"
+                      checked={selected.has(listing.id)}
+                      onChange={() => toggle(listing.id)}
+                      aria-label={`Select ${listing.owner.name}`}
+                      className="h-4 w-4 accent-[#D9B355]"
+                    />
+                  )}
+                </td>
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-white">{listing.owner.name}</span>
@@ -131,11 +180,33 @@ export function RentalDeskListingsTable({
                 <td className="px-5 py-4">
                   <NdaBadge nda={ndas[listing.id]} />
                 </td>
+                <td className="px-5 py-4 text-end">
+                  {listing.sourcePropertyId ? null : (
+                    <RentalDeskDeleteButton
+                      url={`/api/rental-desk/listings/${listing.id}`}
+                      label={`the listing from ${listing.owner.name}`}
+                      onDeleted={() =>
+                        setSelected((current) => {
+                          const next = new Set(current);
+                          next.delete(listing.id);
+                          return next;
+                        })
+                      }
+                    />
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      <RentalDeskEmailBar
+        audience="owners"
+        recipients={recipients}
+        onClear={() => setSelected(new Set())}
+        onKeepOnly={(ids) => setSelected(new Set(ids))}
+      />
     </div>
   );
 }

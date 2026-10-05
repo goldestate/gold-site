@@ -1,4 +1,6 @@
-import { supabase } from './supabase';
+import { supabase, RENTAL_PHOTOS_BUCKET } from './supabase';
+import { ndaFilePathsFor, removeNdaFiles } from './nda-store';
+import type { FollowUpAudience, FollowUpSubject } from './follow-up-emails';
 import type { LocationValue } from './property-taxonomy';
 import type { RentalListingStatusValue, RentalPeriodValue, RentalPropertyTypeValue } from './rental-taxonomy';
 
@@ -290,17 +292,17 @@ export async function createRentalListing(ownerId: string, input: RentalListingI
 // ---------------------------------------------------------------------------
 
 export type RentalRequestWithBroker = RentalRequest & {
-  broker: { name: string; phone: string; company: string | null };
+  broker: { name: string; phone: string; company: string | null; email: string | null };
 };
 
 type RentalRequestRowWithBroker = RentalRequestRow & {
-  brokers: { name: string; phone: string; company: string | null } | null;
+  brokers: { name: string; phone: string; company: string | null; email: string | null } | null;
 };
 
 export async function listRentalRequests(): Promise<RentalRequestWithBroker[]> {
   const { data, error } = await supabase
     .from('rental_requests')
-    .select('*, brokers(name, phone, company)')
+    .select('*, brokers(name, phone, company, email)')
     .order('created_at', { ascending: false });
   if (error) throw error;
   return (data as RentalRequestRowWithBroker[]).map((row) => ({
@@ -308,30 +310,32 @@ export async function listRentalRequests(): Promise<RentalRequestWithBroker[]> {
     broker: {
       name: row.brokers?.name ?? 'Unknown',
       phone: row.brokers?.phone ?? '',
-      company: row.brokers?.company ?? null
+      company: row.brokers?.company ?? null,
+      email: row.brokers?.email ?? null
     }
   }));
 }
 
 export type RentalListingWithOwner = RentalListing & {
-  owner: { name: string; phone: string };
+  owner: { name: string; phone: string; email: string | null };
 };
 
 type RentalListingRowWithOwner = RentalListingRow & {
-  owners: { name: string; phone: string } | null;
+  owners: { name: string; phone: string; email: string | null } | null;
 };
 
 export async function listRentalListings(): Promise<RentalListingWithOwner[]> {
   const { data, error } = await supabase
     .from('rental_listings')
-    .select('*, owners(name, phone)')
+    .select('*, owners(name, phone, email)')
     .order('created_at', { ascending: false });
   if (error) throw error;
   return (data as RentalListingRowWithOwner[]).map((row) => ({
     ...rowToRentalListing(row),
     owner: {
       name: row.owners?.name ?? 'Unknown',
-      phone: row.owners?.phone ?? ''
+      phone: row.owners?.phone ?? '',
+      email: row.owners?.email ?? null
     }
   }));
 }
@@ -393,7 +397,7 @@ type MatchRowWithListing = MatchRow & { rental_listings: RentalListingRowWithOwn
 export async function listMatchesWithListings(): Promise<MatchWithListing[]> {
   const { data, error } = await supabase
     .from('matches')
-    .select('*, rental_listings(*, owners(name, phone))')
+    .select('*, rental_listings(*, owners(name, phone, email))')
     .order('match_score', { ascending: false });
   if (error) throw error;
   return (data as MatchRowWithListing[]).map((row) => ({
@@ -402,7 +406,8 @@ export async function listMatchesWithListings(): Promise<MatchWithListing[]> {
       ...rowToRentalListing(row.rental_listings),
       owner: {
         name: row.rental_listings.owners?.name ?? 'Unknown',
-        phone: row.rental_listings.owners?.phone ?? ''
+        phone: row.rental_listings.owners?.phone ?? '',
+        email: row.rental_listings.owners?.email ?? null
       }
     }
   }));
@@ -452,4 +457,150 @@ export async function markMatchSent(id: string): Promise<MatchSentResult | null>
     brokerWhatsapp: request?.brokers?.whatsapp ?? null,
     referenceCode: request?.reference_code ?? ''
   };
+}
+
+// ---------------------------------------------------------------------------
+// Deleting, and emailing the people staff tick.
+// ---------------------------------------------------------------------------
+
+/** A row id as Postgres makes them. Anything else can't be one, so it's "not found" without a query. */
+export function isRowId(value: unknown): value is string {
+  return typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+}
+
+/**
+ * Deletes a request for good, with its matches, its agreement and the signed
+ * file. The broker's contact stays: the next request from the same phone finds
+ * them again. Returns false when there was nothing to delete.
+ */
+export async function deleteRentalRequest(id: string): Promise<boolean> {
+  const { data, error } = await supabase.from('rental_requests').select('id').eq('id', id).maybeSingle();
+  if (error) throw error;
+  if (!data) return false;
+
+  const signedFiles = await ndaFilePathsFor({ rentalRequestId: id });
+  // matches has no ON DELETE CASCADE, so the request can't go while they point at it.
+  const matches = await supabase.from('matches').delete().eq('request_id', id);
+  if (matches.error) throw matches.error;
+  const removed = await supabase.from('rental_requests').delete().eq('id', id);
+  if (removed.error) throw removed.error;
+
+  // Files last, once nothing on record points at them any more.
+  await removeNdaFiles(signedFiles);
+  return true;
+}
+
+export type DeleteListingResult = 'deleted' | 'not_found' | 'in_house';
+
+/**
+ * Deletes an owner's listing for good, with its matches, its agreement, the
+ * signed file and its photos. GOLD's own units are refused: they mirror
+ * Properties, come back on the next edit there, and their photos are the
+ * property's.
+ */
+export async function deleteRentalListing(id: string): Promise<DeleteListingResult> {
+  const { data, error } = await supabase
+    .from('rental_listings')
+    .select('id, photos, source_property_id')
+    .eq('id', id)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return 'not_found';
+  const row = data as { photos: unknown; source_property_id: string | null };
+  if (row.source_property_id) return 'in_house';
+
+  const signedFiles = await ndaFilePathsFor({ rentalListingId: id });
+  const matches = await supabase.from('matches').delete().eq('listing_id', id);
+  if (matches.error) throw matches.error;
+  const removed = await supabase.from('rental_listings').delete().eq('id', id);
+  if (removed.error) throw removed.error;
+
+  await removeNdaFiles(signedFiles);
+  await removeUnusedRentalPhotos(Array.isArray(row.photos) ? row.photos : []);
+  return 'deleted';
+}
+
+/** The file name inside rental-photos behind one of its public URLs, or null for any other link. */
+function rentalPhotoPath(url: string): string | null {
+  const marker = `/storage/v1/object/public/${RENTAL_PHOTOS_BUCKET}/`;
+  const at = url.indexOf(marker);
+  if (at === -1) return null;
+  let path: string;
+  try {
+    path = decodeURIComponent(url.slice(at + marker.length).split(/[?#]/)[0]);
+  } catch {
+    return null;
+  }
+  return path && !path.includes('..') && !path.includes('/') ? path : null;
+}
+
+/**
+ * Removes a deleted listing's uploads. The form takes photo links as free text,
+ * so a link another listing also uses is left alone. (photos is jsonb: the
+ * filter has to be JSON, which supabase-js only sends for a string.)
+ */
+async function removeUnusedRentalPhotos(photos: unknown[]): Promise<void> {
+  const paths: string[] = [];
+  for (const url of photos) {
+    if (typeof url !== 'string') continue;
+    const path = rentalPhotoPath(url);
+    if (!path) continue;
+    const { data, error } = await supabase.from('rental_listings').select('id').contains('photos', JSON.stringify([url])).limit(1);
+    if (error) {
+      console.error('Could not check whether a rental photo is still in use', error);
+      continue;
+    }
+    if ((data ?? []).length === 0) paths.push(path);
+  }
+  if (paths.length === 0) return;
+  const { error } = await supabase.storage.from(RENTAL_PHOTOS_BUCKET).remove(paths);
+  if (error) console.error('Could not remove rental photos', error);
+}
+
+export type FollowUpRecipient = FollowUpSubject & { id: string; email: string | null };
+
+type RecipientRow = {
+  id: string;
+  property_type: string;
+  location: string;
+  reference_code?: string;
+  source_property_id?: string | null;
+  owners?: { name: string; email: string | null } | null;
+  brokers?: { name: string; email: string | null } | null;
+};
+
+/**
+ * The people behind the rows staff ticked, read fresh. The browser sends only
+ * ids, so nothing can be emailed that isn't on file. In-house listings have no
+ * outside owner and are left out. In the order the ids came.
+ */
+export async function readFollowUpRecipients(audience: FollowUpAudience, ids: string[]): Promise<FollowUpRecipient[]> {
+  const { data, error } =
+    audience === 'owners'
+      ? await supabase
+          .from('rental_listings')
+          .select('id, property_type, location, source_property_id, owners(name, email)')
+          .in('id', ids)
+      : await supabase
+          .from('rental_requests')
+          .select('id, property_type, location, reference_code, brokers(name, email)')
+          .in('id', ids);
+  if (error) throw error;
+
+  const rows = (data ?? []) as unknown as RecipientRow[];
+  const order = new Map(ids.map((id, index) => [id, index]));
+  return rows
+    .filter((row) => !row.source_property_id)
+    .map((row) => {
+      const person = audience === 'owners' ? row.owners : row.brokers;
+      return {
+        id: row.id,
+        name: person?.name ?? '',
+        email: person?.email ?? null,
+        propertyType: row.property_type as RentalPropertyTypeValue,
+        location: row.location as LocationValue,
+        referenceCode: row.reference_code
+      };
+    })
+    .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
 }
