@@ -2,6 +2,7 @@ import { SITE_URL } from './site-content';
 import { locationLabel, type LocationValue } from './property-taxonomy';
 import { rentalPropertyTypeLabel, type RentalPropertyTypeValue } from './rental-taxonomy';
 import type { Email } from './email';
+import type { FollowUpText } from './follow-up-emails';
 
 /**
  * The emails the site sends. Guests get both languages in one message, the one
@@ -188,6 +189,20 @@ export function listingReceivedEmail(input: {
         ar: 'استلمنا عرض عقارك'
       }
     )
+  };
+}
+
+/**
+ * To an owner or broker staff ticked on the Rental Desk. The words come from
+ * lib/follow-up-emails.ts, where the admin's preview reads them too.
+ */
+export function followUpEmail(to: string, message: FollowUpText): Email {
+  const parts = message.parts.map(({ lang, paragraphs, footnote }) => ({ lang, part: { paragraphs, footnote } }));
+  return {
+    to,
+    subject: message.subject,
+    html: layout(parts),
+    text: parts.map(({ part }) => partText(part)).join('\n\n—\n\n')
   };
 }
 
