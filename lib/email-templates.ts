@@ -230,13 +230,17 @@ export function adminNdaSignedEmail(input: {
   ndaId: string;
   name: string;
   method: 'drawn' | 'uploaded';
+  /** The signed PDF, attached when it could be made. */
+  pdf?: { filename: string; content: string } | null;
 }): Email {
-  return adminEmail(
+  const email = adminEmail(
     input.to,
     `Agreement signed · ${input.name}`,
     [
-      `${input.name} signed GOLD’s confidentiality agreement${input.method === 'drawn' ? ' on screen' : ' and uploaded the signed copy'}.`
+      `${input.name} signed GOLD’s confidentiality agreement${input.method === 'drawn' ? ' on screen' : ' and uploaded the signed copy'}.`,
+      ...(input.pdf ? ['The signed agreement is attached as a PDF.'] : [])
     ],
     { href: `${SITE_URL}/goldenadmin2026/nda/${input.ndaId}`, label: 'View the agreement' }
   );
+  return input.pdf ? { ...email, attachments: [input.pdf] } : email;
 }

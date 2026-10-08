@@ -8,10 +8,11 @@ import {
   NDA_PARTIES_INTRO,
   NDA_PARTIES_OUTRO,
   NDA_SECTIONS,
-  NDA_SIGNATURE_FIELDS,
-  NDA_SIGNER_FIELDS,
-  NDA_TITLE
+  NDA_TEMPLATE,
+  NDA_TITLE,
+  type NdaBlankKey
 } from '@/lib/nda';
+import { cleanPhone } from '@/lib/phone';
 import { Link } from '@/i18n/navigation';
 import { GMark } from './gmark';
 import { SectionTitle, SurfaceShell, ArrowIcon } from './section-ui';
@@ -28,9 +29,17 @@ export type NdaPageState =
       received: { kind: 'request'; referenceCode: string } | { kind: 'listing' } | null;
     };
 
+type Details = { name: string; company: string; phone: string; email: string };
+type Field = 'name' | 'phone' | 'email';
+
 const cardClass =
   'rounded-[1.5rem] bg-[#1B1718] p-6 shadow-[0_30px_70px_-35px_rgba(0,0,0,0.7)] ring-1 ring-white/10 sm:p-9';
 const eyebrowClass = 'font-serif text-xs uppercase tracking-[0.4em] text-[rgba(217,179,85,0.9)]';
+const inputClass =
+  'mt-2 block h-12 w-full rounded-[0.9rem] border bg-white/[0.06] px-4 text-base text-white outline-none transition placeholder:text-white/30 focus:bg-white/[0.09]';
+
+/** A position on a page, as a share of its width or height, so it scales with the picture. */
+const share = (points: number, of: number) => `${(points / of) * 100}%`;
 
 function DownIcon() {
   return (
@@ -49,13 +58,109 @@ function DownIcon() {
   );
 }
 
+/** A detail written on its blank in the page picture, where the PDF will have it. */
+function OnBlank({ blank, value }: { blank: NdaBlankKey; value: string }) {
+  if (!value.trim()) return null;
+  const { x, lineY } = NDA_TEMPLATE.blanks[blank];
+  const { width, height, fontSize, lineEnd } = NDA_TEMPLATE;
+  return (
+    <span
+      dir="auto"
+      className="pointer-events-none absolute overflow-hidden text-ellipsis whitespace-nowrap text-left leading-none text-[#231F20]"
+      style={{
+        left: share(x + 4, width),
+        width: share(lineEnd - x - 8, width),
+        top: share(lineY - 4.5 - fontSize * 0.82, height),
+        fontSize: `${(fontSize / width) * 100}cqw`
+      }}
+    >
+      {value}
+    </span>
+  );
+}
+
+/**
+ * GOLD's agreement, page by page, as the PDF it is. What the person types and
+ * draws below shows up on its blanks as they go: the signed PDF is made from
+ * exactly these values, in exactly these places.
+ */
+function AgreementPages({
+  details,
+  signature,
+  today,
+  pageAlt
+}: {
+  details: Details;
+  signature: string | null;
+  today: string;
+  pageAlt: string;
+}) {
+  const { pageImages, pageImageSize, width, height, signature: box } = NDA_TEMPLATE;
+  const onPage: Record<number, [NdaBlankKey, string][]> = {
+    0: [
+      ['partyName', details.name],
+      ['partyCompany', details.company],
+      ['partyPhone', details.phone],
+      ['partyEmail', details.email]
+    ],
+    2: [
+      ['signName', details.name],
+      ['signCompany', details.company],
+      ['signDate', today]
+    ]
+  };
+
+  return (
+    <div className="space-y-4" dir="ltr">
+      {pageImages.map((src, index) => (
+        <div
+          key={src}
+          className="relative overflow-hidden rounded-[0.75rem] bg-white shadow-[0_24px_60px_-30px_rgba(0,0,0,0.85)] [container-type:inline-size]"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={src}
+            alt={pageAlt.replace('{page}', String(index + 1)).replace('{pages}', String(pageImages.length))}
+            width={pageImageSize.width}
+            height={pageImageSize.height}
+            loading={index === 0 ? 'eager' : 'lazy'}
+            decoding="async"
+            draggable={false}
+            className="block h-auto w-full select-none"
+          />
+          {onPage[index]?.map(([blank, value]) => <OnBlank key={blank} blank={blank} value={value} />)}
+          {index === box.page ? (
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute"
+              style={{
+                left: share(box.x, width),
+                top: share(box.top, height),
+                width: share(box.width, width),
+                height: share(box.height, height)
+              }}
+            >
+              {signature ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={signature} alt="" className="h-full w-full object-contain object-left mix-blend-multiply" />
+              ) : (
+                <div className="h-full w-1/2 rounded-[2px] bg-[rgba(217,179,85,0.22)] ring-1 ring-[rgba(184,134,11,0.55)]" />
+              )}
+            </div>
+          ) : null}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /**
  * The confidentiality agreement's signing page: the step after "Request a unit"
  * and "List your property", and where the confirmation email's link leads.
  *
- * Signed right here. The agreement is set like the paper it replaces, with the
- * person's details already filled in, and they sign at the bottom of it with a
- * finger, a mouse or a pen. Nothing to download, print or upload.
+ * Made for a phone. The agreement shows as the PDF it is; below it, plain text
+ * boxes for the details and a signature box big enough for a finger. Sending
+ * signs that PDF: GOLD keeps it with the details and signature on it.
  */
 export function NdaSignSection({
   copy,
@@ -69,22 +174,49 @@ export function NdaSignSection({
   state: NdaPageState;
 }) {
   const padRef = useRef<SignaturePadHandle>(null);
+  const fieldRefs = useRef<Partial<Record<Field, HTMLInputElement | null>>>({});
+  const [details, setDetails] = useState<Details>(() =>
+    state.kind === 'pending' ? { ...state.signer } : { name: '', company: '', phone: '', email: '' }
+  );
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<Field, string>>>({});
+  const [signature, setSignature] = useState<string | null>(null);
   const [started, setStarted] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [outcome, setOutcome] = useState<'done' | 'already' | 'invalid' | null>(null);
 
-  // The page's own language, for the few controls that sit inside the English text.
-  const uiLanguage = { dir: isRtl ? 'rtl' : 'ltr', lang: isRtl ? 'ar' : 'en' } as const;
+  const update = (key: keyof Details, value: string) => {
+    setDetails((current) => ({ ...current, [key]: value }));
+    setFieldErrors((current) => ({ ...current, [key]: undefined }));
+    setError('');
+  };
+
+  const check = (): Partial<Record<Field, string>> => {
+    const found: Partial<Record<Field, string>> = {};
+    if (details.name.trim().length < 2) found.name = copy.errorName;
+    const digits = cleanPhone(details.phone).replace(/^\+/, '');
+    if (digits.length < 7 || digits.length > 15) found.phone = copy.errorPhone;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(details.email.trim())) found.email = copy.errorEmail;
+    return found;
+  };
 
   const clear = () => {
     padRef.current?.clear();
     setStarted(false);
+    setSignature(null);
   };
 
   const submit = async () => {
     setError('');
+    const found = check();
+    setFieldErrors(found);
+    const firstInvalid = (['name', 'phone', 'email'] as const).find((field) => found[field]);
+    if (firstInvalid) {
+      setError(copy.errorFields);
+      fieldRefs.current[firstInvalid]?.focus();
+      return;
+    }
     if (!padRef.current || padRef.current.isEmpty()) {
       setError(copy.errorDraw);
       return;
@@ -93,8 +225,8 @@ export function NdaSignSection({
       setError(copy.errorAgree);
       return;
     }
-    const signature = await padRef.current.toBlob();
-    if (!signature) {
+    const drawn = await padRef.current.toBlob();
+    if (!drawn) {
       setError(copy.errorGeneric);
       return;
     }
@@ -103,13 +235,28 @@ export function NdaSignSection({
     const form = new FormData();
     form.append('method', 'drawn');
     form.append('agree', 'yes');
-    form.append('file', signature, 'signature.png');
+    form.append('file', drawn, 'signature.png');
+    form.append('name', details.name);
+    form.append('company', details.company);
+    form.append('phone', details.phone);
+    form.append('email', details.email);
     try {
       const response = await fetch(`/api/nda/${encodeURIComponent(token)}`, { method: 'POST', body: form });
       if (response.ok) setOutcome('done');
       else if (response.status === 409) setOutcome('already');
       else if (response.status === 404) setOutcome('invalid');
-      else setError(copy.errorGeneric);
+      else {
+        const body = (await response.json().catch(() => null)) as { field?: Field } | null;
+        const field = body?.field;
+        if (field === 'name' || field === 'phone' || field === 'email') {
+          const message = { name: copy.errorName, phone: copy.errorPhone, email: copy.errorEmail }[field];
+          setFieldErrors({ [field]: message });
+          setError(copy.errorFields);
+          fieldRefs.current[field]?.focus();
+        } else {
+          setError(copy.errorGeneric);
+        }
+      }
     } catch {
       setError(copy.errorGeneric);
     } finally {
@@ -143,9 +290,30 @@ export function NdaSignSection({
   } else if (state.kind === 'signed') {
     content = message(copy.signedTitle, copy.signedBody.replace('{date}', state.signedOn));
   } else {
-    const { signer, received, today } = state;
-    const signatureValue = (field: (typeof NDA_SIGNATURE_FIELDS)[number]) =>
-      field === 'Name' ? signer.name : field === 'Company (Optional)' ? signer.company || '—' : today;
+    const { received, today } = state;
+    const textField = (
+      field: keyof Details,
+      label: string,
+      input: React.InputHTMLAttributes<HTMLInputElement>
+    ) => {
+      const problem = field === 'company' ? undefined : fieldErrors[field];
+      return (
+        <label className="block">
+          <span className="text-sm text-white/75">{label}</span>
+          <input
+            ref={(element) => {
+              if (field !== 'company') fieldRefs.current[field] = element;
+            }}
+            value={details[field]}
+            onChange={(event) => update(field, event.target.value)}
+            aria-invalid={problem ? true : undefined}
+            className={`${inputClass} ${problem ? 'border-red-400/70' : 'border-white/15 focus:border-[#D9B355]'}`}
+            {...input}
+          />
+          {problem ? <span className="mt-1.5 block text-sm text-red-300">{problem}</span> : null}
+        </label>
+      );
+    };
 
     content = (
       <div className="space-y-6">
@@ -174,113 +342,121 @@ export function NdaSignSection({
             </a>
           </div>
 
-          {/* English on every page: it is the text being signed. */}
-          <article
-            dir="ltr"
-            lang="en"
-            aria-label={NDA_TITLE}
-            className="mt-4 rounded-[1.25rem] bg-[#FBFAF6] px-5 py-8 text-left text-[0.9375rem] leading-7 text-[rgba(35,31,32,0.84)] shadow-[0_30px_70px_-35px_rgba(0,0,0,0.85)] sm:px-10 sm:py-12"
-          >
-            <h3 className="font-serif text-lg leading-snug text-[#231F20] sm:text-xl">{NDA_TITLE}</h3>
-            <p className="mt-6">{NDA_PARTIES_INTRO}</p>
-            <p className="mt-3 font-medium text-[#231F20]">{NDA_GOLD_PARTY}</p>
-            <p>{NDA_GOLD_ALIAS}</p>
-            <p className="mt-3">and</p>
-            <dl className="mt-3 space-y-1">
-              {NDA_SIGNER_FIELDS.map((field) => (
-                <div key={field.key} className="flex flex-wrap gap-x-2">
-                  <dt>{field.label}:</dt>
-                  <dd className="min-w-0 font-medium text-[#231F20] [overflow-wrap:anywhere]" dir="auto">
-                    {signer[field.key] || '—'}
-                  </dd>
-                </div>
+          <div className="mt-4">
+            <AgreementPages details={details} signature={signature} today={today} pageAlt={copy.pageAlt} />
+          </div>
+
+          <details className="mt-4 rounded-[1.25rem] border border-white/10 bg-white/[0.03] px-5 py-4">
+            <summary className="min-h-[32px] cursor-pointer select-none text-xs font-semibold uppercase tracking-[0.16em] text-[#D9B355]">
+              {copy.readAsText}
+            </summary>
+            {/* English on every page: it is the text being signed. */}
+            <div dir="ltr" lang="en" className="mt-4 text-left text-sm leading-7 text-white/75">
+              <p className="font-medium uppercase tracking-[0.1em] text-white">{NDA_TITLE}</p>
+              <p className="mt-3">
+                {NDA_PARTIES_INTRO} {NDA_GOLD_PARTY} ({NDA_GOLD_ALIAS}) and the Broker / Sales Partner / Client named in
+                it. {NDA_PARTIES_OUTRO}
+              </p>
+              {NDA_SECTIONS.map((section) => (
+                <section key={section.heading} className="mt-5">
+                  <h3 className="font-medium text-white">{section.heading}</h3>
+                  {section.paragraphs?.map((paragraph) => (
+                    <p key={paragraph} className="mt-2">
+                      {paragraph}
+                    </p>
+                  ))}
+                  {section.bullets ? (
+                    <ul className="mt-2 list-disc space-y-1 pl-5">
+                      {section.bullets.map((bullet) => (
+                        <li key={bullet}>{bullet}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {section.after?.map((paragraph) => (
+                    <p key={paragraph} className="mt-2">
+                      {paragraph}
+                    </p>
+                  ))}
+                </section>
               ))}
-            </dl>
-            <p className="mt-3">{NDA_PARTIES_OUTRO}</p>
-
-            {NDA_SECTIONS.map((section) => (
-              <section key={section.heading} className="mt-7">
-                <h4 className="font-semibold text-[#231F20]">{section.heading}</h4>
-                {section.paragraphs?.map((paragraph) => (
-                  <p key={paragraph} className="mt-2">
-                    {paragraph}
-                  </p>
-                ))}
-                {section.bullets ? (
-                  <ul className="mt-2 list-disc space-y-1 pl-5 marker:text-[#B8860B]">
-                    {section.bullets.map((bullet) => (
-                      <li key={bullet}>{bullet}</li>
-                    ))}
-                  </ul>
-                ) : null}
-                {section.after?.map((paragraph) => (
-                  <p key={paragraph} className="mt-2">
-                    {paragraph}
-                  </p>
-                ))}
-              </section>
-            ))}
-
-            {/* The signature block, signed in place. */}
-            <section id="sign" className="mt-10 scroll-mt-28 border-t border-[rgba(35,31,32,0.14)] pt-8">
-              <p className="font-semibold text-[#231F20]">Broker / Sales Partner / Client</p>
-              <dl className="mt-3 space-y-1">
-                {NDA_SIGNATURE_FIELDS.map((field) =>
-                  field === 'Signature' ? (
-                    <div key={field} className="pb-2 pt-3">
-                      <dt>{field}:</dt>
-                      <dd className="mt-2">
-                        <div
-                          className="relative rounded-[0.9rem] ring-1 ring-[rgba(35,31,32,0.16)]"
-                          onPointerDown={() => {
-                            setStarted(true);
-                            setError('');
-                          }}
-                        >
-                          <SignaturePad ref={padRef} label={copy.drawHint} />
-                          {/* The line to sign on sits over the pad, so it never ends up in the signature. */}
-                          <div
-                            aria-hidden="true"
-                            className="pointer-events-none absolute inset-x-5 bottom-10 flex items-end gap-3 border-b border-[rgba(35,31,32,0.3)] pb-1.5"
-                          >
-                            <span className="text-lg leading-none text-[#8B6508]">×</span>
-                            {started ? null : (
-                              <span {...uiLanguage} className="text-sm leading-none text-[rgba(35,31,32,0.4)]">
-                                {copy.signHere}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <div {...uiLanguage} className="mt-2 flex items-center justify-between gap-3">
-                          <span className="text-xs leading-5 text-[rgba(35,31,32,0.55)]">{copy.drawHint}</span>
-                          <button
-                            type="button"
-                            onClick={clear}
-                            disabled={!started}
-                            className="min-h-[40px] flex-none rounded-full px-3 text-xs font-semibold uppercase tracking-[0.14em] text-[#8B6508] transition hover:text-[#231F20] disabled:opacity-40"
-                          >
-                            {copy.clear}
-                          </button>
-                        </div>
-                      </dd>
-                    </div>
-                  ) : (
-                    <div key={field} className="flex flex-wrap gap-x-2">
-                      <dt>{field}:</dt>
-                      <dd className="font-medium text-[#231F20]" dir="auto">
-                        {signatureValue(field)}
-                      </dd>
-                    </div>
-                  )
-                )}
-              </dl>
-              <p className="mt-8 font-medium text-[#231F20]">{NDA_GOLD_PARTY}.</p>
-            </section>
-          </article>
+            </div>
+          </details>
         </div>
 
-        <div className="pt-2">
-          <label className="flex cursor-pointer items-start gap-3 text-sm leading-6 text-white/80">
+        <section
+          id="sign"
+          aria-label={copy.fillTitle}
+          className="scroll-mt-28 rounded-[1.5rem] bg-[#1B1718] p-5 shadow-[0_30px_70px_-35px_rgba(0,0,0,0.7)] ring-1 ring-white/10 sm:p-9"
+        >
+          <div className={eyebrowClass}>{copy.fillTitle}</div>
+          <p className="mt-3 text-sm leading-6 text-white/60">{copy.fillIntro}</p>
+
+          <div className="mt-6 space-y-5">
+            {textField('name', copy.nameLabel, { autoComplete: 'name', dir: 'auto', maxLength: 100 })}
+            {textField('company', copy.companyLabel, { autoComplete: 'organization', dir: 'auto', maxLength: 100 })}
+            {textField('phone', copy.phoneLabel, {
+              type: 'tel',
+              inputMode: 'tel',
+              autoComplete: 'tel',
+              dir: 'ltr',
+              maxLength: 30
+            })}
+            {textField('email', copy.emailLabel, {
+              type: 'email',
+              inputMode: 'email',
+              autoComplete: 'email',
+              autoCapitalize: 'none',
+              spellCheck: false,
+              dir: 'ltr',
+              maxLength: 254
+            })}
+          </div>
+
+          <div className="mt-8">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm text-white/75">{copy.signatureLabel}</span>
+              <button
+                type="button"
+                onClick={clear}
+                disabled={!started}
+                className="min-h-[40px] rounded-full px-3 text-xs font-semibold uppercase tracking-[0.14em] text-[#D9B355] transition hover:text-[#F1D878] disabled:opacity-30"
+              >
+                {copy.clear}
+              </button>
+            </div>
+            <div
+              className="relative mt-2"
+              onPointerDown={() => {
+                setStarted(true);
+                setError('');
+              }}
+            >
+              <SignaturePad
+                ref={padRef}
+                label={copy.drawHint}
+                className="h-64 sm:h-72"
+                onInk={() => setSignature(padRef.current?.toDataUrl() ?? null)}
+              />
+              {/* The line to sign on sits over the box, so it never ends up in the signature. */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-6 bottom-14 flex items-end gap-3 border-b border-[rgba(35,31,32,0.28)] pb-2"
+              >
+                <span className="text-xl leading-none text-[#8B6508]">×</span>
+                {started ? null : <span className="text-base leading-none text-[rgba(35,31,32,0.38)]">{copy.signHere}</span>}
+              </div>
+            </div>
+            <p className="mt-2 text-xs leading-5 text-white/50">{copy.drawHint}</p>
+          </div>
+
+          <p className="mt-6 text-sm text-white/70">
+            {copy.dateLabel}:{' '}
+            <span dir="ltr" className="text-white">
+              {today}
+            </span>
+          </p>
+
+          <label className="mt-6 flex cursor-pointer items-start gap-3 text-sm leading-6 text-white/80">
             <input
               type="checkbox"
               checked={agreed}
@@ -288,7 +464,7 @@ export function NdaSignSection({
                 setAgreed(event.target.checked);
                 setError('');
               }}
-              className="mt-0.5 h-5 w-5 flex-none accent-[#D9B355]"
+              className="mt-0.5 h-6 w-6 flex-none accent-[#D9B355]"
             />
             <span>{copy.agreeLabel}</span>
           </label>
@@ -303,12 +479,12 @@ export function NdaSignSection({
             type="button"
             onClick={submit}
             disabled={busy}
-            className="btn-gold mt-6 inline-flex h-12 w-full items-center justify-center gap-3 rounded-full px-8 text-sm font-medium uppercase tracking-[0.2em] disabled:opacity-60 sm:w-auto"
+            className="btn-gold mt-6 inline-flex h-14 w-full items-center justify-center gap-3 rounded-full px-8 text-sm font-medium uppercase tracking-[0.2em] disabled:opacity-60 sm:h-12 sm:w-auto"
           >
             {busy ? copy.submitting : copy.submit}
             <ArrowIcon rtl={isRtl} />
           </button>
-        </div>
+        </section>
       </div>
     );
   }
