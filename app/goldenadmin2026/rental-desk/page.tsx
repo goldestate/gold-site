@@ -1,5 +1,5 @@
 import { listMatchesWithListings, listRentalListings, listRentalRequests, type MatchWithListing } from '@/lib/rental-desk-store';
-import { RentalDeskListingsTable } from '@/components/admin/rental-desk-listings-table';
+import { RentalDeskListingsPanel } from '@/components/admin/rental-desk-listings-panel';
 import { RentalDeskRequestsPanel } from '@/components/admin/rental-desk-requests-panel';
 import { readNdaIndex, type NdaAgreement } from '@/lib/nda-store';
 import type { NdaSummary } from '@/components/admin/nda-badge';
@@ -66,7 +66,7 @@ export default async function AdminRentalDeskPage() {
           against open requests.
         </p>
         <div className="mt-5">
-          <RentalDeskListingsTable listings={listings} ndas={ndasByListing} />
+          <RentalDeskListingsPanel listings={listings} ndas={ndasByListing} />
         </div>
       </CollapsibleSection>
 

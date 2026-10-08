@@ -239,13 +239,17 @@ export async function downloadNdaFile(path: string): Promise<Uint8Array> {
 }
 
 /**
- * Removes the stored files of a request's agreements, before the request (and,
- * with it, the agreement rows) is deleted. Best effort: a file left behind is
- * private and harmless, so this never stops the delete.
+ * Removes the stored files of a submission's agreements, before the request or
+ * listing (and, with it, the agreement rows) is deleted. Best effort: a file
+ * left behind is private and harmless, so this never stops the delete.
  */
-export async function removeNdaFilesForRequest(rentalRequestId: string): Promise<void> {
+export async function removeNdaFilesFor(subject: { rentalRequestId: string } | { rentalListingId: string }): Promise<void> {
   try {
-    const { data, error } = await supabase.from('nda_agreements').select('id').eq('rental_request_id', rentalRequestId);
+    const query = supabase.from('nda_agreements').select('id');
+    const { data, error } =
+      'rentalRequestId' in subject
+        ? await query.eq('rental_request_id', subject.rentalRequestId)
+        : await query.eq('rental_listing_id', subject.rentalListingId);
     if (error) throw error;
     for (const { id } of (data ?? []) as { id: string }[]) {
       const { data: files, error: listError } = await supabase.storage.from(NDA_BUCKET).list(id);

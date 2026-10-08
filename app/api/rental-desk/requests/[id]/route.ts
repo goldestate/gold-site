@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/require-admin';
 import { deleteRentalRequest } from '@/lib/rental-desk-store';
-import { removeNdaFilesForRequest } from '@/lib/nda-store';
+import { removeNdaFilesFor } from '@/lib/nda-store';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -15,7 +15,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
   }
 
   try {
-    await removeNdaFilesForRequest(params.id);
+    await removeNdaFilesFor({ rentalRequestId: params.id });
     const deleted = await deleteRentalRequest(params.id);
     if (!deleted) {
       return NextResponse.json({ error: 'Request not found. It may already be deleted.' }, { status: 404 });
