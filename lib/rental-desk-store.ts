@@ -1,4 +1,5 @@
-import { supabase } from './supabase';
+import { supabase, RENTAL_PHOTOS_BUCKET } from './supabase';
+import { removeNdaFilesFor } from './nda-store';
 import type { LocationValue } from './property-taxonomy';
 import type { RentalListingStatusValue, RentalPeriodValue, RentalPropertyTypeValue } from './rental-taxonomy';
 
@@ -465,4 +466,46 @@ export async function deleteRentalRequest(id: string): Promise<boolean> {
   const { data, error } = await supabase.from('rental_requests').delete().eq('id', id).select('id');
   if (error) throw error;
   return (data ?? []).length > 0;
+}
+
+export type DeleteListingResult = 'deleted' | 'not-found' | 'in-house';
+
+/**
+ * Deletes an owner's listing for good: its agreement files and matches first,
+ * then the listing, which takes its agreement rows with it, then its photos.
+ * An in-house listing is a copy of a property and comes back with that
+ * property's next save, so it is refused: it's changed in Properties instead.
+ */
+export async function deleteRentalListing(id: string): Promise<DeleteListingResult> {
+  const { data: row, error: readError } = await supabase
+    .from('rental_listings')
+    .select('id, source_property_id, photos')
+    .eq('id', id)
+    .maybeSingle();
+  if (readError) throw readError;
+  if (!row) return 'not-found';
+  const listing = row as { id: string; source_property_id: string | null; photos: unknown };
+  if (listing.source_property_id) return 'in-house';
+
+  await removeNdaFilesFor({ rentalListingId: id });
+  const { error: matchesError } = await supabase.from('matches').delete().eq('listing_id', id);
+  if (matchesError) throw matchesError;
+  const { data, error } = await supabase.from('rental_listings').delete().eq('id', id).select('id');
+  if (error) throw error;
+  if ((data ?? []).length === 0) return 'not-found';
+
+  await removeListingPhotos(Array.isArray(listing.photos) ? listing.photos : []);
+  return 'deleted';
+}
+
+/** Best effort: a photo left behind costs a little storage, never a failed delete. */
+async function removeListingPhotos(urls: unknown[]): Promise<void> {
+  const marker = `/${RENTAL_PHOTOS_BUCKET}/`;
+  const paths = urls
+    .filter((url): url is string => typeof url === 'string' && url.includes(marker))
+    .map((url) => decodeURIComponent(url.slice(url.indexOf(marker) + marker.length).split('?')[0]))
+    .filter((path) => path.length > 0);
+  if (paths.length === 0) return;
+  const { error } = await supabase.storage.from(RENTAL_PHOTOS_BUCKET).remove(paths);
+  if (error) console.error('Could not remove the listing photos', error);
 }
