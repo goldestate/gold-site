@@ -317,28 +317,31 @@ export type SiteCopy = {
     intro: string;
     receivedRequest: string;
     receivedListing: string;
-    detailsTitle: string;
+    agreementTitle: string;
+    agreementLanguageNote: string;
+    jumpToSign: string;
+    /** "{page}" and "{pages}" are filled in. */
+    pageAlt: string;
+    readAsText: string;
+    fillTitle: string;
+    fillIntro: string;
     nameLabel: string;
     companyLabel: string;
     phoneLabel: string;
     emailLabel: string;
-    agreementTitle: string;
-    agreementLanguageNote: string;
-    download: string;
-    signTitle: string;
-    drawTab: string;
-    uploadTab: string;
+    signatureLabel: string;
+    signHere: string;
     drawHint: string;
     clear: string;
-    uploadHint: string;
-    chooseFile: string;
-    replaceFile: string;
+    dateLabel: string;
     agreeLabel: string;
     submit: string;
     submitting: string;
+    errorName: string;
+    errorPhone: string;
+    errorEmail: string;
+    errorFields: string;
     errorDraw: string;
-    errorFile: string;
-    errorFileType: string;
     errorAgree: string;
     errorGeneric: string;
     doneTitle: string;
@@ -803,31 +806,33 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       eyebrow: 'One last step',
       title: 'Sign the confidentiality agreement',
       intro:
-        'GOLD asks every client, broker and owner to keep the unit and client details we share confidential. Read the agreement, then sign it on screen or upload a signed copy.',
+        'GOLD asks every client, broker and owner to keep the unit and client details we share confidential. Read the agreement, fill in your details and sign it with your finger. Everything goes onto the agreement GOLD keeps.',
       receivedRequest: 'Your request {reference} is with our team.',
       receivedListing: 'Your property is with our team for review.',
-      detailsTitle: 'Your details',
-      nameLabel: 'Name',
-      companyLabel: 'Company',
-      phoneLabel: 'Contact number',
-      emailLabel: 'Email',
       agreementTitle: 'The agreement',
       agreementLanguageNote: '',
-      download: 'Download the PDF',
-      signTitle: 'Sign',
-      drawTab: 'Sign on screen',
-      uploadTab: 'Upload a signed copy',
-      drawHint: 'Sign in the box with your finger or mouse.',
+      jumpToSign: 'Fill in and sign',
+      pageAlt: 'Page {page} of {pages} of the confidentiality agreement',
+      readAsText: 'Read the agreement as text',
+      fillTitle: 'Fill in and sign',
+      fillIntro: 'Check your details. They go onto the agreement exactly as written here.',
+      nameLabel: 'Full name',
+      companyLabel: 'Company (optional)',
+      phoneLabel: 'Contact number',
+      emailLabel: 'Email',
+      signatureLabel: 'Signature',
+      signHere: 'Sign here',
+      drawHint: 'Sign with your finger in the white box. Clear it to start again.',
       clear: 'Clear',
-      uploadHint: 'Download the PDF, sign it, then upload a photo or PDF of the signed copy.',
-      chooseFile: 'Choose a photo or PDF',
-      replaceFile: 'Choose another file',
+      dateLabel: 'Date',
       agreeLabel: 'I have read and agree to this agreement.',
       submit: 'Sign and send',
       submitting: 'Sending...',
-      errorDraw: 'Sign in the box first.',
-      errorFile: 'Choose the signed copy first.',
-      errorFileType: 'Use a photo (JPEG, PNG or WebP) or a PDF, under 10 MB.',
+      errorName: 'Enter your full name.',
+      errorPhone: 'Enter a contact number we can reach you on.',
+      errorEmail: 'Enter a valid email address.',
+      errorFields: 'Check the details above.',
+      errorDraw: 'Sign in the white box first.',
       errorAgree: 'Tick the box to accept the agreement.',
       errorGeneric: 'Could not send. Please try again.',
       doneTitle: 'Thank you. The agreement is signed.',
@@ -1241,31 +1246,33 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       eyebrow: 'خطوة أخيرة',
       title: 'وقّع اتفاقية السرية',
       intro:
-        'تطلب جولد من كل عميل ووسيط ومالك الحفاظ على سرية تفاصيل الوحدات والعملاء التي نشاركها. اقرأ الاتفاقية، ثم وقّعها على الشاشة أو ارفع نسخة موقّعة.',
+        'تطلب جولد من كل عميل ووسيط ومالك الحفاظ على سرية تفاصيل الوحدات والعملاء التي نشاركها. اقرأ الاتفاقية، واكتب بياناتك، ثم وقّعها بإصبعك. كل ذلك يُكتب على الاتفاقية التي تحتفظ بها جولد.',
       receivedRequest: 'طلبك {reference} لدى فريقنا الآن.',
       receivedListing: 'عقارك لدى فريقنا للمراجعة.',
-      detailsTitle: 'بياناتك',
-      nameLabel: 'الاسم',
-      companyLabel: 'الشركة',
-      phoneLabel: 'رقم التواصل',
-      emailLabel: 'البريد الإلكتروني',
       agreementTitle: 'الاتفاقية',
       agreementLanguageNote: 'نص الاتفاقية باللغة الإنجليزية.',
-      download: 'حمّل ملف PDF',
-      signTitle: 'التوقيع',
-      drawTab: 'وقّع على الشاشة',
-      uploadTab: 'ارفع نسخة موقّعة',
-      drawHint: 'وقّع داخل المربع بإصبعك أو بالماوس.',
+      jumpToSign: 'اكتب بياناتك ووقّع',
+      pageAlt: 'الصفحة {page} من {pages} من اتفاقية السرية',
+      readAsText: 'اقرأ الاتفاقية كنص',
+      fillTitle: 'اكتب بياناتك ووقّع',
+      fillIntro: 'راجع بياناتك. ستُكتب على الاتفاقية كما هي هنا تماماً.',
+      nameLabel: 'الاسم بالكامل',
+      companyLabel: 'الشركة (اختياري)',
+      phoneLabel: 'رقم التواصل',
+      emailLabel: 'البريد الإلكتروني',
+      signatureLabel: 'التوقيع',
+      signHere: 'وقّع هنا',
+      drawHint: 'وقّع بإصبعك داخل المربع الأبيض. امسحه لتبدأ من جديد.',
       clear: 'مسح',
-      uploadHint: 'حمّل ملف PDF ووقّعه، ثم ارفع صورة أو ملف PDF للنسخة الموقّعة.',
-      chooseFile: 'اختر صورة أو ملف PDF',
-      replaceFile: 'اختر ملفاً آخر',
+      dateLabel: 'التاريخ',
       agreeLabel: 'قرأت هذه الاتفاقية وأوافق عليها.',
       submit: 'وقّع وأرسل',
       submitting: 'جارٍ الإرسال...',
-      errorDraw: 'وقّع داخل المربع أولاً.',
-      errorFile: 'اختر النسخة الموقّعة أولاً.',
-      errorFileType: 'استخدم صورة (JPEG أو PNG أو WebP) أو ملف PDF، أقل من 10 ميجابايت.',
+      errorName: 'اكتب اسمك بالكامل.',
+      errorPhone: 'اكتب رقماً يمكننا التواصل معك عليه.',
+      errorEmail: 'اكتب بريداً إلكترونياً صحيحاً.',
+      errorFields: 'راجع البيانات أعلاه.',
+      errorDraw: 'وقّع داخل المربع الأبيض أولاً.',
       errorAgree: 'ضع علامة في المربع للموافقة على الاتفاقية.',
       errorGeneric: 'تعذّر الإرسال. حاول مرة أخرى.',
       doneTitle: 'شكراً لك. تم توقيع الاتفاقية.',

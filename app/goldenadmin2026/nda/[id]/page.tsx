@@ -29,8 +29,9 @@ function cairo(iso: string | null): string {
 
 /**
  * One confidentiality agreement: who it is for, whether and how it was signed,
- * and the signature or signed copy itself. The file lives in a private bucket
- * and is shown through a link that expires after an hour.
+ * and the signed agreement itself. Signed on screen, that's GOLD's PDF with the
+ * signer's details and signature on it, made when it's opened. An uploaded copy
+ * lives in a private bucket and is shown through a link that expires after an hour.
  */
 export default async function AdminNdaPage({ params }: { params: { id: string } }) {
   if (!UUID.test(params.id)) notFound();
@@ -93,7 +94,41 @@ export default async function AdminNdaPage({ params }: { params: { id: string } 
         </dl>
       </div>
 
-      {nda.status === 'signed' ? (
+      {nda.status === 'signed' && nda.method === 'drawn' ? (
+        <div className="mt-6 rounded-[1.5rem] border border-white/10 bg-white/5 p-6">
+          <div className="text-xs uppercase tracking-[0.18em] text-white/45">Signed agreement</div>
+          <p className="mt-2 text-sm leading-6 text-white/70">
+            GOLD&rsquo;s agreement PDF with the details, signature and date on it.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <a
+              href={`/api/admin/nda/${nda.id}/pdf`}
+              target="_blank"
+              rel="noreferrer"
+              className="btn-gold inline-flex h-12 items-center rounded-full px-6 text-xs font-semibold uppercase tracking-[0.16em]"
+            >
+              Open the signed PDF
+            </a>
+            <a
+              href={`/api/admin/nda/${nda.id}/pdf?download=1`}
+              className="inline-flex h-12 items-center rounded-full border border-[rgba(217,179,85,0.45)] px-6 text-xs font-semibold uppercase tracking-[0.16em] text-[#D9B355] transition hover:border-[#D9B355]"
+            >
+              Download PDF
+            </a>
+          </div>
+          {viewUrl ? (
+            <>
+              <div className="mt-6 text-xs uppercase tracking-[0.18em] text-white/45">Signature</div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={viewUrl}
+                alt={`Signature of ${nda.signer.name}`}
+                className="mt-2 max-h-40 w-full rounded-[1rem] bg-white object-contain p-3"
+              />
+            </>
+          ) : null}
+        </div>
+      ) : nda.status === 'signed' ? (
         <div className="mt-6 rounded-[1.5rem] border border-white/10 bg-white/5 p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="text-xs uppercase tracking-[0.18em] text-white/45">

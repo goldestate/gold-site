@@ -22,7 +22,7 @@ export function NdaBadge({ nda }: { nda: NdaSummary | null | undefined }) {
 
   if (!nda) {
     return (
-      <span className="inline-flex rounded-full bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/35">
+      <span className="inline-flex whitespace-nowrap rounded-full bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/35">
         No NDA
       </span>
     );
@@ -32,7 +32,7 @@ export function NdaBadge({ nda }: { nda: NdaSummary | null | undefined }) {
     return (
       <Link
         href={`/goldenadmin2026/nda/${nda.id}`}
-        className="inline-flex rounded-full bg-[rgba(90,200,120,0.15)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#7ED9A0] transition hover:bg-[rgba(90,200,120,0.25)]"
+        className="inline-flex whitespace-nowrap rounded-full bg-[rgba(90,200,120,0.15)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#7ED9A0] transition hover:bg-[rgba(90,200,120,0.25)]"
       >
         NDA signed · View
       </Link>
@@ -54,14 +54,14 @@ export function NdaBadge({ nda }: { nda: NdaSummary | null | undefined }) {
     <span className="inline-flex flex-wrap items-center gap-2">
       <Link
         href={`/goldenadmin2026/nda/${nda.id}`}
-        className="inline-flex rounded-full bg-[rgba(217,179,85,0.18)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#D9B355] transition hover:bg-[rgba(217,179,85,0.28)]"
+        className="inline-flex whitespace-nowrap rounded-full bg-[rgba(217,179,85,0.18)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#D9B355] transition hover:bg-[rgba(217,179,85,0.28)]"
       >
         NDA not signed
       </Link>
       <button
         type="button"
         onClick={copy}
-        className="rounded-full border border-white/15 px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-white/60 transition hover:text-white"
+        className="whitespace-nowrap rounded-full border border-white/15 px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-white/60 transition hover:text-white"
       >
         {copied === 'yes' ? 'Copied' : copied === 'failed' ? 'Copy failed' : 'Copy signing link'}
       </button>

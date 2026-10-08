@@ -5,6 +5,7 @@ import { readNdaIndex, type NdaAgreement } from '@/lib/nda-store';
 import type { NdaSummary } from '@/components/admin/nda-badge';
 import { LogoutButton } from '@/components/admin/logout-button';
 import { AdminNav } from '@/components/admin/admin-nav';
+import { CollapsibleSection } from '@/components/admin/collapsible-section';
 
 function groupMatchesByRequest(matches: MatchWithListing[]): Record<string, MatchWithListing[]> {
   const grouped: Record<string, MatchWithListing[]> = {};
@@ -48,15 +49,18 @@ export default async function AdminRentalDeskPage() {
         <LogoutButton />
       </div>
 
-      <section className="mt-10">
-        <div className="flex items-center gap-3">
-          <h2 className="text-lg font-medium uppercase tracking-[0.14em] text-white">Listings</h2>
-          {pendingReviewCount > 0 ? (
+      <CollapsibleSection
+        id="rental-desk-listings"
+        title="Listings"
+        count={listings.length}
+        badge={
+          pendingReviewCount > 0 ? (
             <span className="rounded-full bg-[rgba(217,179,85,0.18)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-[#D9B355]">
               {pendingReviewCount} pending review
             </span>
-          ) : null}
-        </div>
+          ) : null
+        }
+      >
         <p className="mt-2 max-w-xl text-sm text-white/55">
           New listings arrive as &ldquo;Pending review&rdquo;. Approve one to &ldquo;Active&rdquo; to start matching it
           against open requests.
@@ -64,10 +68,9 @@ export default async function AdminRentalDeskPage() {
         <div className="mt-5">
           <RentalDeskListingsTable listings={listings} ndas={ndasByListing} />
         </div>
-      </section>
+      </CollapsibleSection>
 
-      <section className="mt-12">
-        <h2 className="text-lg font-medium uppercase tracking-[0.14em] text-white">Rental Requests</h2>
+      <CollapsibleSection id="rental-desk-requests" title="Rental Requests" count={requests.length}>
         <p className="mt-2 max-w-xl text-sm text-white/55">
           Each request lists its best-scoring matches. Marking a match &ldquo;sent&rdquo; records that the broker was
           notified.
@@ -75,7 +78,7 @@ export default async function AdminRentalDeskPage() {
         <div className="mt-5">
           <RentalDeskRequestsPanel requests={requests} matchesByRequest={matchesByRequest} ndas={ndasByRequest} />
         </div>
-      </section>
+      </CollapsibleSection>
     </div>
   );
 }

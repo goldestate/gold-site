@@ -8,6 +8,10 @@ import { formatPrice } from '@/lib/format-price';
 import { locationLabel } from '@/lib/property-taxonomy';
 import { RENTAL_LISTING_STATUSES, rentalPropertyTypeLabel, type RentalListingStatusValue } from '@/lib/rental-taxonomy';
 import { NdaBadge, type NdaSummary } from './nda-badge';
+import { ShowMoreButton, useShowMore } from './collapsible-section';
+
+/** Newest first; the rest wait behind "Show more" so the page stays short. */
+const FIRST_ROWS = 6;
 
 function formatDate(iso: string): string {
   const date = new Date(iso);
@@ -33,6 +37,7 @@ export function RentalDeskListingsTable({
   const router = useRouter();
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const rows = useShowMore(listings, FIRST_ROWS);
 
   const changeStatus = async (listing: RentalListingWithOwner, status: RentalListingStatusValue) => {
     if (status === listing.status) return;
@@ -73,8 +78,8 @@ export function RentalDeskListingsTable({
       ) : null}
 
       <div className="overflow-x-auto rounded-[1.5rem] border border-white/10">
-        <table className="w-full min-w-[1000px] text-left text-sm">
-          <thead className="bg-white/5 text-xs uppercase tracking-[0.16em] text-white/50">
+        <table className="w-full min-w-[900px] text-left text-sm">
+          <thead className="whitespace-nowrap bg-white/5 text-xs uppercase tracking-[0.16em] text-white/50">
             <tr>
               <th className="px-5 py-4">Owner</th>
               <th className="px-5 py-4">Property</th>
@@ -86,9 +91,9 @@ export function RentalDeskListingsTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-white/8">
-            {listings.map((listing) => (
+            {rows.visible.map((listing) => (
               <tr key={listing.id} className={pendingId === listing.id ? 'opacity-50' : ''}>
-                <td className="px-5 py-4">
+                <td className="whitespace-nowrap px-5 py-4">
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-white">{listing.owner.name}</span>
                     {listing.sourcePropertyId ? (
@@ -104,14 +109,14 @@ export function RentalDeskListingsTable({
                     {listing.owner.phone}
                   </a>
                 </td>
-                <td className="px-5 py-4 text-white/70">
+                <td className="whitespace-nowrap px-5 py-4 text-white/70">
                   {rentalPropertyTypeLabel(listing.propertyType, 'en')} · {locationLabel(listing.location, 'en')}
                 </td>
-                <td className="px-5 py-4 text-white/70">{formatPrice(listing.price, 'en')}</td>
-                <td className="px-5 py-4 text-white/70">
+                <td className="whitespace-nowrap px-5 py-4 text-white/70">{formatPrice(listing.price, 'en')}</td>
+                <td className="whitespace-nowrap px-5 py-4 text-white/70">
                   {listing.bedrooms ?? '—'} bed{listing.furnished === null ? '' : listing.furnished ? ' · Furnished' : ' · Unfurnished'}
                 </td>
-                <td className="px-5 py-4 text-white/50">{formatDate(listing.createdAt)}</td>
+                <td className="whitespace-nowrap px-5 py-4 text-white/50">{formatDate(listing.createdAt)}</td>
                 <td className="px-5 py-4">
                   <select
                     value={listing.status}
@@ -136,6 +141,7 @@ export function RentalDeskListingsTable({
           </tbody>
         </table>
       </div>
+      {rows.canToggle ? <ShowMoreButton hidden={rows.hidden} all={rows.all} onClick={rows.toggle} noun="listings" /> : null}
     </div>
   );
 }

@@ -2,18 +2,14 @@
  * GOLD's Non-Disclosure & Brokerage Cooperation Agreement, word for word as GOLD
  * provided it.
  *
- * One copy, used everywhere: the signing page shows it, the downloadable PDF in
- * public/legal is generated from it, and the admin shows it next to each
- * signature. NDA_VERSION is stored with every signature, so a later edit to the
- * wording never changes what an earlier signer agreed to -- change the version
- * whenever the text changes, and regenerate the PDF.
+ * One copy, used everywhere: the signing page shows it and is where it's signed,
+ * and the admin shows it next to each signature. NDA_VERSION is stored with
+ * every signature, so a later edit to the wording never changes what an earlier
+ * signer agreed to -- change the version whenever the text changes.
  */
 export const NDA_VERSION = '2026-10';
 
 export const NDA_TITLE = 'Non-Disclosure & Brokerage Cooperation Agreement';
-
-/** The downloadable copy, with blank lines for the details and signature. */
-export const NDA_PDF_PATH = '/legal/gold-nda.pdf';
 
 export type NdaSection = {
   heading: string;
@@ -144,3 +140,37 @@ export const NDA_SECTIONS: NdaSection[] = [
 
 /** The signature block's lines, under "Broker / Sales Partner / Client". */
 export const NDA_SIGNATURE_FIELDS = ['Name', 'Company (Optional)', 'Signature', 'Date'] as const;
+
+/**
+ * The PDF that gets signed: public/legal/gold-nda.pdf, made from the text above,
+ * with a picture of each page for the signing page to show. When the text
+ * changes, regenerate the PDF and the pictures and measure the blanks again.
+ *
+ * Positions are PDF points from the page's top-left corner, as the pages read.
+ * A blank is the line to write on: text sits just above `lineY`, from `x`.
+ */
+export const NDA_TEMPLATE = {
+  pdfPath: 'public/legal/gold-nda.pdf',
+  width: 594.96,
+  height: 841.92,
+  pageImages: ['/legal/gold-nda-1.webp', '/legal/gold-nda-2.webp', '/legal/gold-nda-3.webp'],
+  pageImageSize: { width: 1587, height: 2246 },
+  /** Line ends: every blank runs to the right margin. */
+  lineEnd: 533.25,
+  blanks: {
+    partyName: { page: 0, x: 213, lineY: 261.75 },
+    partyCompany: { page: 0, x: 116.25, lineY: 285 },
+    partyPhone: { page: 0, x: 149.25, lineY: 307.5 },
+    partyEmail: { page: 0, x: 103.5, lineY: 330.75 },
+    signName: { page: 2, x: 99.75, lineY: 479.25 },
+    signCompany: { page: 2, x: 168, lineY: 502.5 },
+    signDate: { page: 2, x: 94.5, lineY: 548.25 }
+  },
+  /** Where the signature goes: across its line, clear of the lines above and below. */
+  signature: { page: 2, x: 121, top: 504, width: 240, height: 27 },
+  /** Below the page's own footer, for the line that says when and where it was signed. */
+  stampY: 628,
+  fontSize: 11
+} as const;
+
+export type NdaBlankKey = keyof typeof NDA_TEMPLATE.blanks;
