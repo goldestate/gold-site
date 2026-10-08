@@ -453,3 +453,16 @@ export async function markMatchSent(id: string): Promise<MatchSentResult | null>
     referenceCode: request?.reference_code ?? ''
   };
 }
+
+/**
+ * Deletes a request for good: its matches first, since they point at it, then
+ * the request itself, which takes its agreement rows with it. False when there
+ * was no such request.
+ */
+export async function deleteRentalRequest(id: string): Promise<boolean> {
+  const { error: matchesError } = await supabase.from('matches').delete().eq('request_id', id);
+  if (matchesError) throw matchesError;
+  const { data, error } = await supabase.from('rental_requests').delete().eq('id', id).select('id');
+  if (error) throw error;
+  return (data ?? []).length > 0;
+}
