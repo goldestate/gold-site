@@ -4,13 +4,32 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import type { MatchWithListing, RentalRequestWithBroker } from '@/lib/rental-desk-store';
 import { formatPrice } from '@/lib/format-price';
-import { locationLabel } from '@/lib/property-taxonomy';
-import { RENTAL_REQUEST_STATUS_LABELS, rentalPropertyTypeLabel, type RentalRequestStatusValue } from '@/lib/rental-taxonomy';
+import { LOCATIONS, locationLabel } from '@/lib/property-taxonomy';
+import {
+  RENTAL_PROPERTY_TYPES,
+  RENTAL_REQUEST_STATUS_LABELS,
+  rentalPropertyTypeLabel,
+  type RentalRequestStatusValue
+} from '@/lib/rental-taxonomy';
 import { NdaBadge, type NdaSummary } from './nda-badge';
 import { Chevron, ShowMoreButton, useShowMore } from './collapsible-section';
 import { adminFetch } from '@/lib/admin-fetch';
+import {
+  ALL,
+  FilterChips,
+  FilterSearch,
+  FilterSelect,
+  FilterSummary,
+  countOptions,
+  matchesSearch,
+  useStoredState
+} from './list-filters';
+import { AGREEMENT_OPTIONS, agreementState } from './rental-desk-listings-panel';
 
 const MAX_VISIBLE_MATCHES = 5;
+type RequestFilters = { search: string; status: string; location: string; type: string; agreement: string; matches: string };
+const NO_REQUEST_FILTERS: RequestFilters = { search: '', status: ALL, location: ALL, type: ALL, agreement: ALL, matches: ALL };
+
 /** Newest first; older requests wait behind "Show more" so the page stays short. */
 const FIRST_REQUESTS = 5;
 
@@ -247,7 +266,37 @@ export function RentalDeskRequestsPanel({
 }) {
   const router = useRouter();
   const [error, setError] = useState('');
-  const shown = useShowMore(requests, FIRST_REQUESTS);
+  const [filters, setFilters] = useStoredState<RequestFilters>('gold-admin:request-filters', NO_REQUEST_FILTERS);
+  const set = (patch: Partial<RequestFilters>) => setFilters({ ...filters, ...patch });
+
+  const matchState = (request: RentalRequestWithBroker): string => {
+    const matches = matchesByRequest[request.id] ?? [];
+    if (matches.length === 0) return 'none';
+    return matches.some((match) => !match.sentToBroker) ? 'to-send' : 'all-sent';
+  };
+
+  const filtered = requests.filter(
+    (request) =>
+      (!filters.status || request.status === filters.status) &&
+      (!filters.location || request.location === filters.location) &&
+      (!filters.type || request.propertyType === filters.type) &&
+      (!filters.agreement || agreementState(ndas[request.id]) === filters.agreement) &&
+      (!filters.matches || matchState(request) === filters.matches) &&
+      matchesSearch(
+        filters.search,
+        [
+          request.referenceCode,
+          request.broker.name,
+          request.broker.company ?? '',
+          request.broker.phone,
+          request.notes ?? '',
+          locationLabel(request.location, 'en'),
+          rentalPropertyTypeLabel(request.propertyType, 'en')
+        ].join(' ')
+      )
+  );
+  const filtering = Boolean(filters.search || filters.status || filters.location || filters.type || filters.agreement || filters.matches);
+  const shown = useShowMore(filtered, FIRST_REQUESTS);
 
   const handleMarkSent = async (matchId: string) => {
     setError('');
@@ -273,9 +322,84 @@ export function RentalDeskRequestsPanel({
 
   return (
     <div className="space-y-4">
+      <div className="space-y-3 rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4">
+        <FilterSearch value={filters.search} onChange={(value) => set({ search: value })} placeholder="Search by reference or broker" />
+        <FilterChips
+          label="Request status"
+          options={countOptions(
+            requests,
+            (Object.keys(RENTAL_REQUEST_STATUS_LABELS) as RentalRequestStatusValue[]).map((value) => ({
+              value,
+              label: RENTAL_REQUEST_STATUS_LABELS[value]
+            })),
+            (request) => request.status
+          )}
+          value={filters.status}
+          onChange={(value) => set({ status: value })}
+        />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <FilterSelect
+            label="Location"
+            value={filters.location}
+            onChange={(value) => set({ location: value })}
+            options={countOptions(requests, LOCATIONS.map((item) => ({ value: item.value, label: item.en })), (request) => request.location)}
+            anyLabel="All locations"
+          />
+          <FilterSelect
+            label="Type"
+            value={filters.type}
+            onChange={(value) => set({ type: value })}
+            options={countOptions(requests, RENTAL_PROPERTY_TYPES.map((item) => ({ value: item.value, label: item.en })), (request) => request.propertyType)}
+            anyLabel="All types"
+          />
+          <FilterSelect
+            label="Agreement"
+            value={filters.agreement}
+            onChange={(value) => set({ agreement: value })}
+            options={countOptions(requests, AGREEMENT_OPTIONS, (request) => agreementState(ndas[request.id]))}
+            anyLabel="Any"
+          />
+          <FilterSelect
+            label="Matches"
+            value={filters.matches}
+            onChange={(value) => set({ matches: value })}
+            options={countOptions(
+              requests,
+              [
+                { value: 'to-send', label: 'Matches to send' },
+                { value: 'all-sent', label: 'All sent' },
+                { value: 'none', label: 'No matches yet' }
+              ],
+              matchState
+            )}
+            anyLabel="Any"
+          />
+        </div>
+        <FilterSummary
+          shown={filtered.length}
+          total={requests.length}
+          noun="requests"
+          filtering={filtering}
+          onClear={() => setFilters(NO_REQUEST_FILTERS)}
+        />
+      </div>
+
       {error ? (
         <div className="rounded-[1rem] border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-300">
           {error}
+        </div>
+      ) : null}
+
+      {filtered.length === 0 ? (
+        <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-8 text-center text-sm text-white/60">
+          No requests match these filters.{' '}
+          <button
+            type="button"
+            onClick={() => setFilters(NO_REQUEST_FILTERS)}
+            className="font-semibold text-[#D9B355] underline-offset-2 hover:underline"
+          >
+            Clear filters
+          </button>
         </div>
       ) : null}
 

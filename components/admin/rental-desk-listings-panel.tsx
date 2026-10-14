@@ -5,11 +5,26 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import type { RentalListingWithOwner } from '@/lib/rental-desk-store';
 import { formatPrice } from '@/lib/format-price';
-import { locationLabel } from '@/lib/property-taxonomy';
-import { RENTAL_LISTING_STATUSES, rentalPropertyTypeLabel, type RentalListingStatusValue } from '@/lib/rental-taxonomy';
+import { LOCATIONS, locationLabel } from '@/lib/property-taxonomy';
+import {
+  RENTAL_LISTING_STATUSES,
+  RENTAL_PROPERTY_TYPES,
+  rentalPropertyTypeLabel,
+  type RentalListingStatusValue
+} from '@/lib/rental-taxonomy';
 import { adminFetch } from '@/lib/admin-fetch';
 import { NdaBadge, type NdaSummary } from './nda-badge';
 import { Chevron, ShowMoreButton, useShowMore } from './collapsible-section';
+import {
+  ALL,
+  FilterChips,
+  FilterSearch,
+  FilterSelect,
+  FilterSummary,
+  countOptions,
+  matchesSearch,
+  useStoredState
+} from './list-filters';
 
 /** Newest first; older listings wait behind "Show more" so the page stays short. */
 const FIRST_LISTINGS = 5;
@@ -225,6 +240,20 @@ function ListingCard({ listing, nda }: { listing: RentalListingWithOwner; nda: N
   );
 }
 
+type ListingFilters = { search: string; status: string; location: string; type: string; agreement: string; source: string };
+const NO_LISTING_FILTERS: ListingFilters = { search: '', status: ALL, location: ALL, type: ALL, agreement: ALL, source: ALL };
+
+/** What a submission's agreement filter compares against. */
+export function agreementState(nda: NdaSummary | undefined): string {
+  return nda ? (nda.status === 'signed' ? 'signed' : 'pending') : 'none';
+}
+
+export const AGREEMENT_OPTIONS = [
+  { value: 'signed', label: 'NDA signed' },
+  { value: 'pending', label: 'NDA not signed' },
+  { value: 'none', label: 'No NDA' }
+];
+
 export function RentalDeskListingsPanel({
   listings,
   ndas
@@ -233,7 +262,29 @@ export function RentalDeskListingsPanel({
   /** Agreements by listing id. */
   ndas: Record<string, NdaSummary>;
 }) {
-  const shown = useShowMore(listings, FIRST_LISTINGS);
+  const [filters, setFilters] = useStoredState<ListingFilters>('gold-admin:listing-filters', NO_LISTING_FILTERS);
+  const set = (patch: Partial<ListingFilters>) => setFilters({ ...filters, ...patch });
+
+  const filtered = listings.filter(
+    (listing) =>
+      (!filters.status || listing.status === filters.status) &&
+      (!filters.location || listing.location === filters.location) &&
+      (!filters.type || listing.propertyType === filters.type) &&
+      (!filters.agreement || agreementState(ndas[listing.id]) === filters.agreement) &&
+      (!filters.source || (filters.source === 'in-house') === Boolean(listing.sourcePropertyId)) &&
+      matchesSearch(
+        filters.search,
+        [
+          listing.owner.name,
+          listing.owner.phone,
+          locationLabel(listing.location, 'en'),
+          rentalPropertyTypeLabel(listing.propertyType, 'en'),
+          String(listing.price)
+        ].join(' ')
+      )
+  );
+  const filtering = Boolean(filters.search || filters.status || filters.location || filters.type || filters.agreement || filters.source);
+  const shown = useShowMore(filtered, FIRST_LISTINGS);
 
   if (listings.length === 0) {
     return (
@@ -245,6 +296,73 @@ export function RentalDeskListingsPanel({
 
   return (
     <div className="space-y-4">
+      <div className="space-y-3 rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4">
+        <FilterSearch value={filters.search} onChange={(value) => set({ search: value })} placeholder="Search by owner or phone" />
+        <FilterChips
+          label="Listing status"
+          options={countOptions(listings, RENTAL_LISTING_STATUSES, (listing) => listing.status)}
+          value={filters.status}
+          onChange={(value) => set({ status: value })}
+        />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <FilterSelect
+            label="Location"
+            value={filters.location}
+            onChange={(value) => set({ location: value })}
+            options={countOptions(listings, LOCATIONS.map((item) => ({ value: item.value, label: item.en })), (listing) => listing.location)}
+            anyLabel="All locations"
+          />
+          <FilterSelect
+            label="Type"
+            value={filters.type}
+            onChange={(value) => set({ type: value })}
+            options={countOptions(listings, RENTAL_PROPERTY_TYPES.map((item) => ({ value: item.value, label: item.en })), (listing) => listing.propertyType)}
+            anyLabel="All types"
+          />
+          <FilterSelect
+            label="Agreement"
+            value={filters.agreement}
+            onChange={(value) => set({ agreement: value })}
+            options={countOptions(listings, AGREEMENT_OPTIONS, (listing) => agreementState(ndas[listing.id]))}
+            anyLabel="Any"
+          />
+          <FilterSelect
+            label="Source"
+            value={filters.source}
+            onChange={(value) => set({ source: value })}
+            options={countOptions(
+              listings,
+              [
+                { value: 'owner', label: 'From owners' },
+                { value: 'in-house', label: 'In-house' }
+              ],
+              (listing) => (listing.sourcePropertyId ? 'in-house' : 'owner')
+            )}
+            anyLabel="All"
+          />
+        </div>
+        <FilterSummary
+          shown={filtered.length}
+          total={listings.length}
+          noun="listings"
+          filtering={filtering}
+          onClear={() => setFilters(NO_LISTING_FILTERS)}
+        />
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-8 text-center text-sm text-white/60">
+          No listings match these filters.{' '}
+          <button
+            type="button"
+            onClick={() => setFilters(NO_LISTING_FILTERS)}
+            className="font-semibold text-[#D9B355] underline-offset-2 hover:underline"
+          >
+            Clear filters
+          </button>
+        </div>
+      ) : null}
+
       {shown.visible.map((listing) => (
         <ListingCard key={listing.id} listing={listing} nda={ndas[listing.id]} />
       ))}

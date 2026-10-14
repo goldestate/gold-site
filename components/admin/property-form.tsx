@@ -8,7 +8,7 @@ import {
   PRICE_PERIODS,
   PROPERTY_TYPES,
   UNIT_TYPES,
-  showsArea,
+  areaIsRequired,
   type LocationValue,
   type PricePeriodValue,
   type PropertyTypeValue,
@@ -46,7 +46,8 @@ export function PropertyForm({ property }: PropertyFormProps) {
   const [pricePeriod, setPricePeriod] = useState<PricePeriodValue | ''>(property?.pricePeriod ?? '');
   const [bedrooms, setBedrooms] = useState(property ? String(property.bedrooms) : '');
   const [bathrooms, setBathrooms] = useState(property ? String(property.bathrooms) : '');
-  const [area, setArea] = useState(property ? String(property.area) : '');
+  // A rental saved without an area holds 0; show that as an empty box, not "0".
+  const [area, setArea] = useState(property && property.area > 0 ? String(property.area) : '');
   const [description, setDescription] = useState(property?.description ?? '');
   const [tone, setTone] = useState<'color' | 'mono'>(property?.tone ?? 'color');
   const [published, setPublished] = useState(property?.published ?? true);
@@ -62,7 +63,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
   const [error, setError] = useState('');
 
   const isUploading = photos.some((photo) => photo.status === 'uploading');
-  const propertyHasArea = showsArea(propertyType);
+  const needsArea = areaIsRequired(propertyType);
   const [draggedKey, setDraggedKey] = useState<string | null>(null);
 
   const handleFilesSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -174,13 +175,11 @@ export function PropertyForm({ property }: PropertyFormProps) {
       setError('Enter a valid number of bathrooms.');
       return;
     }
-    let parsedArea = 0;
-    if (propertyHasArea) {
-      parsedArea = Number(area);
-      if (!area || Number.isNaN(parsedArea) || parsedArea < 0) {
-        setError('Enter a valid area in m².');
-        return;
-      }
+    // Rentals can leave it empty; anything typed in still has to be a real number.
+    const parsedArea = area.trim() ? Number(area) : 0;
+    if ((needsArea && !area.trim()) || Number.isNaN(parsedArea) || parsedArea < 0) {
+      setError('Enter a valid area in m².');
+      return;
     }
     if (isUploading) {
       setError('Please wait for photo uploads to finish.');
@@ -356,7 +355,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
         </label>
       </div>
 
-      <div className={`grid gap-5 ${propertyHasArea ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
+      <div className="grid gap-5 sm:grid-cols-3">
         <label className="block">
           <span className="mb-2 block text-sm font-medium uppercase tracking-[0.16em] text-white/72">
             Bedrooms
@@ -383,21 +382,20 @@ export function PropertyForm({ property }: PropertyFormProps) {
             className="w-full rounded-[1rem] border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)]"
           />
         </label>
-        {propertyHasArea ? (
-          <label className="block">
-            <span className="mb-2 block text-sm font-medium uppercase tracking-[0.16em] text-white/72">
-              Area (m²)
-            </span>
-            <input
-              type="number"
-              min={0}
-              value={area}
-              onChange={(event) => setArea(event.target.value)}
-              placeholder="210"
-              className="w-full rounded-[1rem] border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)]"
-            />
-          </label>
-        ) : null}
+        <label className="block">
+          <span className="mb-2 block text-sm font-medium uppercase tracking-[0.16em] text-white/72">
+            Area (m²)
+            {needsArea ? null : <span className="ml-2 normal-case tracking-normal text-white/40">optional</span>}
+          </span>
+          <input
+            type="number"
+            min={0}
+            value={area}
+            onChange={(event) => setArea(event.target.value)}
+            placeholder="210"
+            className="w-full rounded-[1rem] border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)]"
+          />
+        </label>
       </div>
 
       <label className="block">

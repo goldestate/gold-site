@@ -5,7 +5,36 @@ import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import type { Property } from '@/lib/properties-store';
 import { formatPrice } from '@/lib/format-price';
-import { locationLabel, propertyTypeLabel, unitTypeLabel } from '@/lib/property-taxonomy';
+import {
+  LOCATIONS,
+  PROPERTY_TYPES,
+  UNIT_TYPES,
+  locationLabel,
+  propertyTypeLabel,
+  unitTypeLabel
+} from '@/lib/property-taxonomy';
+import {
+  ALL,
+  FilterChips,
+  FilterSearch,
+  FilterSelect,
+  FilterSummary,
+  SortSelect,
+  countOptions,
+  matchesSearch,
+  useStoredState
+} from './list-filters';
+
+type PropertyFilters = { search: string; type: string; location: string; unit: string; status: string; sort: string };
+const NO_FILTERS: PropertyFilters = { search: '', type: ALL, location: ALL, unit: ALL, status: ALL, sort: 'newest' };
+
+const SORTS = [
+  { value: 'newest', label: 'Newest first' },
+  { value: 'oldest', label: 'Oldest first' },
+  { value: 'price-high', label: 'Price: high to low' },
+  { value: 'price-low', label: 'Price: low to high' },
+  { value: 'name', label: 'Name: A to Z' }
+];
 
 function formatDate(iso: string): string {
   const date = new Date(iso);
@@ -16,24 +45,68 @@ function formatDate(iso: string): string {
 export function PropertiesTable({ properties }: { properties: Property[] }) {
   const router = useRouter();
   const [pendingId, setPendingId] = useState<string | null>(null);
-  const [search, setSearch] = useState('');
+  const [filters, setFilters] = useStoredState<PropertyFilters>('gold-admin:property-filters', NO_FILTERS);
   const [error, setError] = useState('');
+  const set = (patch: Partial<PropertyFilters>) => setFilters({ ...filters, ...patch });
+  const { search } = filters;
+
+  const typeOptions = countOptions(
+    properties,
+    PROPERTY_TYPES.map((item) => ({ value: item.value, label: item.en })),
+    (property) => property.propertyType
+  );
+  const locationOptions = countOptions(
+    properties,
+    LOCATIONS.map((item) => ({ value: item.value, label: item.en })),
+    (property) => property.location
+  );
+  const unitOptions = countOptions(
+    properties,
+    UNIT_TYPES.map((item) => ({ value: item.value, label: item.en })),
+    (property) => property.unitType
+  );
+  const statusOptions = countOptions(
+    properties,
+    [
+      { value: 'published', label: 'Published' },
+      { value: 'hidden', label: 'Hidden' }
+    ],
+    (property) => (property.published ? 'published' : 'hidden')
+  );
 
   const filtered = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    if (!query) return properties;
-    return properties.filter((property) => {
-      const haystack = [
-        property.name,
-        locationLabel(property.location, 'en'),
-        propertyTypeLabel(property.propertyType, 'en'),
-        unitTypeLabel(property.unitType, 'en')
-      ]
-        .join(' ')
-        .toLowerCase();
-      return haystack.includes(query);
-    });
-  }, [properties, search]);
+    const list = properties.filter(
+      (property) =>
+        (!filters.type || property.propertyType === filters.type) &&
+        (!filters.location || property.location === filters.location) &&
+        (!filters.unit || property.unitType === filters.unit) &&
+        (!filters.status || (filters.status === 'published') === property.published) &&
+        matchesSearch(
+          filters.search,
+          [
+            property.name,
+            locationLabel(property.location, 'en'),
+            propertyTypeLabel(property.propertyType, 'en'),
+            unitTypeLabel(property.unitType, 'en')
+          ].join(' ')
+        )
+    );
+    const time = (iso: string) => new Date(iso).getTime() || 0;
+    switch (filters.sort) {
+      case 'oldest':
+        return [...list].sort((a, b) => time(a.createdAt) - time(b.createdAt));
+      case 'price-high':
+        return [...list].sort((a, b) => b.price - a.price);
+      case 'price-low':
+        return [...list].sort((a, b) => a.price - b.price);
+      case 'name':
+        return [...list].sort((a, b) => a.name.localeCompare(b.name));
+      default:
+        return [...list].sort((a, b) => time(b.createdAt) - time(a.createdAt));
+    }
+  }, [properties, filters]);
+
+  const filtering = Boolean(filters.search || filters.type || filters.location || filters.unit || filters.status);
 
   const togglePublished = async (property: Property) => {
     setPendingId(property.id);
@@ -77,15 +150,23 @@ export function PropertiesTable({ properties }: { properties: Property[] }) {
 
   return (
     <div className="space-y-4">
-      <label className="block max-w-xs">
-        <span className="sr-only">Search properties</span>
-        <input
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search by name or location..."
-          className="w-full rounded-full border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#D9B355] focus:ring-2 focus:ring-[rgba(217,179,85,0.22)]"
+      <div className="space-y-3 rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4">
+        <FilterSearch value={search} onChange={(value) => set({ search: value })} placeholder="Search by name or compound" />
+        <FilterChips label="Property type" options={typeOptions} value={filters.type} onChange={(value) => set({ type: value })} />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <FilterSelect label="Location" value={filters.location} onChange={(value) => set({ location: value })} options={locationOptions} anyLabel="All locations" />
+          <FilterSelect label="Unit type" value={filters.unit} onChange={(value) => set({ unit: value })} options={unitOptions} anyLabel="All units" />
+          <FilterSelect label="Status" value={filters.status} onChange={(value) => set({ status: value })} options={statusOptions} anyLabel="Any status" />
+          <SortSelect value={filters.sort} onChange={(value) => set({ sort: value })} options={SORTS} />
+        </div>
+        <FilterSummary
+          shown={filtered.length}
+          total={properties.length}
+          noun="properties"
+          filtering={filtering}
+          onClear={() => setFilters({ ...NO_FILTERS, sort: filters.sort })}
         />
-      </label>
+      </div>
 
       {error ? (
         <div className="rounded-[1rem] border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-300">
@@ -99,7 +180,14 @@ export function PropertiesTable({ properties }: { properties: Property[] }) {
         </div>
       ) : filtered.length === 0 ? (
         <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-10 text-center text-white/60">
-          No properties match &ldquo;{search}&rdquo;.
+          No properties match these filters.{' '}
+          <button
+            type="button"
+            onClick={() => setFilters({ ...NO_FILTERS, sort: filters.sort })}
+            className="font-semibold text-[#D9B355] underline-offset-2 hover:underline"
+          >
+            Clear filters
+          </button>
         </div>
       ) : (
         <>

@@ -116,7 +116,11 @@ export function priceSuffixLabel(pricePeriod: PricePeriodValue, locale: 'en' | '
   return PRICE_PERIOD_SUFFIXES[pricePeriod]?.[locale] ?? '';
 }
 
-export function showsArea(propertyType: PropertyTypeValue): boolean {
+/**
+ * Whether staff must fill in the area. Rentals may leave it out, but the box is
+ * always there: hiding it for rentals is how a listing's area vanished from the form.
+ */
+export function areaIsRequired(propertyType: PropertyTypeValue): boolean {
   return propertyType !== 'rental';
 }
 
