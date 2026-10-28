@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import type { Property } from '@/lib/properties-store';
+import { SESSION_EXPIRED } from '@/lib/admin-fetch';
 import {
   LOCATIONS,
   PRICE_PERIODS,
@@ -88,13 +89,14 @@ export function PropertyForm({ property }: PropertyFormProps) {
           const form = new FormData();
           form.append('file', file);
           const response = await fetch('/api/upload', { method: 'POST', body: form });
-          const body = await response.json();
+          const body = await response.json().catch(() => ({}));
 
           if (!response.ok) {
+            // A login that ran out while the form was open used to say only
+            // "Unauthorized." on every photo, which read as the site being broken.
+            const message = response.status === 401 ? SESSION_EXPIRED : body.error || 'Upload failed.';
             setPhotos((prev) =>
-              prev.map((photo) =>
-                photo.key === item.key ? { ...photo, status: 'error', error: body.error || 'Upload failed.' } : photo
-              )
+              prev.map((photo) => (photo.key === item.key ? { ...photo, status: 'error', error: message } : photo))
             );
             return;
           }
@@ -224,7 +226,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
 
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
-        setError(body.error || 'Could not save this property.');
+        setError(response.status === 401 ? SESSION_EXPIRED : body.error || 'Could not save this property.');
         return;
       }
 
