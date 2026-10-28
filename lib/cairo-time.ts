@@ -65,8 +65,33 @@ function parseDay(value: string): { year: number; month: number; day: number } |
 
 /** Today's date in Cairo as YYYY-MM-DD -- the earliest end date a new code can have. */
 export function cairoToday(now: Date = new Date()): string {
-  const p = cairoParts(now);
+  return cairoDayOf(now);
+}
+
+/**
+ * The Cairo calendar day an instant falls on, as YYYY-MM-DD. A unit saved at
+ * 01:30 on the 14th in Cairo is stored as 22:30 on the 13th in UTC; counted by
+ * the stored date it would land on the wrong day.
+ */
+export function cairoDayOf(instant: string | Date): string {
+  const p = cairoParts(typeof instant === 'string' ? new Date(instant) : instant);
   return `${p.year}-${pad(p.month)}-${pad(p.day)}`;
+}
+
+/** The calendar day `count` days after `day` (before it, when negative). */
+export function addDays(day: string, count: number): string {
+  const parsed = parseDay(day);
+  if (!parsed) return day;
+  const date = new Date(Date.UTC(parsed.year, parsed.month - 1, parsed.day + count));
+  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}`;
+}
+
+/** Every day from `from` to `to`, both included, oldest first. Empty when `to` comes first. */
+export function daysFrom(from: string, to: string): string[] {
+  const days: string[] = [];
+  if (!parseDay(from) || !parseDay(to)) return days;
+  for (let day = from; day <= to && days.length < 3660; day = addDays(day, 1)) days.push(day);
+  return days;
 }
 
 /**
@@ -121,4 +146,23 @@ function formatCairoDate(date: Date): string {
 /** A code's last day, e.g. "30 Sep 2026" (see codeLastDay). */
 export function formatCodeLastDay(expiresAt: string): string {
   return formatCairoDate(lastDayInstant(expiresAt));
+}
+
+/** "19 Oct 2026, 17:21" in Cairo. Hand-built for the same reason as formatCairoDate. */
+export function formatCairoDateTime(instant: string): string {
+  const date = new Date(instant);
+  if (Number.isNaN(date.getTime())) return '—';
+  const p = cairoParts(date);
+  return `${p.day} ${MONTHS[p.month - 1]} ${p.year}, ${pad(p.hour)}:${pad(p.minute)}`;
+}
+
+const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+/** "Mon 19 Oct" for a YYYY-MM-DD day (or "19 Oct" without the weekday). */
+export function formatDay(day: string, { weekday = true }: { weekday?: boolean } = {}): string {
+  const parsed = parseDay(day);
+  if (!parsed) return day;
+  const label = `${parsed.day} ${MONTHS[parsed.month - 1]}`;
+  if (!weekday) return label;
+  return `${WEEKDAYS[new Date(Date.UTC(parsed.year, parsed.month - 1, parsed.day)).getUTCDay()]} ${label}`;
 }
