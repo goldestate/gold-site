@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import type { Property } from '@/lib/properties-store';
 import { SESSION_EXPIRED } from '@/lib/admin-fetch';
+import { flash } from './flash-banner';
 import {
   LOCATIONS,
   PRICE_PERIODS,
@@ -230,7 +231,8 @@ export function PropertyForm({ property }: PropertyFormProps) {
         return;
       }
 
-      router.push(`/goldenadmin2026/properties?${isEditing ? 'updated' : 'created'}=1`);
+      flash(isEditing ? 'Property saved.' : 'Property added.');
+      router.push('/goldenadmin2026/properties');
       router.refresh();
     } catch {
       setError('Could not reach the server. Please try again.');

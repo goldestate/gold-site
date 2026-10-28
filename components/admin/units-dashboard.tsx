@@ -19,6 +19,7 @@ import { ALL, FilterSearch, FilterSelect, FilterSummary, countOptions, matchesSe
 import { UnitsActivityChart, type ActivityBucket } from './units-activity-chart';
 import { UnitsTable } from './units-table';
 import { CollapsibleSection } from './collapsible-section';
+import { flash } from './flash-banner';
 
 /**
  * The Properties page as data: what is in the catalogue, what was added when,
@@ -317,7 +318,8 @@ export function UnitsDashboard({
       setRestoreError(`Could not restore "${deletion.name}". ${result.error}`);
       return;
     }
-    router.push('/goldenadmin2026/properties?restored=1');
+    flash('Property restored.');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     router.refresh();
   };
 

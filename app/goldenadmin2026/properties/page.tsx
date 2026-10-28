@@ -3,16 +3,13 @@ import { readProperties } from '@/lib/properties-store';
 import { readPhotoUploadDays, readPropertyDeletions } from '@/lib/unit-activity';
 import { cairoToday } from '@/lib/cairo-time';
 import { UnitsDashboard } from '@/components/admin/units-dashboard';
+import { FlashBanner } from '@/components/admin/flash-banner';
 import { AdminNav } from '@/components/admin/admin-nav';
 import { LogoutButton } from '@/components/admin/logout-button';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminPropertiesPage({
-  searchParams
-}: {
-  searchParams: { created?: string; updated?: string; deleted?: string; restored?: string };
-}) {
+export default async function AdminPropertiesPage() {
   const [properties, deletions] = await Promise.all([
     readProperties(),
     // Optional: before migration 008 there is no record, and the page leaves
@@ -27,16 +24,6 @@ export default async function AdminPropertiesPage({
     console.error('Could not read the photo uploads', error);
     return null;
   });
-
-  const banner = searchParams.created
-    ? 'Property added.'
-    : searchParams.updated
-      ? 'Property saved.'
-      : searchParams.deleted
-        ? 'Property deleted.'
-        : searchParams.restored
-          ? 'Property restored.'
-          : null;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
@@ -61,11 +48,7 @@ export default async function AdminPropertiesPage({
         time.
       </p>
 
-      {banner ? (
-        <div className="mt-6 rounded-[1rem] border border-[rgba(217,179,85,0.3)] bg-[rgba(217,179,85,0.1)] px-4 py-3 text-sm text-[#D9B355]">
-          {banner}
-        </div>
-      ) : null}
+      <FlashBanner />
 
       <div className="mt-8">
         <UnitsDashboard properties={properties} photoDays={photoDays} deletions={deletions} today={cairoToday()} />
