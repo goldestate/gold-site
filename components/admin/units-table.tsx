@@ -15,6 +15,7 @@ import {
   unitTypeLabel
 } from '@/lib/property-taxonomy';
 import { useStoredState } from './list-filters';
+import { flash } from './flash-banner';
 
 type SortKey = 'name' | 'location' | 'type' | 'unit' | 'beds' | 'baths' | 'area' | 'price' | 'photos' | 'added' | 'status';
 type Sort = { key: SortKey; dir: 'asc' | 'desc' };
@@ -171,7 +172,9 @@ export function UnitsTable({ units, recoverable }: { units: Property[]; recovera
       setError(`Could not delete "${unit.name}". ${result.error}`);
       return;
     }
-    router.push('/goldenadmin2026/properties?deleted=1');
+    flash('Property deleted.');
+    // The note sits at the top of the page, where the list used to land after a delete.
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     router.refresh();
   };
 
