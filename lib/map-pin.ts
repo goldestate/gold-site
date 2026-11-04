@@ -25,6 +25,8 @@ export const REGION_BOXES: Record<LocationValue, Box> = {
   // 6th of October City and Hadayek October; overlaps Sheikh Zayed next door.
   october: [30.7, 29.75, 31.1, 30.1],
   'new-cairo': [31.3, 29.9, 31.8, 30.15],
+  // The New Administrative Capital, east of New Cairo; overlaps New Cairo's eastern edge.
+  'new-capital': [31.6, 29.85, 32.0, 30.2],
   // Ain Sokhna and the Galala plateau above it.
   'ain-sokhna': [32.1, 29.1, 32.9, 29.95],
   // El Gouna and Hurghada.

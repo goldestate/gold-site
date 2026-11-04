@@ -6,8 +6,10 @@ import type { MatchWithListing, RentalRequestWithBroker } from '@/lib/rental-des
 import { formatPrice } from '@/lib/format-price';
 import { LOCATIONS, locationLabel } from '@/lib/property-taxonomy';
 import {
+  DEAL_TYPES,
   RENTAL_PROPERTY_TYPES,
   RENTAL_REQUEST_STATUS_LABELS,
+  dealTypeLabel,
   rentalPropertyTypeLabel,
   type RentalRequestStatusValue
 } from '@/lib/rental-taxonomy';
@@ -27,8 +29,24 @@ import {
 import { AGREEMENT_OPTIONS, agreementState } from './rental-desk-listings-panel';
 
 const MAX_VISIBLE_MATCHES = 5;
-type RequestFilters = { search: string; status: string; location: string; type: string; agreement: string; matches: string };
-const NO_REQUEST_FILTERS: RequestFilters = { search: '', status: ALL, location: ALL, type: ALL, agreement: ALL, matches: ALL };
+type RequestFilters = {
+  search: string;
+  status: string;
+  deal: string;
+  location: string;
+  type: string;
+  agreement: string;
+  matches: string;
+};
+const NO_REQUEST_FILTERS: RequestFilters = {
+  search: '',
+  status: ALL,
+  deal: ALL,
+  location: ALL,
+  type: ALL,
+  agreement: ALL,
+  matches: ALL
+};
 
 /** Newest first; older requests wait behind "Show more" so the page stays short. */
 const FIRST_REQUESTS = 5;
@@ -141,7 +159,7 @@ function RequestCard({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="font-serif text-xs uppercase tracking-[0.3em] text-[rgba(217,179,85,0.9)]">
-            {request.referenceCode}
+            {request.referenceCode} · {dealTypeLabel(request.dealType, 'en')}
           </div>
           <div className="mt-1 text-white">
             {request.broker.name}
@@ -179,7 +197,9 @@ function RequestCard({
       {request.notes ? <p className="mt-2 text-sm text-white/50">{request.notes}</p> : null}
 
       <div className="mt-4 flex items-center justify-between gap-2 border-t border-white/10 pt-3">
-        {matches.length === 0 ? (
+        {request.dealType === 'resale' ? (
+          <p className="text-xs uppercase tracking-[0.14em] text-white/40">No automatic matches for resale</p>
+        ) : matches.length === 0 ? (
           <p className="text-xs uppercase tracking-[0.14em] text-white/40">No matches yet</p>
         ) : (
           <button
@@ -269,8 +289,13 @@ export function RentalDeskRequestsPanel({
   const [filters, setFilters] = useStoredState<RequestFilters>('gold-admin:request-filters', NO_REQUEST_FILTERS);
   const set = (patch: Partial<RequestFilters>) => setFilters({ ...filters, ...patch });
 
+  // Matching only pairs rentals with rental listings. Any a resale request has
+  // came from before migration 009, when the database couldn't tell them apart.
+  const matchesFor = (request: RentalRequestWithBroker): MatchWithListing[] =>
+    request.dealType === 'resale' ? [] : matchesByRequest[request.id] ?? [];
+
   const matchState = (request: RentalRequestWithBroker): string => {
-    const matches = matchesByRequest[request.id] ?? [];
+    const matches = matchesFor(request);
     if (matches.length === 0) return 'none';
     return matches.some((match) => !match.sentToBroker) ? 'to-send' : 'all-sent';
   };
@@ -278,6 +303,7 @@ export function RentalDeskRequestsPanel({
   const filtered = requests.filter(
     (request) =>
       (!filters.status || request.status === filters.status) &&
+      (!filters.deal || request.dealType === filters.deal) &&
       (!filters.location || request.location === filters.location) &&
       (!filters.type || request.propertyType === filters.type) &&
       (!filters.agreement || agreementState(ndas[request.id]) === filters.agreement) &&
@@ -295,7 +321,9 @@ export function RentalDeskRequestsPanel({
         ].join(' ')
       )
   );
-  const filtering = Boolean(filters.search || filters.status || filters.location || filters.type || filters.agreement || filters.matches);
+  const filtering = Boolean(
+    filters.search || filters.status || filters.deal || filters.location || filters.type || filters.agreement || filters.matches
+  );
   const shown = useShowMore(filtered, FIRST_REQUESTS);
 
   const handleMarkSent = async (matchId: string) => {
@@ -315,7 +343,7 @@ export function RentalDeskRequestsPanel({
   if (requests.length === 0) {
     return (
       <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-10 text-center text-white/60">
-        No rental requests yet.
+        No requests yet.
       </div>
     );
   }
@@ -337,7 +365,14 @@ export function RentalDeskRequestsPanel({
           value={filters.status}
           onChange={(value) => set({ status: value })}
         />
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          <FilterSelect
+            label="Rental or resale"
+            value={filters.deal}
+            onChange={(value) => set({ deal: value })}
+            options={countOptions(requests, DEAL_TYPES.map((item) => ({ value: item.value, label: item.en })), (request) => request.dealType)}
+            anyLabel="Both"
+          />
           <FilterSelect
             label="Location"
             value={filters.location}
@@ -407,7 +442,7 @@ export function RentalDeskRequestsPanel({
         <RequestCard
           key={request.id}
           request={request}
-          matches={matchesByRequest[request.id] ?? []}
+          matches={matchesFor(request)}
           nda={ndas[request.id]}
           onSent={handleMarkSent}
         />

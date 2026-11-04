@@ -236,6 +236,8 @@ export type SiteCopy = {
     intro: string;
     brokerSectionTitle: string;
     requestSectionTitle: string;
+    /** Rental or resale: whether the broker's client wants to rent or to buy a resale unit. */
+    dealTypeLabel: string;
     name: string;
     company: string;
     phone: string;
@@ -502,7 +504,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       },
       featured: {
         eyebrow: 'Newest Listings',
-        title: 'Recently added properties',
+        title: 'Properties',
         viewAllCta: 'View All Properties'
       },
       partners: {
@@ -522,8 +524,8 @@ export const siteCopy: Record<Locale, SiteCopy> = {
           'Our B2B desk connects broker requirements with owner listings directly, so both sides move faster.',
         brokerCard: {
           title: 'Gold Partners',
-          body: 'Submit a client’s rental requirement and we will match it against active listings and reach back out.',
-          cta: 'Submit a Rental Request'
+          body: 'Submit a client’s rental or resale requirement and we will match it against active listings and reach back out.',
+          cta: 'Submit a Rental/Resale Request'
         },
         ownerCard: {
           title: 'For Property Owners',
@@ -728,11 +730,12 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     },
     rentalRequestPage: {
       eyebrow: 'Rental Desk / Gold Partners',
-      title: 'Submit a Rental Request',
+      title: 'Submit a Rental/Resale Request',
       intro:
-        'Tell us what your client needs and we will match it against active rental listings and reach back out with options.',
+        'Tell us what your client needs and we will match it against active listings and reach back out with options.',
       brokerSectionTitle: 'Your details',
       requestSectionTitle: 'What your client needs',
+      dealTypeLabel: 'Request type',
       name: 'Full name',
       company: 'Company (optional)',
       phone: 'Phone',
@@ -751,10 +754,10 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       rentalPeriodLabel: 'Rental period',
       rentalPeriodAny: 'Any',
       notesLabel: 'Notes (optional)',
-      submit: 'Submit Rental Request',
+      submit: 'Submit Request',
       submitting: 'Submitting...',
       successTitle: 'Request received',
-      successBody: 'Your rental request has been submitted. The GOLD team will match it against active listings and reach out.',
+      successBody: 'Your request has been submitted. The GOLD team will match it against active listings and reach out.',
       referenceLabel: 'Your reference code',
       submitAnother: 'Submit another request',
       errors: {
@@ -939,7 +942,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       },
       featured: {
         eyebrow: 'أحدث العروض',
-        title: 'عقارات أضيفت مؤخراً',
+        title: 'العقارات',
         viewAllCta: 'عرض كل العقارات'
       },
       partners: {
@@ -958,8 +961,8 @@ export const siteCopy: Record<Locale, SiteCopy> = {
         subtitle: 'يربط مكتبنا للوسطاء والملاك متطلبات الوسطاء بعروض الملاك مباشرة، ليتحرك الطرفان بسرعة أكبر.',
         brokerCard: {
           title: 'شركاء GOLD',
-          body: 'أرسل متطلبات عميلك الإيجارية وسنقوم بمطابقتها مع العروض النشطة والتواصل معك.',
-          cta: 'إرسال طلب إيجار'
+          body: 'أرسل متطلبات عميلك للإيجار أو إعادة البيع وسنقوم بمطابقتها مع العروض النشطة والتواصل معك.',
+          cta: 'إرسال طلب إيجار أو إعادة بيع'
         },
         ownerCard: {
           title: 'لملاك العقارات',
@@ -1169,10 +1172,11 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     },
     rentalRequestPage: {
       eyebrow: 'مكتب الإيجارات / شركاء GOLD',
-      title: 'إرسال طلب إيجار',
-      intro: 'أخبرنا بما يحتاجه عميلك وسنقوم بمطابقته مع العروض الإيجارية النشطة والتواصل معك بالخيارات المتاحة.',
+      title: 'إرسال طلب إيجار أو إعادة بيع',
+      intro: 'أخبرنا بما يحتاجه عميلك وسنقوم بمطابقته مع العروض النشطة والتواصل معك بالخيارات المتاحة.',
       brokerSectionTitle: 'بياناتك',
       requestSectionTitle: 'ماذا يحتاج عميلك',
+      dealTypeLabel: 'نوع الطلب',
       name: 'الاسم الكامل',
       company: 'الشركة (اختياري)',
       phone: 'رقم الهاتف',
@@ -1191,10 +1195,10 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       rentalPeriodLabel: 'مدة الإيجار',
       rentalPeriodAny: 'أي مدة',
       notesLabel: 'ملاحظات (اختياري)',
-      submit: 'إرسال طلب الإيجار',
+      submit: 'إرسال الطلب',
       submitting: 'جار الإرسال...',
       successTitle: 'تم استلام الطلب',
-      successBody: 'تم إرسال طلب الإيجار الخاص بك. سيقوم فريق GOLD بمطابقته مع العروض النشطة والتواصل معك.',
+      successBody: 'تم إرسال طلبك. سيقوم فريق جولد بمطابقته مع العروض النشطة والتواصل معك.',
       referenceLabel: 'رقم مرجع طلبك',
       submitAnother: 'إرسال طلب آخر',
       errors: {

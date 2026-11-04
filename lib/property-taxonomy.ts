@@ -12,7 +12,14 @@ export type UnitTypeValue =
   | 'clinic'
   | 'office'
   | 'commercial';
-export type LocationValue = 'north-coast' | 'sheikh-zayed' | 'october' | 'new-cairo' | 'ain-sokhna' | 'gouna';
+export type LocationValue =
+  | 'north-coast'
+  | 'sheikh-zayed'
+  | 'october'
+  | 'new-cairo'
+  | 'new-capital'
+  | 'ain-sokhna'
+  | 'gouna';
 /** How a listing's `price` should be read. Stored per row -- never derived from property type. */
 export type PricePeriodValue = 'daily' | 'monthly' | 'quarterly' | 'yearly' | 'total';
 
@@ -50,6 +57,7 @@ export const LOCATIONS: TaxonomyOption<LocationValue>[] = [
   { value: 'sheikh-zayed', en: 'Sheikh Zayed', ar: 'الشيخ زايد' },
   { value: 'october', en: 'October', ar: 'أكتوبر' },
   { value: 'new-cairo', en: 'New Cairo', ar: 'القاهرة الجديدة' },
+  { value: 'new-capital', en: 'New Capital', ar: 'العاصمة الإدارية' },
   { value: 'ain-sokhna', en: 'Ain Sokhna', ar: 'العين السخنة' },
   { value: 'gouna', en: 'Gouna', ar: 'الجونة' }
 ];
@@ -134,6 +142,7 @@ const LEGACY_LOCATION_MATCHES: Array<{ pattern: RegExp; value: LocationValue }> 
   { pattern: /sheikh\s*zayed/i, value: 'sheikh-zayed' },
   { pattern: /october/i, value: 'october' },
   { pattern: /new\s*cairo|5th\s*settlement|fifth\s*settlement/i, value: 'new-cairo' },
+  { pattern: /new\s*capital|administrative\s*capital/i, value: 'new-capital' },
   { pattern: /ain\s*sokhna|sokhna/i, value: 'ain-sokhna' },
   { pattern: /gouna/i, value: 'gouna' }
 ];

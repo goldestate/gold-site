@@ -35,7 +35,7 @@ const ADDRESS =
 const en: PrivacyCopy = {
   eyebrow: 'Privacy',
   title: 'What we collect, and what we do not.',
-  updated: 'Last updated 4 October 2026',
+  updated: 'Last updated 4 November 2026',
   intro:
     'This policy covers the GOLD website at gold-eg.com and the GOLD iPhone app. It is written to be read, not to be survived — if something here is unclear, ask us and we will explain it.',
   sections: [
@@ -71,9 +71,9 @@ const en: PrivacyCopy = {
       paragraphs: ['What you type into a form, only when you send it, and your IP address to stop abuse.'],
       bullets: [
         'Enquiry form: your name, phone number, email address, the type of property you are interested in, and your message. This is emailed to our team and is not stored in our database.',
-        'Rental request form: your name, company, phone, WhatsApp number, email, and what you are looking for — location, budget, bedrooms, dates and any notes you add.',
+        'Rental/resale request form: your name, company, phone, WhatsApp number, email, and what you are looking for — rental or resale, location, budget, bedrooms, dates and any notes you add.',
         'List your property form: your name, phone, WhatsApp number, email, the property details you enter, and any photos you upload.',
-        'After a rental request or a property listing, we ask you to sign GOLD’s confidentiality agreement. We keep the signature you draw on screen, or the signed copy you upload, with your name, company, phone, email and the time you signed. We email you a confirmation with a link to the agreement.',
+        'After a rental/resale request or a property listing, we ask you to sign GOLD’s confidentiality agreement. We keep the signature you draw on screen, or the signed copy you upload, with your name, company, phone, email and the time you signed. We email you a confirmation with a link to the agreement.',
         'Your IP address, to limit how many times the same visitor can send a form or try a code. The app’s identifier is counted the same way when a phone enters or checks codes. Both are used for that and nothing else.',
         'Messages you send us on WhatsApp — including from the “Ask GOLD on WhatsApp” button on a code link — reach us like any other WhatsApp message: we see your number and what you write.'
       ]
@@ -138,7 +138,7 @@ const en: PrivacyCopy = {
 const ar: PrivacyCopy = {
   eyebrow: 'الخصوصية',
   title: 'ما نجمعه، وما لا نجمعه.',
-  updated: 'آخر تحديث 4 أكتوبر 2026',
+  updated: 'آخر تحديث 4 نوفمبر 2026',
   intro:
     'تغطي هذه السياسة موقع جولد على gold-eg.com وتطبيق جولد على الآيفون. كُتبت لتُقرأ بوضوح — إذا كان أي شيء هنا غير واضح، اسألنا وسنشرحه.',
   sections: [
@@ -174,9 +174,9 @@ const ar: PrivacyCopy = {
       paragraphs: ['ما تكتبه في النموذج وفقط عند إرساله، وعنوان الـ IP الخاص بك للحد من إساءة الاستخدام.'],
       bullets: [
         'نموذج الاستفسار: اسمك ورقم هاتفك وبريدك الإلكتروني ونوع العقار الذي يهمك ورسالتك. يُرسل إلى فريقنا بالبريد ولا يُخزَّن في قاعدة بياناتنا.',
-        'نموذج طلب الإيجار: اسمك والشركة والهاتف ورقم واتساب والبريد وما تبحث عنه — الموقع والميزانية وعدد الغرف والتواريخ وأي ملاحظات تضيفها.',
+        'نموذج طلب الإيجار أو إعادة البيع: اسمك والشركة والهاتف ورقم واتساب والبريد وما تبحث عنه — إيجار أو إعادة بيع، والموقع والميزانية وعدد الغرف والتواريخ وأي ملاحظات تضيفها.',
         'نموذج عرض عقارك: اسمك والهاتف ورقم واتساب والبريد وتفاصيل العقار وأي صور ترفعها.',
-        'بعد طلب الإيجار أو عرض العقار، نطلب منك توقيع اتفاقية السرية الخاصة بجولد. نحتفظ بالتوقيع الذي ترسمه على الشاشة أو النسخة الموقّعة التي ترفعها، مع اسمك وشركتك وهاتفك وبريدك ووقت التوقيع. ونرسل لك رسالة تأكيد بالبريد فيها رابط الاتفاقية.',
+        'بعد طلب الإيجار أو إعادة البيع أو عرض العقار، نطلب منك توقيع اتفاقية السرية الخاصة بجولد. نحتفظ بالتوقيع الذي ترسمه على الشاشة أو النسخة الموقّعة التي ترفعها، مع اسمك وشركتك وهاتفك وبريدك ووقت التوقيع. ونرسل لك رسالة تأكيد بالبريد فيها رابط الاتفاقية.',
         'عنوان الـ IP الخاص بك، للحد من عدد مرات إرسال النماذج أو تجربة الأكواد من نفس الزائر. ويُحتسب معرّف التطبيق بالطريقة نفسها عندما يُدخل هاتف أكواداً أو يتحقق منها. يُستخدمان لذلك فقط.',
         'الرسائل التي ترسلها إلينا على واتساب — بما فيها رسائل زر «تواصل مع جولد على واتساب» في رابط الكود — تصلنا مثل أي رسالة واتساب أخرى: نرى رقمك وما تكتبه.'
       ]
