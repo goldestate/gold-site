@@ -70,10 +70,10 @@ export default async function AdminRentalDeskPage() {
         </div>
       </CollapsibleSection>
 
-      <CollapsibleSection id="rental-desk-requests" title="Rental Requests" count={requests.length}>
+      <CollapsibleSection id="rental-desk-requests" title="Rental/Resale Requests" count={requests.length}>
         <p className="mt-2 max-w-xl text-sm text-white/55">
-          Each request lists its best-scoring matches. Marking a match &ldquo;sent&rdquo; records that the broker was
-          notified.
+          Each rental request lists its best-scoring matches. Marking a match &ldquo;sent&rdquo; records that the broker
+          was notified. Resale requests get no automatic matches.
         </p>
         <div className="mt-5">
           <RentalDeskRequestsPanel requests={requests} matchesByRequest={matchesByRequest} ndas={ndasByRequest} />

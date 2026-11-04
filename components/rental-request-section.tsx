@@ -4,7 +4,7 @@ import type { FormEvent } from 'react';
 import { useState } from 'react';
 import type { SiteCopy } from '@/lib/site-content';
 import { LOCATIONS } from '@/lib/property-taxonomy';
-import { RENTAL_PERIODS, RENTAL_PROPERTY_TYPES } from '@/lib/rental-taxonomy';
+import { DEAL_TYPES, RENTAL_PERIODS, RENTAL_PROPERTY_TYPES, type DealTypeValue } from '@/lib/rental-taxonomy';
 import { useRouter } from '@/i18n/navigation';
 import { GMark } from './gmark';
 import { GoldSelect, type GoldSelectOption } from './gold-select';
@@ -20,6 +20,7 @@ type FormState = {
   phone: string;
   whatsapp: string;
   email: string;
+  dealType: DealTypeValue;
   propertyType: string;
   location: string;
   budgetMin: string;
@@ -37,6 +38,7 @@ const emptyForm: FormState = {
   phone: '',
   whatsapp: '',
   email: '',
+  dealType: 'rental',
   propertyType: '',
   location: '',
   budgetMin: '',
@@ -124,6 +126,46 @@ function SelectField({
   );
 }
 
+/** Rental or resale, side by side: two choices read faster than a dropdown. */
+function DealTypeField({
+  label,
+  value,
+  onChange,
+  locale
+}: {
+  label: string;
+  value: DealTypeValue;
+  onChange: (value: DealTypeValue) => void;
+  locale: 'en' | 'ar';
+}) {
+  return (
+    <fieldset className="sm:col-span-2">
+      <legend className={labelClass}>{label}</legend>
+      <div className="inline-flex gap-1 rounded-full border border-white/[0.12] bg-white/[0.04] p-1">
+        {DEAL_TYPES.map((item) => (
+          <label key={item.value} className="cursor-pointer">
+            <input
+              type="radio"
+              name="dealType"
+              value={item.value}
+              checked={value === item.value}
+              onChange={() => onChange(item.value)}
+              className="peer sr-only"
+            />
+            <span
+              className={`inline-flex min-h-[44px] items-center rounded-full px-6 text-sm font-medium uppercase tracking-[0.14em] transition peer-focus-visible:ring-2 peer-focus-visible:ring-[rgba(217,179,85,0.5)] ${
+                value === item.value ? 'bg-[#D9B355] text-[#171314]' : 'text-white/70 hover:text-white'
+              }`}
+            >
+              {item[locale]}
+            </span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
 export function RentalRequestSection({
   copy,
   locale,
@@ -141,6 +183,8 @@ export function RentalRequestSection({
   const [formError, setFormError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [referenceCode, setReferenceCode] = useState<string | null>(null);
+
+  const isRental = form.dealType === 'rental';
 
   const update = (field: keyof FormState, value: string) => {
     setForm((current) => ({ ...current, [field]: value }));
@@ -178,14 +222,16 @@ export function RentalRequestSection({
           whatsapp: form.whatsapp.trim() || undefined,
           email: form.email.trim() || undefined,
           locale,
+          dealType: form.dealType,
           propertyType: form.propertyType,
           location: form.location,
           budgetMin: form.budgetMin ? Number(form.budgetMin) : undefined,
           budgetMax: form.budgetMax ? Number(form.budgetMax) : undefined,
           bedrooms: form.bedrooms ? Number(form.bedrooms) : undefined,
-          furnished: form.furnished ? form.furnished === 'yes' : undefined,
-          moveInDate: form.moveInDate || undefined,
-          rentalPeriod: form.rentalPeriod || undefined,
+          // Hidden for a resale, so whatever was picked before switching stays out.
+          furnished: isRental && form.furnished ? form.furnished === 'yes' : undefined,
+          moveInDate: (isRental && form.moveInDate) || undefined,
+          rentalPeriod: (isRental && form.rentalPeriod) || undefined,
           notes: form.notes.trim() || undefined
         })
       });
@@ -273,14 +319,19 @@ export function RentalRequestSection({
                   {copy.requestSectionTitle}
                 </div>
                 <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                  <DealTypeField label={copy.dealTypeLabel} value={form.dealType} onChange={(v) => update('dealType', v)} locale={locale} />
                   <SelectField label={copy.propertyTypeLabel} value={form.propertyType} onChange={(v) => update('propertyType', v)} error={errors.propertyType} isRtl={isRtl} placeholder={chooseLabel} options={[...RENTAL_PROPERTY_TYPES.map((item) => ({ value: item.value, label: item[locale] }))]} />
                   <SelectField label={copy.locationLabel} value={form.location} onChange={(v) => update('location', v)} error={errors.location} isRtl={isRtl} placeholder={chooseLabel} options={[...LOCATIONS.map((item) => ({ value: item.value, label: item[locale] }))]} />
                   <Field label={copy.budgetMinLabel} type="number" value={form.budgetMin} onChange={(v) => update('budgetMin', v)} isRtl={isRtl} />
                   <Field label={copy.budgetMaxLabel} type="number" value={form.budgetMax} onChange={(v) => update('budgetMax', v)} isRtl={isRtl} />
                   <Field label={copy.bedroomsLabel} type="number" value={form.bedrooms} onChange={(v) => update('bedrooms', v)} isRtl={isRtl} />
-                  <SelectField label={copy.furnishedLabel} value={form.furnished} onChange={(v) => update('furnished', v as FormState['furnished'])} isRtl={isRtl} options={[{ value: '', label: copy.furnishedAny }, { value: 'yes', label: copy.furnishedYes }, { value: 'no', label: copy.furnishedNo }]} />
-                  <Field label={copy.moveInDateLabel} type="date" value={form.moveInDate} onChange={(v) => update('moveInDate', v)} isRtl={isRtl} />
-                  <SelectField label={copy.rentalPeriodLabel} value={form.rentalPeriod} onChange={(v) => update('rentalPeriod', v)} isRtl={isRtl} options={[{ value: '', label: copy.rentalPeriodAny }, ...RENTAL_PERIODS.map((item) => ({ value: item.value, label: item[locale] }))]} />
+                  {isRental ? (
+                    <>
+                      <SelectField label={copy.furnishedLabel} value={form.furnished} onChange={(v) => update('furnished', v as FormState['furnished'])} isRtl={isRtl} options={[{ value: '', label: copy.furnishedAny }, { value: 'yes', label: copy.furnishedYes }, { value: 'no', label: copy.furnishedNo }]} />
+                      <Field label={copy.moveInDateLabel} type="date" value={form.moveInDate} onChange={(v) => update('moveInDate', v)} isRtl={isRtl} />
+                      <SelectField label={copy.rentalPeriodLabel} value={form.rentalPeriod} onChange={(v) => update('rentalPeriod', v)} isRtl={isRtl} options={[{ value: '', label: copy.rentalPeriodAny }, ...RENTAL_PERIODS.map((item) => ({ value: item.value, label: item[locale] }))]} />
+                    </>
+                  ) : null}
                 </div>
                 <label className="mt-4 block">
                   <span className={labelClass}>{copy.notesLabel}</span>

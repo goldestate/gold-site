@@ -1,7 +1,8 @@
 import { supabase, RENTAL_PHOTOS_BUCKET } from './supabase';
 import { removeNdaFilesFor } from './nda-store';
+import { postgresErrorCode } from './directory-store';
 import type { LocationValue } from './property-taxonomy';
-import type { RentalListingStatusValue, RentalPeriodValue, RentalPropertyTypeValue } from './rental-taxonomy';
+import type { DealTypeValue, RentalListingStatusValue, RentalPeriodValue, RentalPropertyTypeValue } from './rental-taxonomy';
 
 export type BrokerInput = {
   name: string;
@@ -67,6 +68,8 @@ export async function upsertBrokerByPhone(input: BrokerInput): Promise<Broker> {
 }
 
 export type RentalRequestInput = {
+  /** Left out by the app, whose form only sends rentals. */
+  dealType?: DealTypeValue;
   propertyType: RentalPropertyTypeValue;
   location: LocationValue;
   budgetMin?: number;
@@ -81,6 +84,7 @@ export type RentalRequestInput = {
 export type RentalRequest = {
   id: string;
   brokerId: string;
+  dealType: DealTypeValue;
   propertyType: RentalPropertyTypeValue;
   location: LocationValue;
   budgetMin: number | null;
@@ -98,6 +102,8 @@ export type RentalRequest = {
 type RentalRequestRow = {
   id: string;
   broker_id: string;
+  /** Absent until migration 009 is run. */
+  deal_type?: string | null;
   property_type: string;
   location: string;
   budget_min: number | null;
@@ -112,10 +118,27 @@ type RentalRequestRow = {
   created_at: string;
 };
 
+/**
+ * Until migration 009 adds the deal_type column, a resale request is saved with
+ * this line at the top of its notes, so it still reaches the team marked as one.
+ * Reading a request takes either as resale and leaves the line out of the notes.
+ */
+const RESALE_NOTE = '[Resale]';
+
+/** Whether an insert failed only because migration 009 hasn't added deal_type yet. */
+function isMissingDealTypeColumn(error: unknown): boolean {
+  const code = postgresErrorCode(error);
+  if (code !== 'PGRST204' && code !== '42703') return false;
+  return /\bdeal_type\b/.test(String((error as { message?: unknown } | null)?.message ?? ''));
+}
+
 function rowToRentalRequest(row: RentalRequestRow): RentalRequest {
+  const notes = row.notes ?? '';
+  const marked = notes.startsWith(RESALE_NOTE);
   return {
     id: row.id,
     brokerId: row.broker_id,
+    dealType: row.deal_type === 'resale' || marked ? 'resale' : 'rental',
     propertyType: row.property_type as RentalPropertyTypeValue,
     location: row.location as LocationValue,
     budgetMin: row.budget_min,
@@ -124,7 +147,7 @@ function rowToRentalRequest(row: RentalRequestRow): RentalRequest {
     furnished: row.furnished,
     moveInDate: row.move_in_date,
     rentalPeriod: row.rental_period as RentalPeriodValue | null,
-    notes: row.notes,
+    notes: marked ? notes.slice(RESALE_NOTE.length).trim() || null : row.notes,
     status: row.status,
     referenceCode: row.reference_code,
     createdAt: row.created_at
@@ -132,24 +155,43 @@ function rowToRentalRequest(row: RentalRequestRow): RentalRequest {
 }
 
 export async function createRentalRequest(brokerId: string, input: RentalRequestInput): Promise<RentalRequest> {
+  const resale = input.dealType === 'resale';
+  const notes = input.notes?.trim() || null;
+  const row = {
+    broker_id: brokerId,
+    property_type: input.propertyType,
+    location: input.location,
+    budget_min: input.budgetMin ?? null,
+    budget_max: input.budgetMax ?? null,
+    bedrooms: input.bedrooms ?? null,
+    // Furnishing, move-in date and rental period belong to a rental.
+    furnished: resale ? null : input.furnished ?? null,
+    move_in_date: resale ? null : input.moveInDate || null,
+    rental_period: resale ? null : input.rentalPeriod ?? null,
+    notes
+  };
+
+  // A rental leaves deal_type to the column's default, so it saves the same
+  // with or without migration 009.
+  const columns: Record<string, unknown> = resale ? { ...row, deal_type: 'resale' } : row;
+  const saved = await supabase.from('rental_requests').insert(columns).select('*').single();
+  if (!saved.error) return rowToRentalRequest(saved.data as RentalRequestRow);
+  if (!resale || !isMissingDealTypeColumn(saved.error)) throw saved.error;
+
   const { data, error } = await supabase
     .from('rental_requests')
-    .insert({
-      broker_id: brokerId,
-      property_type: input.propertyType,
-      location: input.location,
-      budget_min: input.budgetMin ?? null,
-      budget_max: input.budgetMax ?? null,
-      bedrooms: input.bedrooms ?? null,
-      furnished: input.furnished ?? null,
-      move_in_date: input.moveInDate || null,
-      rental_period: input.rentalPeriod ?? null,
-      notes: input.notes?.trim() || null
-    })
+    .insert({ ...row, notes: notes ? `${RESALE_NOTE}\n${notes}` : RESALE_NOTE })
     .select('*')
     .single();
   if (error) throw error;
-  return rowToRentalRequest(data as RentalRequestRow);
+  const request = data as RentalRequestRow;
+
+  // Without migration 009 the matching trigger has just paired it with rentals,
+  // which a buyer has no use for. Best effort: the request itself is saved.
+  const { error: matchesError } = await supabase.from('matches').delete().eq('request_id', request.id);
+  if (matchesError) console.error('Could not clear the resale request’s rental matches', matchesError);
+  else await supabase.from('rental_requests').update({ status: 'new' }).eq('id', request.id).eq('status', 'matching');
+  return rowToRentalRequest(request);
 }
 
 export type OwnerInput = {
