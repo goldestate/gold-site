@@ -2,6 +2,8 @@ export type RentalPropertyTypeValue = 'apartment' | 'villa' | 'office' | 'retail
 export type RentalPeriodValue = 'monthly' | 'yearly' | 'short_term';
 export type RentalListingStatusValue = 'pending_review' | 'active' | 'rented' | 'inactive';
 export type RentalRequestStatusValue = 'new' | 'matching' | 'matches_sent' | 'closed' | 'expired';
+/** What a broker's client wants: to rent, or to buy a resale unit. */
+export type DealTypeValue = 'rental' | 'resale';
 
 type TaxonomyOption<T extends string> = {
   value: T;
@@ -24,6 +26,12 @@ export const RENTAL_PERIODS: TaxonomyOption<RentalPeriodValue>[] = [
   { value: 'short_term', en: 'Short-term', ar: 'قصير الأجل' }
 ];
 
+// Same words as the properties' own Rental and Resale types.
+export const DEAL_TYPES: TaxonomyOption<DealTypeValue>[] = [
+  { value: 'rental', en: 'Rental', ar: 'إيجار' },
+  { value: 'resale', en: 'Resale', ar: 'إعادة بيع' }
+];
+
 const RENTAL_PROPERTY_TYPE_VALUES = RENTAL_PROPERTY_TYPES.map((item) => item.value);
 const RENTAL_PERIOD_VALUES = RENTAL_PERIODS.map((item) => item.value);
 
@@ -41,6 +49,14 @@ export function rentalPropertyTypeLabel(value: RentalPropertyTypeValue, locale: 
 
 export function rentalPeriodLabel(value: RentalPeriodValue, locale: 'en' | 'ar'): string {
   return RENTAL_PERIODS.find((item) => item.value === value)?.[locale] ?? value;
+}
+
+export function isDealType(value: unknown): value is DealTypeValue {
+  return value === 'rental' || value === 'resale';
+}
+
+export function dealTypeLabel(value: DealTypeValue, locale: 'en' | 'ar'): string {
+  return DEAL_TYPES.find((item) => item.value === value)?.[locale] ?? value;
 }
 
 // Admin panel is English-only, so these statuses don't need Arabic labels.

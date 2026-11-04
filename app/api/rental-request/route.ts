@@ -2,7 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkRateLimit, getClientKey } from '@/lib/rate-limit';
 import { upsertBrokerByPhone, createRentalRequest } from '@/lib/rental-desk-store';
 import { isLocation, type LocationValue } from '@/lib/property-taxonomy';
-import { isRentalPeriod, isRentalPropertyType, type RentalPeriodValue, type RentalPropertyTypeValue } from '@/lib/rental-taxonomy';
+import {
+  isDealType,
+  isRentalPeriod,
+  isRentalPropertyType,
+  type DealTypeValue,
+  type RentalPeriodValue,
+  type RentalPropertyTypeValue
+} from '@/lib/rental-taxonomy';
 import { openNdaFor } from '@/lib/nda-store';
 import { adminEmailAddress, isEmailShaped, sendEmail } from '@/lib/email';
 import { adminSubmissionEmail, requestReceivedEmail } from '@/lib/email-templates';
@@ -13,6 +20,8 @@ type RentalRequestPayload = {
   company?: string;
   whatsapp?: string;
   email?: string;
+  /** Rental unless the website's form says resale. The app doesn't send it. */
+  dealType?: DealTypeValue;
   propertyType: RentalPropertyTypeValue;
   location: LocationValue;
   budgetMin?: number;
@@ -39,6 +48,7 @@ function isValidBody(body: unknown): body is RentalRequestPayload {
     (value.company === undefined || typeof value.company === 'string') &&
     (value.whatsapp === undefined || typeof value.whatsapp === 'string') &&
     (value.email === undefined || typeof value.email === 'string') &&
+    (value.dealType === undefined || isDealType(value.dealType)) &&
     isRentalPropertyType(value.propertyType) &&
     isLocation(value.location) &&
     isOptionalFiniteNumber(value.budgetMin) &&
@@ -87,6 +97,7 @@ export async function POST(request: NextRequest) {
     });
 
     const rentalRequest = await createRentalRequest(broker.id, {
+      dealType: body.dealType,
       propertyType: body.propertyType,
       location: body.location,
       budgetMin: body.budgetMin,
@@ -114,6 +125,7 @@ export async function POST(request: NextRequest) {
           lang,
           name: broker.name,
           referenceCode: rentalRequest.referenceCode,
+          dealType: rentalRequest.dealType,
           propertyType: body.propertyType,
           location: body.location,
           ndaToken: nda?.token ?? null
@@ -129,6 +141,7 @@ export async function POST(request: NextRequest) {
           name: broker.name,
           phone: broker.phone,
           email,
+          dealType: rentalRequest.dealType,
           propertyType: body.propertyType,
           location: body.location,
           referenceCode: rentalRequest.referenceCode

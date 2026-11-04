@@ -20,6 +20,8 @@ export type Email = {
   subject: string;
   html: string;
   text: string;
+  /** Files to attach, as base64. */
+  attachments?: { filename: string; content: string }[];
 };
 
 let warnedNoKey = false;
@@ -44,7 +46,8 @@ export async function sendEmail(email: Email): Promise<boolean> {
         reply_to: process.env.EMAIL_REPLY_TO || process.env.EMAIL_TO || DEFAULT_REPLY_TO,
         subject: email.subject,
         html: email.html,
-        text: email.text
+        text: email.text,
+        ...(email.attachments?.length ? { attachments: email.attachments } : {})
       }),
       signal: AbortSignal.timeout(10_000),
       cache: 'no-store'

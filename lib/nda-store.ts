@@ -145,7 +145,7 @@ export async function getNdaById(id: string): Promise<NdaAgreement | null> {
  */
 export async function markNdaSigned(
   token: string,
-  signed: { method: NdaMethod; filePath: string }
+  signed: { method: NdaMethod; filePath: string; signer?: NdaSigner }
 ): Promise<NdaAgreement | null> {
   const { data, error } = await supabase
     .from('nda_agreements')
@@ -156,7 +156,16 @@ export async function markNdaSigned(
       signed_at: new Date().toISOString(),
       // What they read on the page is what they signed, even if the row was
       // created under an earlier version of the text.
-      agreement_version: NDA_VERSION
+      agreement_version: NDA_VERSION,
+      // The details as they typed them on the signing page: what the signed PDF shows.
+      ...(signed.signer
+        ? {
+            signer_name: signed.signer.name,
+            signer_company: signed.signer.company,
+            signer_phone: signed.signer.phone,
+            signer_email: signed.signer.email
+          }
+        : {})
     })
     .eq('token', token)
     .eq('status', 'pending')
@@ -205,37 +214,6 @@ export async function readNdaSubject(
   return null;
 }
 
-/**
- * Where a submission's signed files are. Read before the submission is deleted:
- * its agreements go with it (on delete cascade), and with them the paths.
- */
-export async function ndaFilePathsFor(
-  subject: { rentalRequestId: string } | { rentalListingId: string }
-): Promise<string[]> {
-  const query = supabase.from('nda_agreements').select('file_path');
-  const { data, error } =
-    'rentalRequestId' in subject
-      ? await query.eq('rental_request_id', subject.rentalRequestId)
-      : await query.eq('rental_listing_id', subject.rentalListingId);
-  if (error) {
-    if (isMissingTable(error)) return [];
-    throw error;
-  }
-  return ((data ?? []) as { file_path: string | null }[])
-    .map((row) => row.file_path)
-    .filter((path): path is string => typeof path === 'string' && path.length > 0);
-}
-
-/**
- * Removes signed files from the private bucket. Logs rather than throws: the
- * records they belonged to are already gone, and staff can't do anything more.
- */
-export async function removeNdaFiles(paths: string[]): Promise<void> {
-  if (paths.length === 0) return;
-  const { error } = await supabase.storage.from(NDA_BUCKET).remove(paths);
-  if (error) console.error('Could not remove signed agreement files', error);
-}
-
 export async function uploadNdaFile(path: string, body: Buffer, contentType: string): Promise<void> {
   const { error } = await supabase.storage.from(NDA_BUCKET).upload(path, body, { contentType, upsert: false });
   if (error) throw error;
@@ -251,4 +229,38 @@ export async function ndaFileUrl(path: string, downloadName?: string): Promise<s
     return null;
   }
   return data.signedUrl;
+}
+
+/** A stored signature or signed copy, as bytes. */
+export async function downloadNdaFile(path: string): Promise<Uint8Array> {
+  const { data, error } = await supabase.storage.from(NDA_BUCKET).download(path);
+  if (error) throw error;
+  return new Uint8Array(await data.arrayBuffer());
+}
+
+/**
+ * Removes the stored files of a submission's agreements, before the request or
+ * listing (and, with it, the agreement rows) is deleted. Best effort: a file
+ * left behind is private and harmless, so this never stops the delete.
+ */
+export async function removeNdaFilesFor(subject: { rentalRequestId: string } | { rentalListingId: string }): Promise<void> {
+  try {
+    const query = supabase.from('nda_agreements').select('id');
+    const { data, error } =
+      'rentalRequestId' in subject
+        ? await query.eq('rental_request_id', subject.rentalRequestId)
+        : await query.eq('rental_listing_id', subject.rentalListingId);
+    if (error) throw error;
+    for (const { id } of (data ?? []) as { id: string }[]) {
+      const { data: files, error: listError } = await supabase.storage.from(NDA_BUCKET).list(id);
+      if (listError) throw listError;
+      const paths = (files ?? []).map((file) => `${id}/${file.name}`);
+      if (paths.length > 0) {
+        const { error: removeError } = await supabase.storage.from(NDA_BUCKET).remove(paths);
+        if (removeError) throw removeError;
+      }
+    }
+  } catch (error) {
+    if (!isMissingTable(error)) console.error('Could not remove the agreement files', error);
+  }
 }

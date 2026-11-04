@@ -1,20 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/require-admin';
-import { deleteRentalRequest, isRowId } from '@/lib/rental-desk-store';
+import { deleteRentalRequest } from '@/lib/rental-desk-store';
+import { removeNdaFilesFor } from '@/lib/nda-store';
 
-/** Deletes the request for good (see deleteRentalRequest). */
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Deletes an unwanted request, with its matches, its agreement and the agreement's files. */
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   if (!(await requireAdmin(request))) {
     return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
   }
-  if (!isRowId(params.id)) {
+  if (!UUID.test(params.id)) {
     return NextResponse.json({ error: 'Request not found.' }, { status: 404 });
   }
 
   try {
+    await removeNdaFilesFor({ rentalRequestId: params.id });
     const deleted = await deleteRentalRequest(params.id);
     if (!deleted) {
-      return NextResponse.json({ error: 'Request not found.' }, { status: 404 });
+      return NextResponse.json({ error: 'Request not found. It may already be deleted.' }, { status: 404 });
     }
     return NextResponse.json({ ok: true });
   } catch (error) {

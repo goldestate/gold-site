@@ -4,7 +4,7 @@ import { getProperty, type Property } from '@/lib/properties-store';
 import type { SiteCopy } from '@/lib/site-content';
 import { formatPrice } from '@/lib/format-price';
 import { goldWhatsAppUrl } from '@/lib/app-links';
-import { locationLabel, priceSuffixLabel, propertyTypeLabel, showsArea, unitTypeLabel } from '@/lib/property-taxonomy';
+import { locationLabel, priceSuffixLabel, propertyTypeLabel, unitTypeLabel } from '@/lib/property-taxonomy';
 import { type Locale } from '@/i18n/routing';
 import { PageShell } from '@/components/page-shell';
 import { Link } from '@/i18n/navigation';
@@ -209,7 +209,7 @@ export default async function PropertyDetailPage({
 
   const enquireHref = `/contact?interest=${encodeURIComponent(property.name)}`;
   const callHref = `tel:${copy.contact.hotline.replace(/[^+\d]/g, '')}`;
-  const propertyShowsArea = showsArea(property.propertyType) && property.area > 0;
+  const propertyShowsArea = property.area > 0;
   const priceSuffix = priceSuffixLabel(property.pricePeriod, locale);
   const descriptionBullets = descriptionItems(property.description);
   const whatsappHref = goldWhatsAppUrl(

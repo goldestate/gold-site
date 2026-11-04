@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/require-admin';
-import { deleteRentalListing, isRowId, updateRentalListingStatus } from '@/lib/rental-desk-store';
+import { deleteRentalListing, updateRentalListingStatus } from '@/lib/rental-desk-store';
 import { isRentalListingStatus } from '@/lib/rental-taxonomy';
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   if (!(await requireAdmin(request))) {
@@ -32,25 +34,25 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   }
 }
 
-/** Deletes the listing for good (see deleteRentalListing). */
+/** Deletes an unwanted owner listing, with its matches, its agreement and the agreement's files, and its photos. */
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   if (!(await requireAdmin(request))) {
     return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
   }
-  if (!isRowId(params.id)) {
+  if (!UUID.test(params.id)) {
     return NextResponse.json({ error: 'Listing not found.' }, { status: 404 });
   }
 
   try {
     const result = await deleteRentalListing(params.id);
-    if (result === 'not_found') {
-      return NextResponse.json({ error: 'Listing not found.' }, { status: 404 });
-    }
-    if (result === 'in_house') {
+    if (result === 'in-house') {
       return NextResponse.json(
-        { error: 'This is one of GOLD’s own units. Change or delete it in Properties.' },
+        { error: 'This listing comes from Properties. Remove or change it there.' },
         { status: 409 }
       );
+    }
+    if (result === 'not-found') {
+      return NextResponse.json({ error: 'Listing not found. It may already be deleted.' }, { status: 404 });
     }
     return NextResponse.json({ ok: true });
   } catch (error) {

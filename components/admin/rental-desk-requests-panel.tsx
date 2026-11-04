@@ -4,13 +4,53 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import type { MatchWithListing, RentalRequestWithBroker } from '@/lib/rental-desk-store';
 import { formatPrice } from '@/lib/format-price';
-import { locationLabel } from '@/lib/property-taxonomy';
-import { RENTAL_REQUEST_STATUS_LABELS, rentalPropertyTypeLabel, type RentalRequestStatusValue } from '@/lib/rental-taxonomy';
+import { LOCATIONS, locationLabel } from '@/lib/property-taxonomy';
+import {
+  DEAL_TYPES,
+  RENTAL_PROPERTY_TYPES,
+  RENTAL_REQUEST_STATUS_LABELS,
+  dealTypeLabel,
+  rentalPropertyTypeLabel,
+  type RentalRequestStatusValue
+} from '@/lib/rental-taxonomy';
 import { NdaBadge, type NdaSummary } from './nda-badge';
-import { RentalDeskDeleteButton } from './rental-desk-delete';
+import { Chevron, ShowMoreButton, useShowMore } from './collapsible-section';
 import { RentalDeskEmailBar, type EmailRecipient } from './rental-desk-email';
+import { adminFetch } from '@/lib/admin-fetch';
+import {
+  ALL,
+  FilterChips,
+  FilterSearch,
+  FilterSelect,
+  FilterSummary,
+  countOptions,
+  matchesSearch,
+  useStoredState
+} from './list-filters';
+import { AGREEMENT_OPTIONS, agreementState } from './rental-desk-listings-panel';
 
 const MAX_VISIBLE_MATCHES = 5;
+type RequestFilters = {
+  search: string;
+  status: string;
+  deal: string;
+  location: string;
+  type: string;
+  agreement: string;
+  matches: string;
+};
+const NO_REQUEST_FILTERS: RequestFilters = {
+  search: '',
+  status: ALL,
+  deal: ALL,
+  location: ALL,
+  type: ALL,
+  agreement: ALL,
+  matches: ALL
+};
+
+/** Newest first; older requests wait behind "Show more" so the page stays short. */
+const FIRST_REQUESTS = 5;
 
 function formatDate(iso: string): string {
   const date = new Date(iso);
@@ -78,6 +118,177 @@ function MatchRow({ match, onSent }: { match: MatchWithListing; onSent: (matchId
   );
 }
 
+/**
+ * One request, folded down to who and what: its matches open on demand, it can
+ * be ticked to email the broker, and an unwanted request can be deleted after a
+ * second, explicit tap.
+ */
+function RequestCard({
+  request,
+  matches,
+  nda,
+  onSent,
+  selected,
+  onToggle
+}: {
+  request: RentalRequestWithBroker;
+  matches: MatchWithListing[];
+  nda: NdaSummary | undefined;
+  onSent: (matchId: string) => Promise<void>;
+  selected: boolean;
+  onToggle: () => void;
+}) {
+  const router = useRouter();
+  const [showMatches, setShowMatches] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+
+  const visibleMatches = matches.slice(0, MAX_VISIBLE_MATCHES);
+  const hiddenCount = matches.length - visibleMatches.length;
+  const toSend = matches.filter((match) => !match.sentToBroker).length;
+
+  const remove = async () => {
+    setDeleting(true);
+    setDeleteError('');
+    const result = await adminFetch(`/api/rental-desk/requests/${request.id}`, { method: 'DELETE' });
+    if (result.ok) {
+      router.refresh();
+      return;
+    }
+    setDeleting(false);
+    setDeleteError(result.error);
+  };
+
+  return (
+    <div className={`rounded-[1.5rem] border border-white/10 bg-white/5 p-5 sm:p-6 ${deleting ? 'opacity-50' : ''}`}>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex min-w-0 items-start gap-3">
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={onToggle}
+            aria-label={`Select ${request.referenceCode} from ${request.broker.name} to email`}
+            className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[#D9B355]"
+          />
+          <div className="min-w-0">
+            <div className="font-serif text-xs uppercase tracking-[0.3em] text-[rgba(217,179,85,0.9)]">
+              {request.referenceCode} · {dealTypeLabel(request.dealType, 'en')}
+            </div>
+            <div className="mt-1 text-white">
+              {request.broker.name}
+              {request.broker.company ? ` · ${request.broker.company}` : ''}
+            </div>
+            <a href={`tel:${request.broker.phone}`} className="text-xs text-white/50 hover:text-[#D9B355]">
+              {request.broker.phone}
+            </a>
+          </div>
+        </div>
+        <div className="flex flex-col items-end gap-2">
+          <span
+            className={`whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] ${
+              requestStatusBadgeClass[request.status as RentalRequestStatusValue] ?? 'bg-white/10 text-white/60'
+            }`}
+          >
+            {RENTAL_REQUEST_STATUS_LABELS[request.status as RentalRequestStatusValue] ?? request.status}
+          </span>
+          <NdaBadge nda={nda} />
+        </div>
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-sm text-white/70">
+        <span>{rentalPropertyTypeLabel(request.propertyType, 'en')}</span>
+        <span>{locationLabel(request.location, 'en')}</span>
+        {request.budgetMin || request.budgetMax ? (
+          <span>
+            Budget: {request.budgetMin ? formatPrice(request.budgetMin, 'en') : 'Any'} –{' '}
+            {request.budgetMax ? formatPrice(request.budgetMax, 'en') : 'Any'}
+          </span>
+        ) : null}
+        {request.bedrooms ? <span>{request.bedrooms}+ beds</span> : null}
+        {request.furnished !== null ? <span>{request.furnished ? 'Furnished' : 'Unfurnished'}</span> : null}
+        {request.moveInDate ? <span>Move-in: {formatDate(request.moveInDate)}</span> : null}
+      </div>
+      {request.notes ? <p className="mt-2 text-sm text-white/50">{request.notes}</p> : null}
+
+      <div className="mt-4 flex items-center justify-between gap-2 border-t border-white/10 pt-3">
+        {request.dealType === 'resale' ? (
+          <p className="text-xs uppercase tracking-[0.14em] text-white/40">No automatic matches for resale</p>
+        ) : matches.length === 0 ? (
+          <p className="text-xs uppercase tracking-[0.14em] text-white/40">No matches yet</p>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setShowMatches((open) => !open)}
+            aria-expanded={showMatches}
+            className="inline-flex min-h-[44px] items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-white/70 transition hover:text-white"
+          >
+            Matches ({matches.length})
+            {toSend > 0 ? <span className="text-[#D9B355]">· {toSend} to send</span> : null}
+            <Chevron open={showMatches} className="h-4 w-4" />
+          </button>
+        )}
+        {confirming ? null : (
+          <button
+            type="button"
+            onClick={() => setConfirming(true)}
+            aria-label={`Delete ${request.referenceCode}`}
+            title="Delete"
+            className="inline-flex h-11 w-11 flex-none items-center justify-center rounded-full text-red-300/70 transition hover:bg-red-400/10 hover:text-red-300"
+          >
+            <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+              <path d="M3.5 5.5h13M8 5.5V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1.5M5.5 5.5l.7 10.1a1.5 1.5 0 0 0 1.5 1.4h4.6a1.5 1.5 0 0 0 1.5-1.4l.7-10.1M8.5 9v4.5M11.5 9v4.5" />
+            </svg>
+          </button>
+        )}
+      </div>
+
+      {confirming ? (
+        <div className="mt-3 rounded-[1rem] border border-red-400/30 bg-red-400/10 p-4">
+          <p className="text-sm text-white/85">
+            Delete {request.referenceCode} for good? Its matches
+            {nda ? (nda.status === 'signed' ? ' and its signed agreement' : ' and its agreement') : ''} go too. This
+            can&rsquo;t be undone.
+          </p>
+          {deleteError ? <p className="mt-2 text-sm text-red-300">{deleteError}</p> : null}
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={remove}
+              disabled={deleting}
+              className="min-h-[44px] rounded-full bg-red-500/80 px-5 text-xs font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-red-500 disabled:opacity-60"
+            >
+              {deleting ? 'Deleting...' : 'Delete for good'}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setConfirming(false);
+                setDeleteError('');
+              }}
+              disabled={deleting}
+              className="min-h-[44px] rounded-full border border-white/15 px-5 text-xs font-semibold uppercase tracking-[0.14em] text-white/70 transition hover:text-white"
+            >
+              Keep it
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {showMatches && matches.length > 0 ? (
+        <div className="mt-3 space-y-2">
+          {visibleMatches.map((match) => (
+            <MatchRow key={match.id} match={match} onSent={onSent} />
+          ))}
+          {hiddenCount > 0 ? (
+            <p className="text-xs text-white/40">+{hiddenCount} more match{hiddenCount === 1 ? '' : 'es'}</p>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export function RentalDeskRequestsPanel({
   requests,
   matchesByRequest,
@@ -90,10 +301,57 @@ export function RentalDeskRequestsPanel({
 }) {
   const router = useRouter();
   const [error, setError] = useState('');
+  const [filters, setFilters] = useStoredState<RequestFilters>('gold-admin:request-filters', NO_REQUEST_FILTERS);
+  const set = (patch: Partial<RequestFilters>) => setFilters({ ...filters, ...patch });
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
+  const toggle = (id: string) =>
+    setSelected((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
 
-  const allSelected = requests.length > 0 && requests.every((request) => selected.has(request.id));
-  const recipients: EmailRecipient[] = requests
+  // Matching only pairs rentals with rental listings. Any a resale request has
+  // came from before migration 009, when the database couldn't tell them apart.
+  const matchesFor = (request: RentalRequestWithBroker): MatchWithListing[] =>
+    request.dealType === 'resale' ? [] : matchesByRequest[request.id] ?? [];
+
+  const matchState = (request: RentalRequestWithBroker): string => {
+    const matches = matchesFor(request);
+    if (matches.length === 0) return 'none';
+    return matches.some((match) => !match.sentToBroker) ? 'to-send' : 'all-sent';
+  };
+
+  const filtered = requests.filter(
+    (request) =>
+      (!filters.status || request.status === filters.status) &&
+      (!filters.deal || request.dealType === filters.deal) &&
+      (!filters.location || request.location === filters.location) &&
+      (!filters.type || request.propertyType === filters.type) &&
+      (!filters.agreement || agreementState(ndas[request.id]) === filters.agreement) &&
+      (!filters.matches || matchState(request) === filters.matches) &&
+      matchesSearch(
+        filters.search,
+        [
+          request.referenceCode,
+          request.broker.name,
+          request.broker.company ?? '',
+          request.broker.phone,
+          request.notes ?? '',
+          locationLabel(request.location, 'en'),
+          rentalPropertyTypeLabel(request.propertyType, 'en')
+        ].join(' ')
+      )
+  );
+  const filtering = Boolean(
+    filters.search || filters.status || filters.deal || filters.location || filters.type || filters.agreement || filters.matches
+  );
+  const shown = useShowMore(filtered, FIRST_REQUESTS);
+
+  // Only the requests the filters show: nobody a filter hides gets an email.
+  const allTicked = filtered.length > 0 && filtered.every((request) => selected.has(request.id));
+  const recipients: EmailRecipient[] = filtered
     .filter((request) => selected.has(request.id))
     .map((request) => ({
       id: request.id,
@@ -103,20 +361,6 @@ export function RentalDeskRequestsPanel({
       location: request.location,
       referenceCode: request.referenceCode
     }));
-
-  const toggle = (id: string) =>
-    setSelected((current) => {
-      const next = new Set(current);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  const forget = (id: string) =>
-    setSelected((current) => {
-      const next = new Set(current);
-      next.delete(id);
-      return next;
-    });
 
   const handleMarkSent = async (matchId: string) => {
     setError('');
@@ -135,113 +379,128 @@ export function RentalDeskRequestsPanel({
   if (requests.length === 0) {
     return (
       <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-10 text-center text-white/60">
-        No rental requests yet.
+        No requests yet.
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
+      <div className="space-y-3 rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4">
+        <FilterSearch value={filters.search} onChange={(value) => set({ search: value })} placeholder="Search by reference or broker" />
+        <FilterChips
+          label="Request status"
+          options={countOptions(
+            requests,
+            (Object.keys(RENTAL_REQUEST_STATUS_LABELS) as RentalRequestStatusValue[]).map((value) => ({
+              value,
+              label: RENTAL_REQUEST_STATUS_LABELS[value]
+            })),
+            (request) => request.status
+          )}
+          value={filters.status}
+          onChange={(value) => set({ status: value })}
+        />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          <FilterSelect
+            label="Rental or resale"
+            value={filters.deal}
+            onChange={(value) => set({ deal: value })}
+            options={countOptions(requests, DEAL_TYPES.map((item) => ({ value: item.value, label: item.en })), (request) => request.dealType)}
+            anyLabel="Both"
+          />
+          <FilterSelect
+            label="Location"
+            value={filters.location}
+            onChange={(value) => set({ location: value })}
+            options={countOptions(requests, LOCATIONS.map((item) => ({ value: item.value, label: item.en })), (request) => request.location)}
+            anyLabel="All locations"
+          />
+          <FilterSelect
+            label="Type"
+            value={filters.type}
+            onChange={(value) => set({ type: value })}
+            options={countOptions(requests, RENTAL_PROPERTY_TYPES.map((item) => ({ value: item.value, label: item.en })), (request) => request.propertyType)}
+            anyLabel="All types"
+          />
+          <FilterSelect
+            label="Agreement"
+            value={filters.agreement}
+            onChange={(value) => set({ agreement: value })}
+            options={countOptions(requests, AGREEMENT_OPTIONS, (request) => agreementState(ndas[request.id]))}
+            anyLabel="Any"
+          />
+          <FilterSelect
+            label="Matches"
+            value={filters.matches}
+            onChange={(value) => set({ matches: value })}
+            options={countOptions(
+              requests,
+              [
+                { value: 'to-send', label: 'Matches to send' },
+                { value: 'all-sent', label: 'All sent' },
+                { value: 'none', label: 'No matches yet' }
+              ],
+              matchState
+            )}
+            anyLabel="Any"
+          />
+        </div>
+        <FilterSummary
+          shown={filtered.length}
+          total={requests.length}
+          noun="requests"
+          filtering={filtering}
+          onClear={() => setFilters(NO_REQUEST_FILTERS)}
+        />
+      </div>
+
       {error ? (
         <div className="rounded-[1rem] border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-300">
           {error}
         </div>
       ) : null}
 
-      <label className="inline-flex min-h-[36px] cursor-pointer items-center gap-3 text-xs uppercase tracking-[0.14em] text-white/50">
-        <input
-          type="checkbox"
-          checked={allSelected}
-          onChange={() => setSelected(allSelected ? new Set() : new Set(requests.map((request) => request.id)))}
-          className="h-4 w-4 accent-[#D9B355]"
+      {filtered.length === 0 ? (
+        <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-8 text-center text-sm text-white/60">
+          No requests match these filters.{' '}
+          <button
+            type="button"
+            onClick={() => setFilters(NO_REQUEST_FILTERS)}
+            className="font-semibold text-[#D9B355] underline-offset-2 hover:underline"
+          >
+            Clear filters
+          </button>
+        </div>
+      ) : null}
+
+      {filtered.length > 0 ? (
+        <label className="inline-flex min-h-[44px] cursor-pointer items-center gap-3 px-1 text-xs uppercase tracking-[0.14em] text-white/50">
+          <input
+            type="checkbox"
+            checked={allTicked}
+            onChange={() => setSelected(allTicked ? new Set() : new Set(filtered.map((request) => request.id)))}
+            className="h-4 w-4 accent-[#D9B355]"
+          />
+          Select all ({filtered.length})
+        </label>
+      ) : null}
+
+      {shown.visible.map((request) => (
+        <RequestCard
+          key={request.id}
+          request={request}
+          matches={matchesFor(request)}
+          nda={ndas[request.id]}
+          onSent={handleMarkSent}
+          selected={selected.has(request.id)}
+          onToggle={() => toggle(request.id)}
         />
-        Select all
-      </label>
+      ))}
 
-      {requests.map((request) => {
-        const matches = matchesByRequest[request.id] ?? [];
-        const visibleMatches = matches.slice(0, MAX_VISIBLE_MATCHES);
-        const hiddenCount = matches.length - visibleMatches.length;
-
-        return (
-          <div key={request.id} className="rounded-[1.5rem] border border-white/10 bg-white/5 p-6">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="flex items-start gap-4">
-                <input
-                  type="checkbox"
-                  checked={selected.has(request.id)}
-                  onChange={() => toggle(request.id)}
-                  aria-label={`Select ${request.referenceCode} from ${request.broker.name}`}
-                  className="mt-0.5 h-4 w-4 shrink-0 accent-[#D9B355]"
-                />
-                <div>
-                  <div className="font-serif text-xs uppercase tracking-[0.3em] text-[rgba(217,179,85,0.9)]">
-                    {request.referenceCode}
-                  </div>
-                  <div className="mt-1 text-white">
-                    {request.broker.name}
-                    {request.broker.company ? ` · ${request.broker.company}` : ''}
-                  </div>
-                  <a href={`tel:${request.broker.phone}`} className="text-xs text-white/50 hover:text-[#D9B355]">
-                    {request.broker.phone}
-                  </a>
-                </div>
-              </div>
-              <div className="flex flex-col items-end gap-2">
-                <span
-                  className={`rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] ${
-                    requestStatusBadgeClass[request.status as RentalRequestStatusValue] ?? 'bg-white/10 text-white/60'
-                  }`}
-                >
-                  {RENTAL_REQUEST_STATUS_LABELS[request.status as RentalRequestStatusValue] ?? request.status}
-                </span>
-                <NdaBadge nda={ndas[request.id]} />
-              </div>
-            </div>
-
-            <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-sm text-white/70">
-              <span>{rentalPropertyTypeLabel(request.propertyType, 'en')}</span>
-              <span>{locationLabel(request.location, 'en')}</span>
-              {request.budgetMin || request.budgetMax ? (
-                <span>
-                  Budget: {request.budgetMin ? formatPrice(request.budgetMin, 'en') : 'Any'} –{' '}
-                  {request.budgetMax ? formatPrice(request.budgetMax, 'en') : 'Any'}
-                </span>
-              ) : null}
-              {request.bedrooms ? <span>{request.bedrooms}+ beds</span> : null}
-              {request.furnished !== null ? <span>{request.furnished ? 'Furnished' : 'Unfurnished'}</span> : null}
-              {request.moveInDate ? <span>Move-in: {formatDate(request.moveInDate)}</span> : null}
-            </div>
-            {request.notes ? <p className="mt-2 text-sm text-white/50">{request.notes}</p> : null}
-
-            <div className="mt-5 space-y-2">
-              {visibleMatches.length === 0 ? (
-                <p className="text-xs uppercase tracking-[0.14em] text-white/40">No matches yet</p>
-              ) : (
-                <>
-                  <div className="text-xs uppercase tracking-[0.14em] text-white/40">
-                    Top matches ({matches.length})
-                  </div>
-                  {visibleMatches.map((match) => (
-                    <MatchRow key={match.id} match={match} onSent={handleMarkSent} />
-                  ))}
-                  {hiddenCount > 0 ? (
-                    <p className="text-xs text-white/40">+{hiddenCount} more match{hiddenCount === 1 ? '' : 'es'}</p>
-                  ) : null}
-                </>
-              )}
-            </div>
-
-            <div className="mt-5 flex justify-end border-t border-white/10 pt-4">
-              <RentalDeskDeleteButton
-                url={`/api/rental-desk/requests/${request.id}`}
-                label={`request ${request.referenceCode}`}
-                onDeleted={() => forget(request.id)}
-              />
-            </div>
-          </div>
-        );
-      })}
+      {shown.canToggle ? (
+        <ShowMoreButton hidden={shown.hidden} all={shown.all} onClick={shown.toggle} noun="requests" />
+      ) : null}
 
       <RentalDeskEmailBar
         audience="brokers"

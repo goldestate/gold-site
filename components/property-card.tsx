@@ -1,6 +1,6 @@
 import type { Property } from '@/lib/properties-store';
 import { formatPrice } from '@/lib/format-price';
-import { locationLabel, priceSuffixLabel, propertyTypeLabel, showsArea, unitTypeLabel } from '@/lib/property-taxonomy';
+import { locationLabel, priceSuffixLabel, propertyTypeLabel, unitTypeLabel } from '@/lib/property-taxonomy';
 import { ArrowIcon, StatIcon } from './section-ui';
 import { Link } from '@/i18n/navigation';
 
@@ -26,7 +26,7 @@ export function PropertyCard({
   viewDetailsLabel: string;
   delay?: number;
 }) {
-  const propertyShowsArea = showsArea(property.propertyType) && property.area > 0;
+  const propertyShowsArea = property.area > 0;
   const priceSuffix = priceSuffixLabel(property.pricePeriod, locale);
   const isRtl = locale === 'ar';
 

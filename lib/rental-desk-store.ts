@@ -1,8 +1,9 @@
 import { supabase, RENTAL_PHOTOS_BUCKET } from './supabase';
-import { ndaFilePathsFor, removeNdaFiles } from './nda-store';
+import { removeNdaFilesFor } from './nda-store';
+import { postgresErrorCode } from './directory-store';
 import type { FollowUpAudience, FollowUpSubject } from './follow-up-emails';
 import type { LocationValue } from './property-taxonomy';
-import type { RentalListingStatusValue, RentalPeriodValue, RentalPropertyTypeValue } from './rental-taxonomy';
+import type { DealTypeValue, RentalListingStatusValue, RentalPeriodValue, RentalPropertyTypeValue } from './rental-taxonomy';
 
 export type BrokerInput = {
   name: string;
@@ -68,6 +69,8 @@ export async function upsertBrokerByPhone(input: BrokerInput): Promise<Broker> {
 }
 
 export type RentalRequestInput = {
+  /** Left out by the app, whose form only sends rentals. */
+  dealType?: DealTypeValue;
   propertyType: RentalPropertyTypeValue;
   location: LocationValue;
   budgetMin?: number;
@@ -82,6 +85,7 @@ export type RentalRequestInput = {
 export type RentalRequest = {
   id: string;
   brokerId: string;
+  dealType: DealTypeValue;
   propertyType: RentalPropertyTypeValue;
   location: LocationValue;
   budgetMin: number | null;
@@ -99,6 +103,8 @@ export type RentalRequest = {
 type RentalRequestRow = {
   id: string;
   broker_id: string;
+  /** Absent until migration 009 is run. */
+  deal_type?: string | null;
   property_type: string;
   location: string;
   budget_min: number | null;
@@ -113,10 +119,27 @@ type RentalRequestRow = {
   created_at: string;
 };
 
+/**
+ * Until migration 009 adds the deal_type column, a resale request is saved with
+ * this line at the top of its notes, so it still reaches the team marked as one.
+ * Reading a request takes either as resale and leaves the line out of the notes.
+ */
+const RESALE_NOTE = '[Resale]';
+
+/** Whether an insert failed only because migration 009 hasn't added deal_type yet. */
+function isMissingDealTypeColumn(error: unknown): boolean {
+  const code = postgresErrorCode(error);
+  if (code !== 'PGRST204' && code !== '42703') return false;
+  return /\bdeal_type\b/.test(String((error as { message?: unknown } | null)?.message ?? ''));
+}
+
 function rowToRentalRequest(row: RentalRequestRow): RentalRequest {
+  const notes = row.notes ?? '';
+  const marked = notes.startsWith(RESALE_NOTE);
   return {
     id: row.id,
     brokerId: row.broker_id,
+    dealType: row.deal_type === 'resale' || marked ? 'resale' : 'rental',
     propertyType: row.property_type as RentalPropertyTypeValue,
     location: row.location as LocationValue,
     budgetMin: row.budget_min,
@@ -125,7 +148,7 @@ function rowToRentalRequest(row: RentalRequestRow): RentalRequest {
     furnished: row.furnished,
     moveInDate: row.move_in_date,
     rentalPeriod: row.rental_period as RentalPeriodValue | null,
-    notes: row.notes,
+    notes: marked ? notes.slice(RESALE_NOTE.length).trim() || null : row.notes,
     status: row.status,
     referenceCode: row.reference_code,
     createdAt: row.created_at
@@ -133,24 +156,43 @@ function rowToRentalRequest(row: RentalRequestRow): RentalRequest {
 }
 
 export async function createRentalRequest(brokerId: string, input: RentalRequestInput): Promise<RentalRequest> {
+  const resale = input.dealType === 'resale';
+  const notes = input.notes?.trim() || null;
+  const row = {
+    broker_id: brokerId,
+    property_type: input.propertyType,
+    location: input.location,
+    budget_min: input.budgetMin ?? null,
+    budget_max: input.budgetMax ?? null,
+    bedrooms: input.bedrooms ?? null,
+    // Furnishing, move-in date and rental period belong to a rental.
+    furnished: resale ? null : input.furnished ?? null,
+    move_in_date: resale ? null : input.moveInDate || null,
+    rental_period: resale ? null : input.rentalPeriod ?? null,
+    notes
+  };
+
+  // A rental leaves deal_type to the column's default, so it saves the same
+  // with or without migration 009.
+  const columns: Record<string, unknown> = resale ? { ...row, deal_type: 'resale' } : row;
+  const saved = await supabase.from('rental_requests').insert(columns).select('*').single();
+  if (!saved.error) return rowToRentalRequest(saved.data as RentalRequestRow);
+  if (!resale || !isMissingDealTypeColumn(saved.error)) throw saved.error;
+
   const { data, error } = await supabase
     .from('rental_requests')
-    .insert({
-      broker_id: brokerId,
-      property_type: input.propertyType,
-      location: input.location,
-      budget_min: input.budgetMin ?? null,
-      budget_max: input.budgetMax ?? null,
-      bedrooms: input.bedrooms ?? null,
-      furnished: input.furnished ?? null,
-      move_in_date: input.moveInDate || null,
-      rental_period: input.rentalPeriod ?? null,
-      notes: input.notes?.trim() || null
-    })
+    .insert({ ...row, notes: notes ? `${RESALE_NOTE}\n${notes}` : RESALE_NOTE })
     .select('*')
     .single();
   if (error) throw error;
-  return rowToRentalRequest(data as RentalRequestRow);
+  const request = data as RentalRequestRow;
+
+  // Without migration 009 the matching trigger has just paired it with rentals,
+  // which a buyer has no use for. Best effort: the request itself is saved.
+  const { error: matchesError } = await supabase.from('matches').delete().eq('request_id', request.id);
+  if (matchesError) console.error('Could not clear the resale request’s rental matches', matchesError);
+  else await supabase.from('rental_requests').update({ status: 'new' }).eq('id', request.id).eq('status', 'matching');
+  return rowToRentalRequest(request);
 }
 
 export type OwnerInput = {
@@ -459,102 +501,68 @@ export async function markMatchSent(id: string): Promise<MatchSentResult | null>
   };
 }
 
+/**
+ * Deletes a request for good: its matches first, since they point at it, then
+ * the request itself, which takes its agreement rows with it. False when there
+ * was no such request.
+ */
+export async function deleteRentalRequest(id: string): Promise<boolean> {
+  const { error: matchesError } = await supabase.from('matches').delete().eq('request_id', id);
+  if (matchesError) throw matchesError;
+  const { data, error } = await supabase.from('rental_requests').delete().eq('id', id).select('id');
+  if (error) throw error;
+  return (data ?? []).length > 0;
+}
+
+export type DeleteListingResult = 'deleted' | 'not-found' | 'in-house';
+
+/**
+ * Deletes an owner's listing for good: its agreement files and matches first,
+ * then the listing, which takes its agreement rows with it, then its photos.
+ * An in-house listing is a copy of a property and comes back with that
+ * property's next save, so it is refused: it's changed in Properties instead.
+ */
+export async function deleteRentalListing(id: string): Promise<DeleteListingResult> {
+  const { data: row, error: readError } = await supabase
+    .from('rental_listings')
+    .select('id, source_property_id, photos')
+    .eq('id', id)
+    .maybeSingle();
+  if (readError) throw readError;
+  if (!row) return 'not-found';
+  const listing = row as { id: string; source_property_id: string | null; photos: unknown };
+  if (listing.source_property_id) return 'in-house';
+
+  await removeNdaFilesFor({ rentalListingId: id });
+  const { error: matchesError } = await supabase.from('matches').delete().eq('listing_id', id);
+  if (matchesError) throw matchesError;
+  const { data, error } = await supabase.from('rental_listings').delete().eq('id', id).select('id');
+  if (error) throw error;
+  if ((data ?? []).length === 0) return 'not-found';
+
+  await removeListingPhotos(Array.isArray(listing.photos) ? listing.photos : []);
+  return 'deleted';
+}
+
+/** Best effort: a photo left behind costs a little storage, never a failed delete. */
+async function removeListingPhotos(urls: unknown[]): Promise<void> {
+  const marker = `/${RENTAL_PHOTOS_BUCKET}/`;
+  const paths = urls
+    .filter((url): url is string => typeof url === 'string' && url.includes(marker))
+    .map((url) => decodeURIComponent(url.slice(url.indexOf(marker) + marker.length).split('?')[0]))
+    .filter((path) => path.length > 0);
+  if (paths.length === 0) return;
+  const { error } = await supabase.storage.from(RENTAL_PHOTOS_BUCKET).remove(paths);
+  if (error) console.error('Could not remove the listing photos', error);
+}
+
 // ---------------------------------------------------------------------------
-// Deleting, and emailing the people staff tick.
+// Emailing the people staff tick.
 // ---------------------------------------------------------------------------
 
 /** A row id as Postgres makes them. Anything else can't be one, so it's "not found" without a query. */
 export function isRowId(value: unknown): value is string {
   return typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
-}
-
-/**
- * Deletes a request for good, with its matches, its agreement and the signed
- * file. The broker's contact stays: the next request from the same phone finds
- * them again. Returns false when there was nothing to delete.
- */
-export async function deleteRentalRequest(id: string): Promise<boolean> {
-  const { data, error } = await supabase.from('rental_requests').select('id').eq('id', id).maybeSingle();
-  if (error) throw error;
-  if (!data) return false;
-
-  const signedFiles = await ndaFilePathsFor({ rentalRequestId: id });
-  // matches has no ON DELETE CASCADE, so the request can't go while they point at it.
-  const matches = await supabase.from('matches').delete().eq('request_id', id);
-  if (matches.error) throw matches.error;
-  const removed = await supabase.from('rental_requests').delete().eq('id', id);
-  if (removed.error) throw removed.error;
-
-  // Files last, once nothing on record points at them any more.
-  await removeNdaFiles(signedFiles);
-  return true;
-}
-
-export type DeleteListingResult = 'deleted' | 'not_found' | 'in_house';
-
-/**
- * Deletes an owner's listing for good, with its matches, its agreement, the
- * signed file and its photos. GOLD's own units are refused: they mirror
- * Properties, come back on the next edit there, and their photos are the
- * property's.
- */
-export async function deleteRentalListing(id: string): Promise<DeleteListingResult> {
-  const { data, error } = await supabase
-    .from('rental_listings')
-    .select('id, photos, source_property_id')
-    .eq('id', id)
-    .maybeSingle();
-  if (error) throw error;
-  if (!data) return 'not_found';
-  const row = data as { photos: unknown; source_property_id: string | null };
-  if (row.source_property_id) return 'in_house';
-
-  const signedFiles = await ndaFilePathsFor({ rentalListingId: id });
-  const matches = await supabase.from('matches').delete().eq('listing_id', id);
-  if (matches.error) throw matches.error;
-  const removed = await supabase.from('rental_listings').delete().eq('id', id);
-  if (removed.error) throw removed.error;
-
-  await removeNdaFiles(signedFiles);
-  await removeUnusedRentalPhotos(Array.isArray(row.photos) ? row.photos : []);
-  return 'deleted';
-}
-
-/** The file name inside rental-photos behind one of its public URLs, or null for any other link. */
-function rentalPhotoPath(url: string): string | null {
-  const marker = `/storage/v1/object/public/${RENTAL_PHOTOS_BUCKET}/`;
-  const at = url.indexOf(marker);
-  if (at === -1) return null;
-  let path: string;
-  try {
-    path = decodeURIComponent(url.slice(at + marker.length).split(/[?#]/)[0]);
-  } catch {
-    return null;
-  }
-  return path && !path.includes('..') && !path.includes('/') ? path : null;
-}
-
-/**
- * Removes a deleted listing's uploads. The form takes photo links as free text,
- * so a link another listing also uses is left alone. (photos is jsonb: the
- * filter has to be JSON, which supabase-js only sends for a string.)
- */
-async function removeUnusedRentalPhotos(photos: unknown[]): Promise<void> {
-  const paths: string[] = [];
-  for (const url of photos) {
-    if (typeof url !== 'string') continue;
-    const path = rentalPhotoPath(url);
-    if (!path) continue;
-    const { data, error } = await supabase.from('rental_listings').select('id').contains('photos', JSON.stringify([url])).limit(1);
-    if (error) {
-      console.error('Could not check whether a rental photo is still in use', error);
-      continue;
-    }
-    if ((data ?? []).length === 0) paths.push(path);
-  }
-  if (paths.length === 0) return;
-  const { error } = await supabase.storage.from(RENTAL_PHOTOS_BUCKET).remove(paths);
-  if (error) console.error('Could not remove rental photos', error);
 }
 
 export type FollowUpRecipient = FollowUpSubject & { id: string; email: string | null };

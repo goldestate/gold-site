@@ -879,3 +879,157 @@ alter table public.nda_agreements enable row level security;
 insert into storage.buckets (id, name, public)
 values ('nda-files', 'nda-files', false)
 on conflict (id) do update set public = false;
+
+-- ---------- 008_property_deletions.sql ----------
+create table if not exists public.property_deletions (
+  id uuid primary key default gen_random_uuid(),
+  property_id uuid not null,
+  name text not null,
+  -- The whole row as it was, photos and created_at included, so a restore
+  -- brings it back exactly.
+  snapshot jsonb not null,
+  deleted_at timestamptz not null default now()
+);
+
+create index if not exists property_deletions_deleted_at_idx on public.property_deletions (deleted_at desc);
+
+-- Same posture as every other table: the server reads and writes with the
+-- service role, and nothing is reachable with the public key.
+alter table public.property_deletions enable row level security;
+
+create or replace function public.record_property_deletion()
+returns trigger
+language plpgsql
+as $$
+begin
+  insert into public.property_deletions (property_id, name, snapshot)
+  values (old.id, old.name, to_jsonb(old));
+  return old;
+end;
+$$;
+
+drop trigger if exists properties_record_deletion_trigger on public.properties;
+create trigger properties_record_deletion_trigger
+  before delete on public.properties
+  for each row execute function public.record_property_deletion();
+
+-- Puts a deleted property back under its old id and date, and drops it from the
+-- record. Returns the id, or null when there is no such deletion (already
+-- restored). Re-inserting goes through the properties triggers like any save,
+-- so a rental comes back into the Rental Desk as well.
+create or replace function public.restore_deleted_property(p_deletion_id uuid)
+returns uuid
+language plpgsql
+as $$
+declare
+  v_snapshot jsonb;
+  v_id uuid;
+begin
+  select snapshot into v_snapshot from public.property_deletions where id = p_deletion_id for update;
+  if not found then
+    return null;
+  end if;
+
+  insert into public.properties
+  select * from jsonb_populate_record(null::public.properties, v_snapshot)
+  returning id into v_id;
+
+  delete from public.property_deletions where id = p_deletion_id;
+  return v_id;
+end;
+$$;
+
+revoke all on function public.restore_deleted_property(uuid) from public, anon, authenticated;
+grant execute on function public.restore_deleted_property(uuid) to service_role;
+
+-- ---------- 009_rental_request_deal_type.sql ----------
+alter table public.rental_requests
+  add column if not exists deal_type text not null default 'rental'
+    check (deal_type in ('rental', 'resale'));
+
+-- Resale requests saved before the column existed.
+update public.rental_requests
+set deal_type = 'resale',
+    notes = nullif(btrim(substr(notes, length('[Resale]') + 1), E' \t\r\n'), '')
+where deal_type = 'rental' and notes like '[Resale]%';
+
+create or replace function public.generate_matches_for_request(p_request_id uuid)
+returns void
+language plpgsql
+as $$
+declare
+  v_request public.rental_requests;
+  v_inserted integer;
+begin
+  select * into v_request from public.rental_requests where id = p_request_id;
+  if not found or v_request.deal_type <> 'rental' then
+    return;
+  end if;
+
+  with scored as (
+    select listing.id as listing_id, public.rental_match_score(v_request, listing) as score
+    from public.rental_listings listing
+    where listing.status = 'active'
+      and listing.property_type = v_request.property_type
+  )
+  insert into public.matches (request_id, listing_id, match_score)
+  select v_request.id, listing_id, score
+  from scored
+  where score > 50
+  order by score desc
+  on conflict (request_id, listing_id) do nothing;
+
+  get diagnostics v_inserted = row_count;
+
+  if v_inserted > 0 and v_request.status = 'new' then
+    update public.rental_requests set status = 'matching' where id = v_request.id;
+  end if;
+end;
+$$;
+
+create or replace function public.generate_matches_for_listing(p_listing_id uuid)
+returns void
+language plpgsql
+as $$
+declare
+  v_listing public.rental_listings;
+begin
+  select * into v_listing from public.rental_listings where id = p_listing_id;
+  if not found or v_listing.status <> 'active' then
+    return;
+  end if;
+
+  with scored as (
+    select req.id as request_id, public.rental_match_score(req, v_listing) as score
+    from public.rental_requests req
+    where req.status in ('new', 'matching')
+      and req.deal_type = 'rental'
+      and req.property_type = v_listing.property_type
+  ),
+  inserted as (
+    insert into public.matches (request_id, listing_id, match_score)
+    select request_id, v_listing.id, score
+    from scored
+    where score > 50
+    order by score desc
+    on conflict (request_id, listing_id) do nothing
+    returning request_id
+  )
+  update public.rental_requests
+  set status = 'matching'
+  where id in (select request_id from inserted)
+    and status = 'new';
+end;
+$$;
+
+-- Rentals the old matching paired with resale requests.
+delete from public.matches
+where request_id in (select id from public.rental_requests where deal_type = 'resale');
+
+update public.rental_requests
+set status = 'new'
+where deal_type = 'resale' and status = 'matching';
+
+-- CHECK after running: should return one row, 'deal_type'.
+-- select column_name from information_schema.columns
+-- where table_schema = 'public' and table_name = 'rental_requests' and column_name = 'deal_type';

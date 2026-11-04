@@ -12,7 +12,14 @@ export type UnitTypeValue =
   | 'clinic'
   | 'office'
   | 'commercial';
-export type LocationValue = 'north-coast' | 'sheikh-zayed' | 'new-cairo' | 'ain-sokhna' | 'gouna';
+export type LocationValue =
+  | 'north-coast'
+  | 'sheikh-zayed'
+  | 'october'
+  | 'new-cairo'
+  | 'new-capital'
+  | 'ain-sokhna'
+  | 'gouna';
 /** How a listing's `price` should be read. Stored per row -- never derived from property type. */
 export type PricePeriodValue = 'daily' | 'monthly' | 'quarterly' | 'yearly' | 'total';
 
@@ -48,7 +55,9 @@ export const UNIT_TYPES: TaxonomyOption<UnitTypeValue>[] = [
 export const LOCATIONS: TaxonomyOption<LocationValue>[] = [
   { value: 'north-coast', en: 'North Coast', ar: 'الساحل الشمالي' },
   { value: 'sheikh-zayed', en: 'Sheikh Zayed', ar: 'الشيخ زايد' },
+  { value: 'october', en: 'October', ar: 'أكتوبر' },
   { value: 'new-cairo', en: 'New Cairo', ar: 'القاهرة الجديدة' },
+  { value: 'new-capital', en: 'New Capital', ar: 'العاصمة الإدارية' },
   { value: 'ain-sokhna', en: 'Ain Sokhna', ar: 'العين السخنة' },
   { value: 'gouna', en: 'Gouna', ar: 'الجونة' }
 ];
@@ -116,7 +125,11 @@ export function priceSuffixLabel(pricePeriod: PricePeriodValue, locale: 'en' | '
   return PRICE_PERIOD_SUFFIXES[pricePeriod]?.[locale] ?? '';
 }
 
-export function showsArea(propertyType: PropertyTypeValue): boolean {
+/**
+ * Whether staff must fill in the area. Rentals may leave it out, but the box is
+ * always there: hiding it for rentals is how a listing's area vanished from the form.
+ */
+export function areaIsRequired(propertyType: PropertyTypeValue): boolean {
   return propertyType !== 'rental';
 }
 
@@ -127,7 +140,9 @@ export function locationLabel(value: LocationValue, locale: 'en' | 'ar'): string
 const LEGACY_LOCATION_MATCHES: Array<{ pattern: RegExp; value: LocationValue }> = [
   { pattern: /north\s*coast/i, value: 'north-coast' },
   { pattern: /sheikh\s*zayed/i, value: 'sheikh-zayed' },
+  { pattern: /october/i, value: 'october' },
   { pattern: /new\s*cairo|5th\s*settlement|fifth\s*settlement/i, value: 'new-cairo' },
+  { pattern: /new\s*capital|administrative\s*capital/i, value: 'new-capital' },
   { pattern: /ain\s*sokhna|sokhna/i, value: 'ain-sokhna' },
   { pattern: /gouna/i, value: 'gouna' }
 ];

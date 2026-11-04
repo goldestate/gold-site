@@ -1,6 +1,6 @@
 import { SITE_URL } from './site-content';
 import { locationLabel, type LocationValue } from './property-taxonomy';
-import { rentalPropertyTypeLabel, type RentalPropertyTypeValue } from './rental-taxonomy';
+import { dealTypeLabel, rentalPropertyTypeLabel, type DealTypeValue, type RentalPropertyTypeValue } from './rental-taxonomy';
 import type { Email } from './email';
 import type { FollowUpText } from './follow-up-emails';
 
@@ -89,12 +89,14 @@ export function requestReceivedEmail(input: {
   lang: Lang;
   name: string;
   referenceCode: string;
+  dealType: DealTypeValue;
   propertyType: RentalPropertyTypeValue;
   location: LocationValue;
   ndaToken: string | null;
 }): Email {
+  // A rental reads as before; a resale says so first.
   const unit = (lang: Lang) =>
-    `${rentalPropertyTypeLabel(input.propertyType, lang)} — ${locationLabel(input.location, lang)}`;
+    `${input.dealType === 'resale' ? `${dealTypeLabel('resale', lang)} · ` : ''}${rentalPropertyTypeLabel(input.propertyType, lang)} — ${locationLabel(input.location, lang)}`;
   const sign = (lang: Lang) =>
     input.ndaToken
       ? {
@@ -220,18 +222,21 @@ export function adminSubmissionEmail(input: {
   name: string;
   phone: string;
   email: string | null;
+  /** Requests only: rental or resale. */
+  dealType?: DealTypeValue;
   propertyType: RentalPropertyTypeValue;
   location: LocationValue;
   referenceCode?: string;
 }): Email {
   const what = `${rentalPropertyTypeLabel(input.propertyType, 'en')} — ${locationLabel(input.location, 'en')}`;
+  const request = `${input.dealType === 'resale' ? 'resale' : 'rental'} request`;
   return adminEmail(
     input.to,
     input.kind === 'request'
-      ? `New request ${input.referenceCode ?? ''} · ${input.name}`
+      ? `New ${request} ${input.referenceCode ?? ''} · ${input.name}`
       : `New listing · ${input.name}`,
     [
-      input.kind === 'request' ? `New unit request${input.referenceCode ? ` (${input.referenceCode})` : ''}.` : 'New property listing.',
+      input.kind === 'request' ? `New ${request}${input.referenceCode ? ` (${input.referenceCode})` : ''}.` : 'New property listing.',
       `${input.name} · ${input.phone}${input.email ? ` · ${input.email}` : ''}`,
       what
     ],
@@ -245,13 +250,17 @@ export function adminNdaSignedEmail(input: {
   ndaId: string;
   name: string;
   method: 'drawn' | 'uploaded';
+  /** The signed PDF, attached when it could be made. */
+  pdf?: { filename: string; content: string } | null;
 }): Email {
-  return adminEmail(
+  const email = adminEmail(
     input.to,
     `Agreement signed · ${input.name}`,
     [
-      `${input.name} signed GOLD’s confidentiality agreement${input.method === 'drawn' ? ' on screen' : ' and uploaded the signed copy'}.`
+      `${input.name} signed GOLD’s confidentiality agreement${input.method === 'drawn' ? ' on screen' : ' and uploaded the signed copy'}.`,
+      ...(input.pdf ? ['The signed agreement is attached as a PDF.'] : [])
     ],
     { href: `${SITE_URL}/goldenadmin2026/nda/${input.ndaId}`, label: 'View the agreement' }
   );
+  return input.pdf ? { ...email, attachments: [input.pdf] } : email;
 }
