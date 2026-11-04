@@ -1,6 +1,7 @@
 import { supabase, RENTAL_PHOTOS_BUCKET } from './supabase';
 import { removeNdaFilesFor } from './nda-store';
 import { postgresErrorCode } from './directory-store';
+import type { FollowUpAudience, FollowUpSubject } from './follow-up-emails';
 import type { LocationValue } from './property-taxonomy';
 import type { DealTypeValue, RentalListingStatusValue, RentalPeriodValue, RentalPropertyTypeValue } from './rental-taxonomy';
 
@@ -333,17 +334,17 @@ export async function createRentalListing(ownerId: string, input: RentalListingI
 // ---------------------------------------------------------------------------
 
 export type RentalRequestWithBroker = RentalRequest & {
-  broker: { name: string; phone: string; company: string | null };
+  broker: { name: string; phone: string; company: string | null; email: string | null };
 };
 
 type RentalRequestRowWithBroker = RentalRequestRow & {
-  brokers: { name: string; phone: string; company: string | null } | null;
+  brokers: { name: string; phone: string; company: string | null; email: string | null } | null;
 };
 
 export async function listRentalRequests(): Promise<RentalRequestWithBroker[]> {
   const { data, error } = await supabase
     .from('rental_requests')
-    .select('*, brokers(name, phone, company)')
+    .select('*, brokers(name, phone, company, email)')
     .order('created_at', { ascending: false });
   if (error) throw error;
   return (data as RentalRequestRowWithBroker[]).map((row) => ({
@@ -351,30 +352,32 @@ export async function listRentalRequests(): Promise<RentalRequestWithBroker[]> {
     broker: {
       name: row.brokers?.name ?? 'Unknown',
       phone: row.brokers?.phone ?? '',
-      company: row.brokers?.company ?? null
+      company: row.brokers?.company ?? null,
+      email: row.brokers?.email ?? null
     }
   }));
 }
 
 export type RentalListingWithOwner = RentalListing & {
-  owner: { name: string; phone: string };
+  owner: { name: string; phone: string; email: string | null };
 };
 
 type RentalListingRowWithOwner = RentalListingRow & {
-  owners: { name: string; phone: string } | null;
+  owners: { name: string; phone: string; email: string | null } | null;
 };
 
 export async function listRentalListings(): Promise<RentalListingWithOwner[]> {
   const { data, error } = await supabase
     .from('rental_listings')
-    .select('*, owners(name, phone)')
+    .select('*, owners(name, phone, email)')
     .order('created_at', { ascending: false });
   if (error) throw error;
   return (data as RentalListingRowWithOwner[]).map((row) => ({
     ...rowToRentalListing(row),
     owner: {
       name: row.owners?.name ?? 'Unknown',
-      phone: row.owners?.phone ?? ''
+      phone: row.owners?.phone ?? '',
+      email: row.owners?.email ?? null
     }
   }));
 }
@@ -436,7 +439,7 @@ type MatchRowWithListing = MatchRow & { rental_listings: RentalListingRowWithOwn
 export async function listMatchesWithListings(): Promise<MatchWithListing[]> {
   const { data, error } = await supabase
     .from('matches')
-    .select('*, rental_listings(*, owners(name, phone))')
+    .select('*, rental_listings(*, owners(name, phone, email))')
     .order('match_score', { ascending: false });
   if (error) throw error;
   return (data as MatchRowWithListing[]).map((row) => ({
@@ -445,7 +448,8 @@ export async function listMatchesWithListings(): Promise<MatchWithListing[]> {
       ...rowToRentalListing(row.rental_listings),
       owner: {
         name: row.rental_listings.owners?.name ?? 'Unknown',
-        phone: row.rental_listings.owners?.phone ?? ''
+        phone: row.rental_listings.owners?.phone ?? '',
+        email: row.rental_listings.owners?.email ?? null
       }
     }
   }));
@@ -550,4 +554,61 @@ async function removeListingPhotos(urls: unknown[]): Promise<void> {
   if (paths.length === 0) return;
   const { error } = await supabase.storage.from(RENTAL_PHOTOS_BUCKET).remove(paths);
   if (error) console.error('Could not remove the listing photos', error);
+}
+
+// ---------------------------------------------------------------------------
+// Emailing the people staff tick.
+// ---------------------------------------------------------------------------
+
+/** A row id as Postgres makes them. Anything else can't be one, so it's "not found" without a query. */
+export function isRowId(value: unknown): value is string {
+  return typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+}
+
+export type FollowUpRecipient = FollowUpSubject & { id: string; email: string | null };
+
+type RecipientRow = {
+  id: string;
+  property_type: string;
+  location: string;
+  reference_code?: string;
+  source_property_id?: string | null;
+  owners?: { name: string; email: string | null } | null;
+  brokers?: { name: string; email: string | null } | null;
+};
+
+/**
+ * The people behind the rows staff ticked, read fresh. The browser sends only
+ * ids, so nothing can be emailed that isn't on file. In-house listings have no
+ * outside owner and are left out. In the order the ids came.
+ */
+export async function readFollowUpRecipients(audience: FollowUpAudience, ids: string[]): Promise<FollowUpRecipient[]> {
+  const { data, error } =
+    audience === 'owners'
+      ? await supabase
+          .from('rental_listings')
+          .select('id, property_type, location, source_property_id, owners(name, email)')
+          .in('id', ids)
+      : await supabase
+          .from('rental_requests')
+          .select('id, property_type, location, reference_code, brokers(name, email)')
+          .in('id', ids);
+  if (error) throw error;
+
+  const rows = (data ?? []) as unknown as RecipientRow[];
+  const order = new Map(ids.map((id, index) => [id, index]));
+  return rows
+    .filter((row) => !row.source_property_id)
+    .map((row) => {
+      const person = audience === 'owners' ? row.owners : row.brokers;
+      return {
+        id: row.id,
+        name: person?.name ?? '',
+        email: person?.email ?? null,
+        propertyType: row.property_type as RentalPropertyTypeValue,
+        location: row.location as LocationValue,
+        referenceCode: row.reference_code
+      };
+    })
+    .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
 }

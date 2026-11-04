@@ -15,6 +15,7 @@ import {
 import { adminFetch } from '@/lib/admin-fetch';
 import { NdaBadge, type NdaSummary } from './nda-badge';
 import { Chevron, ShowMoreButton, useShowMore } from './collapsible-section';
+import { RentalDeskEmailBar, type EmailRecipient } from './rental-desk-email';
 import {
   ALL,
   FilterChips,
@@ -52,10 +53,21 @@ function BinIcon() {
 
 /**
  * One listing, folded down to who, what and its status: its photos and dates
- * open on demand. An owner's listing can be deleted after a second, explicit
- * tap; an in-house one is a copy of a property, so it's changed in Properties.
+ * open on demand. An owner's listing can be ticked to email its owner, and
+ * deleted after a second, explicit tap; an in-house one is a copy of a
+ * property, so it's changed in Properties and has no owner to email.
  */
-function ListingCard({ listing, nda }: { listing: RentalListingWithOwner; nda: NdaSummary | undefined }) {
+function ListingCard({
+  listing,
+  nda,
+  selected,
+  onToggle
+}: {
+  listing: RentalListingWithOwner;
+  nda: NdaSummary | undefined;
+  selected: boolean;
+  onToggle: () => void;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -100,21 +112,34 @@ function ListingCard({ listing, nda }: { listing: RentalListingWithOwner; nda: N
   return (
     <div className={`rounded-[1.5rem] border border-white/10 bg-white/5 p-5 sm:p-6 ${deleting || saving ? 'opacity-50' : ''}`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-medium text-white">{listing.owner.name}</span>
-            {editHref ? (
-              <Link
-                href={editHref}
-                className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-white/60 transition hover:bg-white/15 hover:text-white"
-              >
-                In-house
-              </Link>
-            ) : null}
+        <div className="flex min-w-0 items-start gap-3">
+          {inHouse ? (
+            <span aria-hidden="true" className="h-4 w-4 shrink-0" />
+          ) : (
+            <input
+              type="checkbox"
+              checked={selected}
+              onChange={onToggle}
+              aria-label={`Select ${listing.owner.name} to email`}
+              className="mt-1 h-4 w-4 shrink-0 cursor-pointer accent-[#D9B355]"
+            />
+          )}
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-medium text-white">{listing.owner.name}</span>
+              {editHref ? (
+                <Link
+                  href={editHref}
+                  className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-white/60 transition hover:bg-white/15 hover:text-white"
+                >
+                  In-house
+                </Link>
+              ) : null}
+            </div>
+            <a href={`tel:${listing.owner.phone}`} className="text-xs text-white/50 hover:text-[#D9B355]">
+              {listing.owner.phone}
+            </a>
           </div>
-          <a href={`tel:${listing.owner.phone}`} className="text-xs text-white/50 hover:text-[#D9B355]">
-            {listing.owner.phone}
-          </a>
         </div>
         <div className="flex flex-col items-end gap-2">
           <select
@@ -264,6 +289,14 @@ export function RentalDeskListingsPanel({
 }) {
   const [filters, setFilters] = useStoredState<ListingFilters>('gold-admin:listing-filters', NO_LISTING_FILTERS);
   const set = (patch: Partial<ListingFilters>) => setFilters({ ...filters, ...patch });
+  const [selected, setSelected] = useState<Set<string>>(() => new Set());
+  const toggle = (id: string) =>
+    setSelected((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
 
   const filtered = listings.filter(
     (listing) =>
@@ -285,6 +318,20 @@ export function RentalDeskListingsPanel({
   );
   const filtering = Boolean(filters.search || filters.status || filters.location || filters.type || filters.agreement || filters.source);
   const shown = useShowMore(filtered, FIRST_LISTINGS);
+
+  // Owners' listings only, and only those the filters show: nobody a filter
+  // hides gets an email.
+  const tickable = filtered.filter((listing) => !listing.sourcePropertyId);
+  const allTicked = tickable.length > 0 && tickable.every((listing) => selected.has(listing.id));
+  const recipients: EmailRecipient[] = tickable
+    .filter((listing) => selected.has(listing.id))
+    .map((listing) => ({
+      id: listing.id,
+      name: listing.owner.name,
+      email: listing.owner.email,
+      propertyType: listing.propertyType,
+      location: listing.location
+    }));
 
   if (listings.length === 0) {
     return (
@@ -363,12 +410,37 @@ export function RentalDeskListingsPanel({
         </div>
       ) : null}
 
+      {tickable.length > 0 ? (
+        <label className="inline-flex min-h-[44px] cursor-pointer items-center gap-3 px-1 text-xs uppercase tracking-[0.14em] text-white/50">
+          <input
+            type="checkbox"
+            checked={allTicked}
+            onChange={() => setSelected(allTicked ? new Set() : new Set(tickable.map((listing) => listing.id)))}
+            className="h-4 w-4 accent-[#D9B355]"
+          />
+          Select all ({tickable.length})
+        </label>
+      ) : null}
+
       {shown.visible.map((listing) => (
-        <ListingCard key={listing.id} listing={listing} nda={ndas[listing.id]} />
+        <ListingCard
+          key={listing.id}
+          listing={listing}
+          nda={ndas[listing.id]}
+          selected={selected.has(listing.id)}
+          onToggle={() => toggle(listing.id)}
+        />
       ))}
       {shown.canToggle ? (
         <ShowMoreButton hidden={shown.hidden} all={shown.all} onClick={shown.toggle} noun="listings" />
       ) : null}
+
+      <RentalDeskEmailBar
+        audience="owners"
+        recipients={recipients}
+        onClear={() => setSelected(new Set())}
+        onKeepOnly={(ids) => setSelected(new Set(ids))}
+      />
     </div>
   );
 }

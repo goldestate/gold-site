@@ -93,7 +93,7 @@ const en: PrivacyCopy = {
       bullets: [
         'Supabase — stores our database, uploaded photos, and signed agreements.',
         'Railway — hosts the website.',
-        'Resend — delivers enquiry emails to our team, and the confirmation emails we send you.'
+        'Resend — delivers enquiry emails to our team, and the emails we send you about your request or listing: the confirmation, and updates from our team.'
       ]
     },
     {
@@ -194,7 +194,7 @@ const ar: PrivacyCopy = {
       bullets: [
         'Supabase — تخزين قاعدة البيانات والصور المرفوعة والاتفاقيات الموقّعة.',
         'Railway — استضافة الموقع.',
-        'Resend — إيصال رسائل الاستفسار إلى فريقنا، ورسائل التأكيد التي نرسلها إليك.'
+        'Resend — إيصال رسائل الاستفسار إلى فريقنا، والرسائل التي نرسلها إليك بخصوص طلبك أو عقارك: رسالة التأكيد، والتحديثات من فريقنا.'
       ]
     },
     {

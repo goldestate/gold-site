@@ -15,6 +15,7 @@ import {
 } from '@/lib/rental-taxonomy';
 import { NdaBadge, type NdaSummary } from './nda-badge';
 import { Chevron, ShowMoreButton, useShowMore } from './collapsible-section';
+import { RentalDeskEmailBar, type EmailRecipient } from './rental-desk-email';
 import { adminFetch } from '@/lib/admin-fetch';
 import {
   ALL,
@@ -118,19 +119,24 @@ function MatchRow({ match, onSent }: { match: MatchWithListing; onSent: (matchId
 }
 
 /**
- * One request, folded down to who and what: its matches open on demand, and an
- * unwanted request can be deleted after a second, explicit tap.
+ * One request, folded down to who and what: its matches open on demand, it can
+ * be ticked to email the broker, and an unwanted request can be deleted after a
+ * second, explicit tap.
  */
 function RequestCard({
   request,
   matches,
   nda,
-  onSent
+  onSent,
+  selected,
+  onToggle
 }: {
   request: RentalRequestWithBroker;
   matches: MatchWithListing[];
   nda: NdaSummary | undefined;
   onSent: (matchId: string) => Promise<void>;
+  selected: boolean;
+  onToggle: () => void;
 }) {
   const router = useRouter();
   const [showMatches, setShowMatches] = useState(false);
@@ -157,17 +163,26 @@ function RequestCard({
   return (
     <div className={`rounded-[1.5rem] border border-white/10 bg-white/5 p-5 sm:p-6 ${deleting ? 'opacity-50' : ''}`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <div className="font-serif text-xs uppercase tracking-[0.3em] text-[rgba(217,179,85,0.9)]">
-            {request.referenceCode} · {dealTypeLabel(request.dealType, 'en')}
+        <div className="flex min-w-0 items-start gap-3">
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={onToggle}
+            aria-label={`Select ${request.referenceCode} from ${request.broker.name} to email`}
+            className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[#D9B355]"
+          />
+          <div className="min-w-0">
+            <div className="font-serif text-xs uppercase tracking-[0.3em] text-[rgba(217,179,85,0.9)]">
+              {request.referenceCode} · {dealTypeLabel(request.dealType, 'en')}
+            </div>
+            <div className="mt-1 text-white">
+              {request.broker.name}
+              {request.broker.company ? ` · ${request.broker.company}` : ''}
+            </div>
+            <a href={`tel:${request.broker.phone}`} className="text-xs text-white/50 hover:text-[#D9B355]">
+              {request.broker.phone}
+            </a>
           </div>
-          <div className="mt-1 text-white">
-            {request.broker.name}
-            {request.broker.company ? ` · ${request.broker.company}` : ''}
-          </div>
-          <a href={`tel:${request.broker.phone}`} className="text-xs text-white/50 hover:text-[#D9B355]">
-            {request.broker.phone}
-          </a>
         </div>
         <div className="flex flex-col items-end gap-2">
           <span
@@ -288,6 +303,14 @@ export function RentalDeskRequestsPanel({
   const [error, setError] = useState('');
   const [filters, setFilters] = useStoredState<RequestFilters>('gold-admin:request-filters', NO_REQUEST_FILTERS);
   const set = (patch: Partial<RequestFilters>) => setFilters({ ...filters, ...patch });
+  const [selected, setSelected] = useState<Set<string>>(() => new Set());
+  const toggle = (id: string) =>
+    setSelected((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
 
   // Matching only pairs rentals with rental listings. Any a resale request has
   // came from before migration 009, when the database couldn't tell them apart.
@@ -325,6 +348,19 @@ export function RentalDeskRequestsPanel({
     filters.search || filters.status || filters.deal || filters.location || filters.type || filters.agreement || filters.matches
   );
   const shown = useShowMore(filtered, FIRST_REQUESTS);
+
+  // Only the requests the filters show: nobody a filter hides gets an email.
+  const allTicked = filtered.length > 0 && filtered.every((request) => selected.has(request.id));
+  const recipients: EmailRecipient[] = filtered
+    .filter((request) => selected.has(request.id))
+    .map((request) => ({
+      id: request.id,
+      name: request.broker.name,
+      email: request.broker.email,
+      propertyType: request.propertyType,
+      location: request.location,
+      referenceCode: request.referenceCode
+    }));
 
   const handleMarkSent = async (matchId: string) => {
     setError('');
@@ -438,6 +474,18 @@ export function RentalDeskRequestsPanel({
         </div>
       ) : null}
 
+      {filtered.length > 0 ? (
+        <label className="inline-flex min-h-[44px] cursor-pointer items-center gap-3 px-1 text-xs uppercase tracking-[0.14em] text-white/50">
+          <input
+            type="checkbox"
+            checked={allTicked}
+            onChange={() => setSelected(allTicked ? new Set() : new Set(filtered.map((request) => request.id)))}
+            className="h-4 w-4 accent-[#D9B355]"
+          />
+          Select all ({filtered.length})
+        </label>
+      ) : null}
+
       {shown.visible.map((request) => (
         <RequestCard
           key={request.id}
@@ -445,12 +493,21 @@ export function RentalDeskRequestsPanel({
           matches={matchesFor(request)}
           nda={ndas[request.id]}
           onSent={handleMarkSent}
+          selected={selected.has(request.id)}
+          onToggle={() => toggle(request.id)}
         />
       ))}
 
       {shown.canToggle ? (
         <ShowMoreButton hidden={shown.hidden} all={shown.all} onClick={shown.toggle} noun="requests" />
       ) : null}
+
+      <RentalDeskEmailBar
+        audience="brokers"
+        recipients={recipients}
+        onClear={() => setSelected(new Set())}
+        onKeepOnly={(ids) => setSelected(new Set(ids))}
+      />
     </div>
   );
 }
