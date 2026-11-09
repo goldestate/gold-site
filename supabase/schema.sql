@@ -1033,3 +1033,30 @@ where deal_type = 'resale' and status = 'matching';
 -- CHECK after running: should return one row, 'deal_type'.
 -- select column_name from information_schema.columns
 -- where table_schema = 'public' and table_name = 'rental_requests' and column_name = 'deal_type';
+
+-- ---------- 010_loft_unit_type.sql ----------
+create or replace function public.map_unit_type_to_rental_property_type(p_unit_type text)
+returns text
+language sql
+immutable
+as $$
+  select case p_unit_type
+    when 'apartment' then 'apartment'
+    when 'loft' then 'apartment'
+    when 'duplex' then 'apartment'
+    when 'penthouse' then 'apartment'
+    when 'studio' then 'apartment'
+    when 'villa' then 'villa'
+    when 'townhouse' then 'villa'
+    when 'twinhouse' then 'villa'
+    when 'chalet' then 'chalet'
+    when 'cabin' then 'chalet'
+    when 'office' then 'office'
+    when 'clinic' then 'office'
+    when 'commercial' then 'retail'
+    else 'other'
+  end;
+$$;
+
+-- CHECK after running: should return 'apartment'.
+-- select public.map_unit_type_to_rental_property_type('loft');

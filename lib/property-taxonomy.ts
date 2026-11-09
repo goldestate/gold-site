@@ -4,6 +4,7 @@ export type UnitTypeValue =
   | 'cabin'
   | 'chalet'
   | 'apartment'
+  | 'loft'
   | 'duplex'
   | 'penthouse'
   | 'townhouse'
@@ -17,6 +18,7 @@ export type LocationValue =
   | 'sheikh-zayed'
   | 'october'
   | 'new-cairo'
+  | 'sixth-settlement'
   | 'new-capital'
   | 'ain-sokhna'
   | 'gouna';
@@ -42,6 +44,7 @@ export const UNIT_TYPES: TaxonomyOption<UnitTypeValue>[] = [
   { value: 'cabin', en: 'Cabin', ar: 'كابينة' },
   { value: 'chalet', en: 'Chalet', ar: 'شاليه' },
   { value: 'apartment', en: 'Apartment', ar: 'شقة' },
+  { value: 'loft', en: 'Loft', ar: 'لوفت' },
   { value: 'duplex', en: 'Duplex', ar: 'دوبلكس' },
   { value: 'penthouse', en: 'Penthouse', ar: 'بنتهاوس' },
   { value: 'townhouse', en: 'Townhouse', ar: 'تاون هاوس' },
@@ -57,6 +60,7 @@ export const LOCATIONS: TaxonomyOption<LocationValue>[] = [
   { value: 'sheikh-zayed', en: 'Sheikh Zayed', ar: 'الشيخ زايد' },
   { value: 'october', en: 'October', ar: 'أكتوبر' },
   { value: 'new-cairo', en: 'New Cairo', ar: 'القاهرة الجديدة' },
+  { value: 'sixth-settlement', en: '6th Settlement', ar: 'التجمع السادس' },
   { value: 'new-capital', en: 'New Capital', ar: 'العاصمة الإدارية' },
   { value: 'ain-sokhna', en: 'Ain Sokhna', ar: 'العين السخنة' },
   { value: 'gouna', en: 'Gouna', ar: 'الجونة' }
@@ -141,6 +145,8 @@ const LEGACY_LOCATION_MATCHES: Array<{ pattern: RegExp; value: LocationValue }> 
   { pattern: /north\s*coast/i, value: 'north-coast' },
   { pattern: /sheikh\s*zayed/i, value: 'sheikh-zayed' },
   { pattern: /october/i, value: 'october' },
+  // Ahead of New Cairo, so "New Cairo, 6th Settlement" lands on the narrower one.
+  { pattern: /6th\s*settlement|sixth\s*settlement/i, value: 'sixth-settlement' },
   { pattern: /new\s*cairo|5th\s*settlement|fifth\s*settlement/i, value: 'new-cairo' },
   { pattern: /new\s*capital|administrative\s*capital/i, value: 'new-capital' },
   { pattern: /ain\s*sokhna|sokhna/i, value: 'ain-sokhna' },
