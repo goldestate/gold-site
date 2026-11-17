@@ -4,7 +4,7 @@ import { upsertOwnerByPhone, createRentalListing } from '@/lib/rental-desk-store
 import { isLocation, type LocationValue } from '@/lib/property-taxonomy';
 import { isRentalPropertyType, type RentalPropertyTypeValue } from '@/lib/rental-taxonomy';
 import { openNdaFor } from '@/lib/nda-store';
-import { adminEmailAddress, isEmailShaped, sendEmail } from '@/lib/email';
+import { isEmailShaped, sendEmail, submissionEmailAddresses } from '@/lib/email';
 import { adminSubmissionEmail, listingReceivedEmail } from '@/lib/email-templates';
 
 type ListPropertyPayload = {
@@ -114,20 +114,17 @@ export async function POST(request: NextRequest) {
         })
       );
     }
-    const admin = adminEmailAddress();
-    if (admin) {
-      void sendEmail(
-        adminSubmissionEmail({
-          to: admin,
-          kind: 'listing',
-          name: owner.name,
-          phone: owner.phone ?? body.phone.trim(),
-          email,
-          propertyType: body.propertyType,
-          location: body.location
-        })
-      );
-    }
+    void sendEmail(
+      adminSubmissionEmail({
+        to: submissionEmailAddresses(),
+        kind: 'listing',
+        name: owner.name,
+        phone: owner.phone ?? body.phone.trim(),
+        email,
+        propertyType: body.propertyType,
+        location: body.location
+      })
+    );
 
     // ndaToken opens the signing page. Absent before migration 007; the form
     // then shows its usual thank-you instead.
