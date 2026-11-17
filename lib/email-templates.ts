@@ -210,14 +210,14 @@ export function followUpEmail(to: string, message: FollowUpText): Email {
 
 const ADMIN_RENTAL_DESK = `${SITE_URL}/goldenadmin2026/rental-desk`;
 
-function adminEmail(to: string, subject: string, lines: string[], action: { href: string; label: string }): Email {
+function adminEmail(to: string | string[], subject: string, lines: string[], action: { href: string; label: string }): Email {
   const part: Part = { paragraphs: lines, action };
   return { to, subject, html: layout([{ lang: 'en', part }]), text: partText(part) };
 }
 
 /** To GOLD staff, when a request or a listing arrives. */
 export function adminSubmissionEmail(input: {
-  to: string;
+  to: string | string[];
   kind: 'request' | 'listing';
   name: string;
   phone: string;
@@ -233,20 +233,21 @@ export function adminSubmissionEmail(input: {
   return adminEmail(
     input.to,
     input.kind === 'request'
-      ? `New ${request} ${input.referenceCode ?? ''} · ${input.name}`
-      : `New listing · ${input.name}`,
+      ? `To approve: new ${request} ${input.referenceCode ?? ''} · ${input.name}`
+      : `To approve: new listing · ${input.name}`,
     [
       input.kind === 'request' ? `New ${request}${input.referenceCode ? ` (${input.referenceCode})` : ''}.` : 'New property listing.',
       `${input.name} · ${input.phone}${input.email ? ` · ${input.email}` : ''}`,
-      what
+      what,
+      'It is waiting for you on the Rental Desk. Approve or reject it there.'
     ],
-    { href: ADMIN_RENTAL_DESK, label: 'Open the Rental Desk' }
+    { href: ADMIN_RENTAL_DESK, label: 'Approve or reject' }
   );
 }
 
 /** To GOLD staff, when someone signs the agreement. */
 export function adminNdaSignedEmail(input: {
-  to: string;
+  to: string | string[];
   ndaId: string;
   name: string;
   method: 'drawn' | 'uploaded';

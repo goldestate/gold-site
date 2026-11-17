@@ -5,7 +5,8 @@
  *   EMAIL_FROM       the verified sender, e.g. "GOLD <no-reply@gold-eg.com>"
  *   EMAIL_TO         GOLD's inbox: replies to confirmations go there, and staff
  *                    are told about new submissions and signed agreements there
- * EMAIL_REPLY_TO and EMAIL_ADMIN_TO override those two uses separately.
+ * EMAIL_REPLY_TO and EMAIL_ADMIN_TO override those two uses separately. Staff
+ * notifications always reach gold.domain01@gmail.com as well.
  *
  * Never throws and never blocks a form: without a key nothing is sent, and a
  * failed send is logged. A visitor's request must not fail because an email did.
@@ -16,7 +17,7 @@ const DEFAULT_FROM = 'GOLD <no-reply@gold-eg.com>';
 const DEFAULT_REPLY_TO = 'gold.domain01@gmail.com';
 
 export type Email = {
-  to: string;
+  to: string | string[];
   subject: string;
   html: string;
   text: string;
@@ -42,7 +43,7 @@ export async function sendEmail(email: Email): Promise<boolean> {
       headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         from: process.env.EMAIL_FROM || DEFAULT_FROM,
-        to: [email.to],
+        to: Array.isArray(email.to) ? email.to : [email.to],
         reply_to: process.env.EMAIL_REPLY_TO || process.env.EMAIL_TO || DEFAULT_REPLY_TO,
         subject: email.subject,
         html: email.html,
@@ -63,9 +64,20 @@ export async function sendEmail(email: Email): Promise<boolean> {
   }
 }
 
-/** Where staff notifications go, or null when none are wanted. */
-export function adminEmailAddress(): string | null {
-  return process.env.EMAIL_ADMIN_TO?.trim() || process.env.EMAIL_TO?.trim() || null;
+/** GOLD's inbox, told about every new listing and request whatever the settings say. */
+const STAFF_INBOX = 'gold.domain01@gmail.com';
+
+/**
+ * Where staff notifications go: GOLD's inbox, plus EMAIL_ADMIN_TO (or EMAIL_TO)
+ * when that names another address. Gmail ignores letter case, so
+ * Gold.domain01@ and gold.domain01@ are one inbox and get one copy.
+ */
+export function adminEmailAddress(): string[] {
+  const configured = process.env.EMAIL_ADMIN_TO?.trim() || process.env.EMAIL_TO?.trim() || '';
+  const addresses = [STAFF_INBOX, ...configured.split(',').map((item) => item.trim())].filter(Boolean);
+  return addresses.filter(
+    (address, index) => addresses.findIndex((other) => other.toLowerCase() === address.toLowerCase()) === index
+  );
 }
 
 export { isEmailShaped } from './email-address';

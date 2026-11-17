@@ -12,6 +12,7 @@ import {
   rentalPropertyTypeLabel,
   type RentalListingStatusValue
 } from '@/lib/rental-taxonomy';
+import { ReviewButtons } from './review-buttons';
 import { adminFetch } from '@/lib/admin-fetch';
 import { NdaBadge, type NdaSummary } from './nda-badge';
 import { Chevron, ShowMoreButton, useShowMore } from './collapsible-section';
@@ -166,6 +167,14 @@ function ListingCard({
           <span key={fact}>{fact}</span>
         ))}
       </div>
+      {listing.status === 'pending_review' && !inHouse ? (
+        <ReviewButtons
+          label={`the listing from ${listing.owner.name}`}
+          busy={saving || deleting}
+          onApprove={() => changeStatus('active')}
+          onReject={() => changeStatus('inactive')}
+        />
+      ) : null}
       {statusError ? <p className="mt-2 text-sm text-red-300">{statusError}</p> : null}
 
       <div className="mt-4 flex items-center justify-between gap-2 border-t border-white/10 pt-3">

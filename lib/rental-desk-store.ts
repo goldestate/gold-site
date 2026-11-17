@@ -396,6 +396,28 @@ export async function updateRentalListingStatus(
   return data ? rowToRentalListing(data as RentalListingRow) : null;
 }
 
+/**
+ * Staff approve or reject a request that is waiting for review (migration 011
+ * makes new requests wait). Approving opens it and pairs it with the active
+ * listings; rejecting closes it. Null when there is no such request waiting.
+ */
+export async function reviewRentalRequest(id: string, decision: 'approve' | 'reject'): Promise<RentalRequest | null> {
+  const { data, error } = await supabase
+    .from('rental_requests')
+    .update({ status: decision === 'approve' ? 'new' : 'closed' })
+    .eq('id', id)
+    .eq('status', 'pending_review')
+    .select('*')
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+  if (decision === 'approve') {
+    const { error: matchError } = await supabase.rpc('generate_matches_for_request', { p_request_id: id });
+    if (matchError) console.error('Approved request, but matching it failed', matchError);
+  }
+  return rowToRentalRequest(data as RentalRequestRow);
+}
+
 export type Match = {
   id: string;
   requestId: string;
