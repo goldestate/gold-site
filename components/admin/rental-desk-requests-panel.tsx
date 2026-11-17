@@ -17,6 +17,7 @@ import { NdaBadge, type NdaSummary } from './nda-badge';
 import { Chevron, ShowMoreButton, useShowMore } from './collapsible-section';
 import { RentalDeskEmailBar, type EmailRecipient } from './rental-desk-email';
 import { adminFetch } from '@/lib/admin-fetch';
+import { ReviewButtons } from './review-buttons';
 import {
   ALL,
   FilterChips,
@@ -59,6 +60,7 @@ function formatDate(iso: string): string {
 }
 
 const requestStatusBadgeClass: Record<RentalRequestStatusValue, string> = {
+  pending_review: 'bg-[rgba(217,179,85,0.18)] text-[#D9B355]',
   new: 'bg-white/10 text-white/60',
   matching: 'bg-[rgba(217,179,85,0.18)] text-[#D9B355]',
   matches_sent: 'bg-[rgba(90,200,120,0.15)] text-[#7ED9A0]',
@@ -143,6 +145,17 @@ function RequestCard({
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
+  const [reviewing, setReviewing] = useState(false);
+  const [reviewError, setReviewError] = useState('');
+
+  const review = async (decision: 'approve' | 'reject') => {
+    setReviewing(true);
+    setReviewError('');
+    const result = await adminFetch(`/api/rental-desk/requests/${request.id}`, { method: 'PATCH', body: { decision } });
+    setReviewing(false);
+    if (result.ok) router.refresh();
+    else setReviewError(result.error);
+  };
 
   const visibleMatches = matches.slice(0, MAX_VISIBLE_MATCHES);
   const hiddenCount = matches.length - visibleMatches.length;
@@ -161,7 +174,7 @@ function RequestCard({
   };
 
   return (
-    <div className={`rounded-[1.5rem] border border-white/10 bg-white/5 p-5 sm:p-6 ${deleting ? 'opacity-50' : ''}`}>
+    <div className={`rounded-[1.5rem] border border-white/10 bg-white/5 p-5 sm:p-6 ${deleting || reviewing ? 'opacity-50' : ''}`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
           <input
@@ -210,6 +223,15 @@ function RequestCard({
         {request.moveInDate ? <span>Move-in: {formatDate(request.moveInDate)}</span> : null}
       </div>
       {request.notes ? <p className="mt-2 text-sm text-white/50">{request.notes}</p> : null}
+      {request.status === 'pending_review' ? (
+        <ReviewButtons
+          label={`${request.referenceCode} from ${request.broker.name}`}
+          busy={reviewing || deleting}
+          onApprove={() => review('approve')}
+          onReject={() => review('reject')}
+        />
+      ) : null}
+      {reviewError ? <p className="mt-2 text-sm text-red-300">{reviewError}</p> : null}
 
       <div className="mt-4 flex items-center justify-between gap-2 border-t border-white/10 pt-3">
         {request.dealType === 'resale' ? (

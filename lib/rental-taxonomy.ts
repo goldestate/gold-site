@@ -1,7 +1,7 @@
 export type RentalPropertyTypeValue = 'apartment' | 'villa' | 'office' | 'retail' | 'chalet' | 'other';
 export type RentalPeriodValue = 'monthly' | 'yearly' | 'short_term';
 export type RentalListingStatusValue = 'pending_review' | 'active' | 'rented' | 'inactive';
-export type RentalRequestStatusValue = 'new' | 'matching' | 'matches_sent' | 'closed' | 'expired';
+export type RentalRequestStatusValue = 'pending_review' | 'new' | 'matching' | 'matches_sent' | 'closed' | 'expired';
 /** What a broker's client wants: to rent, or to buy a resale unit. */
 export type DealTypeValue = 'rental' | 'resale';
 
@@ -78,6 +78,7 @@ export function rentalListingStatusLabel(value: RentalListingStatusValue): strin
 }
 
 export const RENTAL_REQUEST_STATUS_LABELS: Record<RentalRequestStatusValue, string> = {
+  pending_review: 'Pending review',
   new: 'New',
   matching: 'Matching',
   matches_sent: 'Matches sent',
