@@ -5,8 +5,8 @@
  *   EMAIL_FROM       the verified sender, e.g. "GOLD <no-reply@gold-eg.com>"
  *   EMAIL_TO         GOLD's inbox: replies to confirmations go there, and staff
  *                    are told about new submissions and signed agreements there
- * EMAIL_REPLY_TO and EMAIL_ADMIN_TO override those two uses separately. Staff
- * notifications always reach gold.domain01@gmail.com as well.
+ * EMAIL_REPLY_TO and EMAIL_ADMIN_TO override those two uses separately. New
+ * listings and requests also always reach gold.domain01@ and gold.admin01@gmail.com.
  *
  * Never throws and never blocks a form: without a key nothing is sent, and a
  * failed send is logged. A visitor's request must not fail because an email did.
@@ -64,17 +64,20 @@ export async function sendEmail(email: Email): Promise<boolean> {
   }
 }
 
-/** GOLD's inbox, told about every new listing and request whatever the settings say. */
-const STAFF_INBOX = 'gold.domain01@gmail.com';
+/** Where staff notifications go (EMAIL_ADMIN_TO, else EMAIL_TO), or null when none are wanted. */
+export function adminEmailAddress(): string | null {
+  return process.env.EMAIL_ADMIN_TO?.trim() || process.env.EMAIL_TO?.trim() || null;
+}
+
+/** The two inboxes told about every new listing and request. */
+const SUBMISSION_INBOXES = ['gold.domain01@gmail.com', 'gold.admin01@gmail.com'];
 
 /**
- * Where staff notifications go: GOLD's inbox, plus EMAIL_ADMIN_TO (or EMAIL_TO)
- * when that names another address. Gmail ignores letter case, so
- * Gold.domain01@ and gold.domain01@ are one inbox and get one copy.
+ * New listings and requests only: both inboxes above, plus the usual staff
+ * address when it is another one. Gmail ignores letter case, so one copy each.
  */
-export function adminEmailAddress(): string[] {
-  const configured = process.env.EMAIL_ADMIN_TO?.trim() || process.env.EMAIL_TO?.trim() || '';
-  const addresses = [STAFF_INBOX, ...configured.split(',').map((item) => item.trim())].filter(Boolean);
+export function submissionEmailAddresses(): string[] {
+  const addresses = [...SUBMISSION_INBOXES, adminEmailAddress() ?? ''].filter(Boolean);
   return addresses.filter(
     (address, index) => addresses.findIndex((other) => other.toLowerCase() === address.toLowerCase()) === index
   );
