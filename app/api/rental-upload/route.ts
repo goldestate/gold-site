@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase, RENTAL_PHOTOS_BUCKET } from '@/lib/supabase';
+import { RENTAL_PHOTOS_BUCKET } from '@/lib/supabase';
+import { savePhoto } from '@/lib/file-storage';
 import { sniffImageExtension } from '@/lib/sniff-image';
 import { checkRateLimit, getClientKey } from '@/lib/rate-limit';
 
@@ -47,16 +48,11 @@ export async function POST(request: NextRequest) {
   }
 
   const filename = `${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage.from(RENTAL_PHOTOS_BUCKET).upload(filename, buffer, {
-    contentType: CONTENT_TYPES[ext],
-    cacheControl: '31536000'
-  });
-
-  if (error) {
+  try {
+    const url = await savePhoto(RENTAL_PHOTOS_BUCKET, filename, buffer, CONTENT_TYPES[ext]);
+    return NextResponse.json({ url });
+  } catch (error) {
     console.error('Failed to upload rental photo', error);
     return NextResponse.json({ error: 'Could not upload this photo. Please try again.' }, { status: 500 });
   }
-
-  const { data } = supabase.storage.from(RENTAL_PHOTOS_BUCKET).getPublicUrl(filename);
-  return NextResponse.json({ url: data.publicUrl });
 }

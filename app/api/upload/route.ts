@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/require-admin';
-import { supabase, PROPERTY_PHOTOS_BUCKET } from '@/lib/supabase';
+import { PROPERTY_PHOTOS_BUCKET } from '@/lib/supabase';
+import { savePhoto } from '@/lib/file-storage';
 import { sniffImageExtension } from '@/lib/sniff-image';
 
 const MAX_SIZE_BYTES = 8 * 1024 * 1024;
@@ -39,16 +40,11 @@ export async function POST(request: NextRequest) {
   }
 
   const filename = `${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage.from(PROPERTY_PHOTOS_BUCKET).upload(filename, buffer, {
-    contentType: CONTENT_TYPES[ext],
-    cacheControl: '31536000'
-  });
-
-  if (error) {
+  try {
+    const url = await savePhoto(PROPERTY_PHOTOS_BUCKET, filename, buffer, CONTENT_TYPES[ext]);
+    return NextResponse.json({ url });
+  } catch (error) {
     console.error('Failed to upload photo', error);
     return NextResponse.json({ error: 'Could not upload this photo. Please try again.' }, { status: 500 });
   }
-
-  const { data } = supabase.storage.from(PROPERTY_PHOTOS_BUCKET).getPublicUrl(filename);
-  return NextResponse.json({ url: data.publicUrl });
 }

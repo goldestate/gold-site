@@ -35,7 +35,7 @@ const ADDRESS =
 const en: PrivacyCopy = {
   eyebrow: 'Privacy',
   title: 'What we collect, and what we do not.',
-  updated: 'Last updated 4 November 2026',
+  updated: 'Last updated 19 November 2026',
   intro:
     'This policy covers the GOLD website at gold-eg.com and the GOLD iPhone app. It is written to be read, not to be survived — if something here is unclear, ask us and we will explain it.',
   sections: [
@@ -88,10 +88,10 @@ const en: PrivacyCopy = {
     {
       heading: 'Who else can see it',
       paragraphs: [
-        'Three companies handle data on our behalf, and only to run the service:'
+        'Four companies handle data on our behalf, and only to run the service:'
       ],
       bullets: [
-        'Supabase — stores our database, uploaded photos, and signed agreements.',
+        'Supabase and Cloudflare — store our database, uploaded photos, signed agreements, and backups of the database.',
         'Railway — hosts the website.',
         'Resend — delivers enquiry emails to our team, and the emails we send you about your request or listing: the confirmation, and updates from our team.'
       ]
@@ -104,6 +104,7 @@ const en: PrivacyCopy = {
         'Code records — the app identifier, the code it entered and those two times — are kept after the code ends or is revoked, so our staff can still see how many phones a finished stay’s code reached. They are not deleted on a schedule: they stay until you ask us to delete them, or until we remove that compound from the guide. Tell us the code you were given and we will delete its records. The code itself, and the note our staff wrote on it, are kept with them.',
         'On your phone, the contacts a code opened are removed the next time the app can reach us after the code ends.',
         'Rate-limit counters hold an IP address or app identifier, a count, and when the count resets, 10 to 15 minutes later. For the website’s forms they are kept only in our server’s memory. For codes they are kept in our database and deleted, after they expire, by a clean-up that runs as the site is used. How soon depends on how busy the site is: it can take anywhere from minutes to more than a day.',
+        'We back up the database once a day. A daily backup is kept for 31 days, and the first of each month for 13 months, so something deleted from the database is gone from the backups within 13 months.',
         'If you want any of it removed sooner, ask us and we will delete it.'
       ]
     },
@@ -138,7 +139,7 @@ const en: PrivacyCopy = {
 const ar: PrivacyCopy = {
   eyebrow: 'الخصوصية',
   title: 'ما نجمعه، وما لا نجمعه.',
-  updated: 'آخر تحديث 4 نوفمبر 2026',
+  updated: 'آخر تحديث 19 نوفمبر 2026',
   intro:
     'تغطي هذه السياسة موقع جولد على gold-eg.com وتطبيق جولد على الآيفون. كُتبت لتُقرأ بوضوح — إذا كان أي شيء هنا غير واضح، اسألنا وسنشرحه.',
   sections: [
@@ -190,9 +191,9 @@ const ar: PrivacyCopy = {
     },
     {
       heading: 'من يمكنه الاطلاع عليها',
-      paragraphs: ['ثلاث شركات تتعامل مع البيانات نيابة عنّا، ولتشغيل الخدمة فقط:'],
+      paragraphs: ['أربع شركات تتعامل مع البيانات نيابة عنّا، ولتشغيل الخدمة فقط:'],
       bullets: [
-        'Supabase — تخزين قاعدة البيانات والصور المرفوعة والاتفاقيات الموقّعة.',
+        'Supabase وCloudflare — تخزين قاعدة البيانات والصور المرفوعة والاتفاقيات الموقّعة والنسخ الاحتياطية من قاعدة البيانات.',
         'Railway — استضافة الموقع.',
         'Resend — إيصال رسائل الاستفسار إلى فريقنا، والرسائل التي نرسلها إليك بخصوص طلبك أو عقارك: رسالة التأكيد، والتحديثات من فريقنا.'
       ]
@@ -205,6 +206,7 @@ const ar: PrivacyCopy = {
         'سجلات الأكواد — معرّف التطبيق والكود الذي أُدخل عليه والوقتان المذكوران — نحتفظ بها بعد انتهاء الكود أو إلغائه، حتى يرى فريقنا عدد الهواتف التي وصل إليها كود إقامة انتهت. ولا تُحذف تلقائياً في موعد محدد: تبقى حتى تطلب منّا حذفها، أو حتى نزيل ذلك الكمبوند من الدليل. أخبرنا بالكود الذي وصلك وسنحذف سجلاته. ويبقى الكود نفسه والملاحظة التي كتبها فريقنا عليه معها.',
         'على هاتفك، تُزال جهات الاتصال التي فتحها الكود في أول مرة يتمكن فيها التطبيق من الوصول إلينا بعد انتهاء الكود.',
         'سجلات الحد من المحاولات تحتوي على عنوان IP أو معرّف التطبيق، وعدد المحاولات، ووقت إعادة ضبط العدد بعد 10 إلى 15 دقيقة. بالنسبة لنماذج الموقع تبقى في ذاكرة الخادم فقط. وبالنسبة للأكواد تُحفظ في قاعدة بياناتنا، وتحذفها بعد انتهائها عملية تنظيف تعمل مع استخدام الموقع. ويتوقف موعد الحذف على مدى نشاط الموقع: قد يكون بعد دقائق، وقد يستغرق أكثر من يوم.',
+        'نأخذ نسخة احتياطية من قاعدة البيانات مرة كل يوم. نحتفظ بالنسخة اليومية 31 يوماً، وبأول نسخة من كل شهر 13 شهراً، فما يُحذف من قاعدة البيانات يختفي من النسخ الاحتياطية خلال 13 شهراً.',
         'إذا أردت حذف أي منها قبل ذلك، اطلب منّا وسنحذفها.'
       ]
     },

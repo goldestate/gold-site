@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { SITE_URL, getSiteCopy } from '@/lib/site-content';
-import { getProperty, type Property } from '@/lib/properties-store';
+import { getPublishedProperty, type Property } from '@/lib/properties-store';
 import type { SiteCopy } from '@/lib/site-content';
 import { formatPrice } from '@/lib/format-price';
 import { goldWhatsAppUrl } from '@/lib/app-links';
@@ -170,7 +170,7 @@ export async function generateMetadata({
 }: {
   params: { locale: Locale; id: string };
 }): Promise<Metadata> {
-  const property = await getProperty(params.id);
+  const property = await getPublishedProperty(params.id);
   const copy = getSiteCopy(params.locale);
   if (!property || !property.published) {
     return { title: `${copy.propertyDetail.notFoundTitle} — ${copy.seo.title}` };
@@ -186,7 +186,7 @@ export default async function PropertyDetailPage({
   const { locale, id } = params;
   const copy = getSiteCopy(locale);
   const isRtl = locale === 'ar';
-  const property = await getProperty(id);
+  const property = await getPublishedProperty(id);
 
   if (!property || !property.published) {
     return (

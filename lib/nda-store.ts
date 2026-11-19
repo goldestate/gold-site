@@ -1,13 +1,12 @@
 import { randomBytes } from 'node:crypto';
 import { supabase } from './supabase';
+import { NDA_FOLDER, deletePrivateFolder, privateFileUrl, readPrivateFile, savePrivateFile } from './file-storage';
 import { NDA_VERSION } from './nda';
 
 /**
  * Server-only. Confidentiality agreements: one per "Request a unit" or "List your
  * property" submission, pending until the person signs it on the signing page.
  */
-
-export const NDA_BUCKET = 'nda-files';
 
 export type NdaStatus = 'pending' | 'signed';
 export type NdaMethod = 'drawn' | 'uploaded';
@@ -215,27 +214,17 @@ export async function readNdaSubject(
 }
 
 export async function uploadNdaFile(path: string, body: Buffer, contentType: string): Promise<void> {
-  const { error } = await supabase.storage.from(NDA_BUCKET).upload(path, body, { contentType, upsert: false });
-  if (error) throw error;
+  await savePrivateFile(NDA_FOLDER, path, body, contentType);
 }
 
 /** A link that opens the private file for an hour, for the admin only. */
 export async function ndaFileUrl(path: string, downloadName?: string): Promise<string | null> {
-  const { data, error } = await supabase.storage
-    .from(NDA_BUCKET)
-    .createSignedUrl(path, 60 * 60, downloadName ? { download: downloadName } : undefined);
-  if (error) {
-    console.error('Could not sign the NDA file link', error);
-    return null;
-  }
-  return data.signedUrl;
+  return privateFileUrl(NDA_FOLDER, path, 60 * 60, downloadName);
 }
 
 /** A stored signature or signed copy, as bytes. */
 export async function downloadNdaFile(path: string): Promise<Uint8Array> {
-  const { data, error } = await supabase.storage.from(NDA_BUCKET).download(path);
-  if (error) throw error;
-  return new Uint8Array(await data.arrayBuffer());
+  return readPrivateFile(NDA_FOLDER, path);
 }
 
 /**
@@ -252,13 +241,7 @@ export async function removeNdaFilesFor(subject: { rentalRequestId: string } | {
         : await query.eq('rental_listing_id', subject.rentalListingId);
     if (error) throw error;
     for (const { id } of (data ?? []) as { id: string }[]) {
-      const { data: files, error: listError } = await supabase.storage.from(NDA_BUCKET).list(id);
-      if (listError) throw listError;
-      const paths = (files ?? []).map((file) => `${id}/${file.name}`);
-      if (paths.length > 0) {
-        const { error: removeError } = await supabase.storage.from(NDA_BUCKET).remove(paths);
-        if (removeError) throw removeError;
-      }
+      await deletePrivateFolder(NDA_FOLDER, id);
     }
   } catch (error) {
     if (!isMissingTable(error)) console.error('Could not remove the agreement files', error);
