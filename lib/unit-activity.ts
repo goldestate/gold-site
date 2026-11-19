@@ -1,6 +1,7 @@
 import { supabase, PROPERTY_PHOTOS_BUCKET } from './supabase';
+import { listPhotos } from './file-storage';
+import { forgetCachedProperties, type Property } from './properties-store';
 import { cairoDayOf } from './cairo-time';
-import type { Property } from './properties-store';
 import {
   isPropertyType,
   isUnitType,
@@ -58,7 +59,7 @@ function isMissing(error: unknown): boolean {
   return code === 'PGRST205' || code === '42P01' || code === 'PGRST202' || code === '42883';
 }
 
-/** The file name inside the photo bucket, from a photo's public URL. */
+/** The file name inside the photo folder, from a photo's link on Supabase or Cloudflare. */
 function photoName(url: string): string | null {
   const marker = `/${PROPERTY_PHOTOS_BUCKET}/`;
   const at = url.indexOf(marker);
@@ -77,10 +78,6 @@ function namesIn(urls: string[], into: Set<string>) {
   }
 }
 
-const PAGE_SIZE = 1000;
-// A ceiling, not an expectation: 50,000 photos is decades of listings.
-const MAX_PAGES = 50;
-
 /**
  * Photos uploaded per Cairo day, and how many of them no current unit uses.
  * Days with no uploads are left out.
@@ -95,27 +92,15 @@ export async function readPhotoUploadDays(
   for (const deletion of deletions ?? []) namesIn(deletion.images, deleted);
 
   const byDay = new Map<string, PhotoUploadDay>();
-  for (let page = 0; page < MAX_PAGES; page += 1) {
-    const { data, error } = await supabase.storage.from(PROPERTY_PHOTOS_BUCKET).list('', {
-      limit: PAGE_SIZE,
-      offset: page * PAGE_SIZE,
-      sortBy: { column: 'created_at', order: 'asc' }
-    });
-    if (error) throw error;
-
-    for (const file of data ?? []) {
-      // Folders come back with no id; uploads all sit at the top level.
-      if (!file.id || !file.created_at) continue;
-      const day = cairoDayOf(file.created_at);
-      const entry = byDay.get(day) ?? { day, uploaded: 0, unattached: 0, fromDeleted: 0 };
-      entry.uploaded += 1;
-      if (!inUse.has(file.name)) {
-        entry.unattached += 1;
-        if (deleted.has(file.name)) entry.fromDeleted += 1;
-      }
-      byDay.set(day, entry);
+  for (const photo of await listPhotos(PROPERTY_PHOTOS_BUCKET)) {
+    const day = cairoDayOf(photo.uploadedAt);
+    const entry = byDay.get(day) ?? { day, uploaded: 0, unattached: 0, fromDeleted: 0 };
+    entry.uploaded += 1;
+    if (!inUse.has(photo.name)) {
+      entry.unattached += 1;
+      if (deleted.has(photo.name)) entry.fromDeleted += 1;
     }
-    if (!data || data.length < PAGE_SIZE) break;
+    byDay.set(day, entry);
   }
 
   return [...byDay.values()].sort((a, b) => a.day.localeCompare(b.day));
@@ -164,5 +149,6 @@ export async function restoreDeletedProperty(deletionId: string): Promise<Restor
     if ((error as { code?: unknown }).code === '23505') return 'exists';
     throw error;
   }
+  if (data) forgetCachedProperties();
   return data ? 'restored' : 'not-found';
 }

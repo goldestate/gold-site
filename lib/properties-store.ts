@@ -1,3 +1,4 @@
+import { revalidateTag, unstable_cache } from 'next/cache';
 import { supabase } from './supabase';
 import {
   isPricePeriod,
@@ -129,7 +130,18 @@ export async function readProperties(): Promise<Property[]> {
   return (data as PropertyRow[]).map(rowToProperty);
 }
 
-export async function readPublishedProperties(): Promise<Property[]> {
+/**
+ * The public site's listings are kept in Next's data cache rather than read on
+ * every visit: Supabase's free plan counts every byte the database sends, and
+ * the full list is a few hundred kilobytes. Every change made through the site
+ * clears it (PROPERTIES_CACHE_TAG); the hour is for a change made some other
+ * way, such as the SQL editor. Next skips caching anything over 2 MB, so a far
+ * bigger catalogue would simply go back to reading the database each time.
+ */
+export const PROPERTIES_CACHE_TAG = 'properties';
+const PROPERTIES_CACHE_SECONDS = 60 * 60;
+
+async function readPublishedFromDatabase(): Promise<Property[]> {
   const { data, error } = await supabase
     .from('properties')
     .select('*')
@@ -137,6 +149,25 @@ export async function readPublishedProperties(): Promise<Property[]> {
     .order('created_at', { ascending: false });
   if (error) throw error;
   return (data as PropertyRow[]).map(rowToProperty);
+}
+
+const readPublishedCached = unstable_cache(readPublishedFromDatabase, ['published-properties'], {
+  tags: [PROPERTIES_CACHE_TAG],
+  revalidate: PROPERTIES_CACHE_SECONDS
+});
+
+export async function readPublishedProperties(): Promise<Property[]> {
+  return readPublishedCached();
+}
+
+/** One published listing, for the public page, from the same cached list. */
+export async function getPublishedProperty(id: string): Promise<Property | null> {
+  return (await readPublishedCached()).find((property) => property.id === id) ?? null;
+}
+
+/** Called after every change to the listings, so the public site shows it at once. */
+export function forgetCachedProperties(): void {
+  revalidateTag(PROPERTIES_CACHE_TAG);
 }
 
 export async function getProperty(id: string): Promise<Property | null> {
@@ -148,6 +179,7 @@ export async function getProperty(id: string): Promise<Property | null> {
 export async function createProperty(input: PropertyInput): Promise<Property> {
   const { data, error } = await supabase.from('properties').insert(inputToRow(input)).select('*').single();
   if (error) throw error;
+  forgetCachedProperties();
   return rowToProperty(data as PropertyRow);
 }
 
@@ -159,11 +191,13 @@ export async function updateProperty(id: string, patch: Partial<PropertyInput>):
     .select('*')
     .maybeSingle();
   if (error) throw error;
+  forgetCachedProperties();
   return data ? rowToProperty(data as PropertyRow) : null;
 }
 
 export async function deleteProperty(id: string): Promise<boolean> {
   const { data, error } = await supabase.from('properties').delete().eq('id', id).select('id').maybeSingle();
   if (error) throw error;
+  forgetCachedProperties();
   return Boolean(data);
 }

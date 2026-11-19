@@ -3,7 +3,8 @@ import Link from 'next/link';
 const SECTIONS = [
   { key: 'properties', label: 'Properties', href: '/goldenadmin2026/properties' },
   { key: 'rental-desk', label: 'Rental Desk', href: '/goldenadmin2026/rental-desk' },
-  { key: 'directory', label: 'Directory', href: '/goldenadmin2026/directory' }
+  { key: 'directory', label: 'Directory', href: '/goldenadmin2026/directory' },
+  { key: 'storage', label: 'Storage', href: '/goldenadmin2026/storage' }
 ] as const;
 
 export type AdminSection = (typeof SECTIONS)[number]['key'];

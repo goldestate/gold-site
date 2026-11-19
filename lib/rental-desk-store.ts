@@ -1,4 +1,5 @@
-import { supabase, RENTAL_PHOTOS_BUCKET } from './supabase';
+import { supabase } from './supabase';
+import { deletePhotos } from './file-storage';
 import { removeNdaFilesFor } from './nda-store';
 import { postgresErrorCode } from './directory-store';
 import type { FollowUpAudience, FollowUpSubject } from './follow-up-emails';
@@ -566,16 +567,13 @@ export async function deleteRentalListing(id: string): Promise<DeleteListingResu
   return 'deleted';
 }
 
-/** Best effort: a photo left behind costs a little storage, never a failed delete. */
+/**
+ * Best effort: a photo left behind costs a little storage, never a failed
+ * delete. Only uploads to the owners' photo folder go: an in-house listing's
+ * photos belong to its property.
+ */
 async function removeListingPhotos(urls: unknown[]): Promise<void> {
-  const marker = `/${RENTAL_PHOTOS_BUCKET}/`;
-  const paths = urls
-    .filter((url): url is string => typeof url === 'string' && url.includes(marker))
-    .map((url) => decodeURIComponent(url.slice(url.indexOf(marker) + marker.length).split('?')[0]))
-    .filter((path) => path.length > 0);
-  if (paths.length === 0) return;
-  const { error } = await supabase.storage.from(RENTAL_PHOTOS_BUCKET).remove(paths);
-  if (error) console.error('Could not remove the listing photos', error);
+  await deletePhotos(urls.filter((url): url is string => typeof url === 'string' && url.includes('/rental-photos/')));
 }
 
 // ---------------------------------------------------------------------------
