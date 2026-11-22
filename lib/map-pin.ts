@@ -32,7 +32,10 @@ export const REGION_BOXES: Record<LocationValue, Box> = {
   // Ain Sokhna and the Galala plateau above it.
   'ain-sokhna': [32.1, 29.1, 32.9, 29.95],
   // El Gouna and Hurghada.
-  gouna: [33.4, 26.9, 34.0, 27.6]
+  gouna: [33.4, 26.9, 34.0, 27.6],
+  // The Red Sea coast from Ras Gharib down to Berenice: Hurghada, Sahl Hasheesh,
+  // Makadi, Soma Bay, Safaga, El Quseir, Marsa Alam. Overlaps Gouna's box.
+  'red-sea': [32.9, 23.5, 36.0, 28.6]
 };
 
 export function isInBox(pin: Pin, box: Box): boolean {

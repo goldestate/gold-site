@@ -21,7 +21,8 @@ export type LocationValue =
   | 'sixth-settlement'
   | 'new-capital'
   | 'ain-sokhna'
-  | 'gouna';
+  | 'gouna'
+  | 'red-sea';
 /** How a listing's `price` should be read. Stored per row -- never derived from property type. */
 export type PricePeriodValue = 'daily' | 'monthly' | 'quarterly' | 'yearly' | 'total';
 
@@ -63,7 +64,8 @@ export const LOCATIONS: TaxonomyOption<LocationValue>[] = [
   { value: 'sixth-settlement', en: '6th Settlement', ar: 'التجمع السادس' },
   { value: 'new-capital', en: 'New Capital', ar: 'العاصمة الإدارية' },
   { value: 'ain-sokhna', en: 'Ain Sokhna', ar: 'العين السخنة' },
-  { value: 'gouna', en: 'Gouna', ar: 'الجونة' }
+  { value: 'gouna', en: 'Gouna', ar: 'الجونة' },
+  { value: 'red-sea', en: 'Red Sea', ar: 'البحر الأحمر' }
 ];
 
 // Ordered shortest-to-longest tenure, then the sale case. Rendered by the admin
@@ -150,7 +152,9 @@ const LEGACY_LOCATION_MATCHES: Array<{ pattern: RegExp; value: LocationValue }> 
   { pattern: /new\s*cairo|5th\s*settlement|fifth\s*settlement/i, value: 'new-cairo' },
   { pattern: /new\s*capital|administrative\s*capital/i, value: 'new-capital' },
   { pattern: /ain\s*sokhna|sokhna/i, value: 'ain-sokhna' },
-  { pattern: /gouna/i, value: 'gouna' }
+  { pattern: /gouna/i, value: 'gouna' },
+  // After Gouna and Sokhna, so "El Gouna, Red Sea" stays Gouna.
+  { pattern: /red\s*sea|hurghada|sahl\s*hash(?:ee|i)sh|makadi|soma\s*bay|safaga|quseir|marsa\s*alam/i, value: 'red-sea' }
 ];
 
 export function normalizeLegacyLocation(value: unknown): LocationValue {
